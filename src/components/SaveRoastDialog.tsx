@@ -188,7 +188,7 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
                 id="roast-process"
                 value={formData.roastProcess}
                 onChange={(e) => setFormData(prev => ({ ...prev, roastProcess: e.target.value }))}
-                placeholder="e.g., Light City, Medium Dark, French"
+                placeholder="e.g., Washed, Natural, Honey"
               />
             </div>
             
