@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { Play, Pause, Square, ArrowLeft } from "lucide-react";
+import { Play, Pause, Square, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 interface RoastData {
   time: number;
   targetTemp: number;
@@ -25,6 +26,7 @@ interface RoastMonitorProps {
 const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
+  const { signOut, user } = useAuth();
   const [isRoasting, setIsRoasting] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTemp, setTargetTemp] = useState<string>("200");
@@ -127,8 +129,22 @@ const RoastMonitor = ({
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
          {/* Header */}
-         <div className="flex items-center justify-center mb-6">
+         <div className="flex items-center justify-between mb-6">
            <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
+           <div className="flex items-center gap-4">
+             <span className="text-sm text-muted-foreground">
+               Welcome, {user?.email}
+             </span>
+             <Button 
+               variant="outline" 
+               size="sm"
+               onClick={signOut}
+               className="flex items-center gap-2"
+             >
+               <LogOut className="h-4 w-4" />
+               Sign Out
+             </Button>
+           </div>
          </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
