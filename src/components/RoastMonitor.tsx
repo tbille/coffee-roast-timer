@@ -210,7 +210,7 @@ const RoastMonitor = ({
                            stroke="hsl(var(--destructive))" 
                            strokeWidth={2}
                            strokeDasharray="3 3"
-                           label={{ value: "First Crack", position: "top" }}
+                           label={{ value: "First crack", position: "top" }}
                          />
                        )}
                        {secondCrackTime && (
@@ -219,7 +219,7 @@ const RoastMonitor = ({
                            stroke="hsl(var(--destructive))" 
                            strokeWidth={2}
                            strokeDasharray="3 3"
-                           label={{ value: "Second Crack", position: "top" }}
+                           label={{ value: "Second crack", position: "top" }}
                          />
                        )}
                     </LineChart>
