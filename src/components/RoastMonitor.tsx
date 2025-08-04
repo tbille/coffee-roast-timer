@@ -343,19 +343,33 @@ const RoastMonitor = ({
                         />
                         <Legend />
                         
-                        {/* Reference profile line (dotted) */}
+                        {/* Reference profile lines (dotted) */}
                         {referenceProfile && (
-                          <Line 
-                            type="monotone" 
-                            dataKey="currentTemp" 
-                            stroke="hsl(var(--muted-foreground))" 
-                            strokeWidth={2} 
-                            name={`Reference: ${referenceProfileName}`}
-                            strokeDasharray="8 4" 
-                            data={referenceProfile}
-                            connectNulls={false}
-                            dot={false}
-                          />
+                          <>
+                            <Line 
+                              type="monotone" 
+                              dataKey="currentTemp" 
+                              stroke="hsl(var(--muted-foreground))" 
+                              strokeWidth={2} 
+                              name={`Reference Actual: ${referenceProfileName}`}
+                              strokeDasharray="8 4" 
+                              data={referenceProfile}
+                              connectNulls={false}
+                              dot={false}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="targetTemp" 
+                              stroke="hsl(var(--muted-foreground))" 
+                              strokeWidth={1.5} 
+                              name={`Reference Target: ${referenceProfileName}`}
+                              strokeDasharray="12 6" 
+                              data={referenceProfile}
+                              connectNulls={false}
+                              dot={false}
+                              opacity={0.7}
+                            />
+                          </>
                         )}
                         
                         {/* Current roast lines */}
@@ -409,6 +423,17 @@ const RoastMonitor = ({
                                   strokeWidth={2} 
                                   strokeDasharray="8 4" 
                                   dot={false}
+                                  name="Actual"
+                                />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="targetTemp" 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  strokeWidth={1.5} 
+                                  strokeDasharray="12 6" 
+                                  dot={false}
+                                  opacity={0.7}
+                                  name="Target"
                                 />
                               </LineChart>
                             </ResponsiveContainer>
