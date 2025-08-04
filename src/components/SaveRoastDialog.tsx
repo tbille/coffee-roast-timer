@@ -120,7 +120,7 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
       <DialogTrigger asChild>
         <Button 
           disabled={disabled} 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 mx-auto"
           variant="outline"
         >
           <Save className="h-4 w-4" />
