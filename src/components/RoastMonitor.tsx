@@ -186,11 +186,16 @@ const RoastMonitor = ({
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={roastData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="time" stroke="hsl(var(--foreground))" label={{
-                      value: 'Time (seconds)',
-                      position: 'insideBottom',
-                      offset: -10
-                    }} />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="hsl(var(--foreground))" 
+                        tickFormatter={formatTime}
+                        label={{
+                          value: 'Time (MM:SS)',
+                          position: 'insideBottom',
+                          offset: -10
+                        }} 
+                      />
                       <YAxis stroke="hsl(var(--foreground))" label={{
                       value: 'Temperature (°C)',
                       angle: -90,
