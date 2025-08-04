@@ -3,13 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Play, Pause, Square, ArrowLeft } from "lucide-react";
 interface RoastData {
   time: number;
   targetTemp: number;
   currentTemp: number;
 }
+
+interface CrackEvent {
+  time: number;
+  targetTemp: number;
+  currentTemp: number;
+  type: 'first' | 'second';
+}
+
 interface RoastMonitorProps {
   onBack: () => void;
 }
@@ -22,6 +30,7 @@ const RoastMonitor = ({
   const [currentTemp, setCurrentTemp] = useState<string>("20");
   const [lastRecordedTemp, setLastRecordedTemp] = useState<string>("20");
   const [roastData, setRoastData] = useState<RoastData[]>([]);
+  const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
 
   // Timer effect
   useEffect(() => {
@@ -46,6 +55,31 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
+
+  const handleFirstCrack = () => {
+    if (isRoasting && elapsedTime > 0) {
+      const crackEvent: CrackEvent = {
+        time: elapsedTime,
+        targetTemp: parseFloat(targetTemp) || 0,
+        currentTemp: parseFloat(currentTemp) || 0,
+        type: 'first'
+      };
+      setCrackEvents(prev => [...prev.filter(e => e.type !== 'first'), crackEvent]);
+    }
+  };
+
+  const handleSecondCrack = () => {
+    if (isRoasting && elapsedTime > 0) {
+      const crackEvent: CrackEvent = {
+        time: elapsedTime,
+        targetTemp: parseFloat(targetTemp) || 0,
+        currentTemp: parseFloat(currentTemp) || 0,
+        type: 'second'
+      };
+      setCrackEvents(prev => [...prev.filter(e => e.type !== 'second'), crackEvent]);
+    }
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -57,6 +91,7 @@ const RoastMonitor = ({
     setIsRoasting(false);
     setElapsedTime(0);
     setRoastData([]);
+    setCrackEvents([]);
   };
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
@@ -116,6 +151,19 @@ const RoastMonitor = ({
                   </Button>
                 </div>
                 
+                {/* Crack Events */}
+                <div className="space-y-2">
+                  <Label>Crack Events</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button onClick={handleFirstCrack} disabled={!isRoasting} variant="outline" className="w-full">
+                      First Crack
+                    </Button>
+                    <Button onClick={handleSecondCrack} disabled={!isRoasting} variant="outline" className="w-full">
+                      Second Crack
+                    </Button>
+                  </div>
+                </div>
+                
               </CardContent>
             </Card>
           </div>
@@ -150,6 +198,20 @@ const RoastMonitor = ({
                         <Legend />
                         <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
+                        {crackEvents.map((crack, index) => (
+                          <ReferenceLine 
+                            key={`${crack.type}-${index}`}
+                            x={crack.time} 
+                            stroke={crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))"} 
+                            strokeDasharray="5 5"
+                            strokeWidth={2}
+                            label={{
+                              value: crack.type === 'first' ? 'First Crack' : 'Second Crack',
+                              position: 'insideTopRight',
+                              style: { fontSize: '12px', fill: crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))" }
+                            }}
+                          />
+                        ))}
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
