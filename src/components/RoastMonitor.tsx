@@ -110,13 +110,18 @@ const RoastMonitor = ({
     if (!firstCrackEvent || elapsedTime === 0) return 0;
     return 100 - (firstCrackEvent.time / elapsedTime) * 100;
   };
-  const handleStart = () => setIsRoasting(true);
-  const handlePause = () => setIsRoasting(false);
-  const handleStop = () => {
-    setIsRoasting(false);
+  const handleStart = () => {
+    // Reset everything when starting a new roast
     setElapsedTime(0);
     setRoastData([]);
     setCrackEvents([]);
+    setIsRoasting(true);
+  };
+  
+  const handlePause = () => setIsRoasting(false);
+  
+  const handleStop = () => {
+    setIsRoasting(false);
   };
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
