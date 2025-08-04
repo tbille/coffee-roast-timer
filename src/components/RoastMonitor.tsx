@@ -135,6 +135,14 @@ const RoastMonitor = ({
             <div className="flex items-center gap-4">
               {user ? (
                 <>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="flex items-center gap-2"
+                  >
+                    My Profiles
+                  </Button>
                   <span className="text-sm text-muted-foreground">
                     Welcome, {user?.email}
                   </span>
