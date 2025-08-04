@@ -208,21 +208,29 @@ const RoastMonitor = ({
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={roastData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="time" stroke="hsl(var(--foreground))" label={{
-                        value: 'Time (seconds)',
-                        position: 'insideBottom',
-                        offset: -10
-                      }} />
+                        <XAxis 
+                          dataKey="time" 
+                          stroke="hsl(var(--foreground))" 
+                          label={{
+                            value: 'Time (MM:SS)',
+                            position: 'insideBottom',
+                            offset: -10
+                          }} 
+                          tickFormatter={formatTime}
+                        />
                         <YAxis stroke="hsl(var(--foreground))" label={{
                         value: 'Temperature (°C)',
                         angle: -90,
                         position: 'insideLeft'
                       }} />
-                        <Tooltip contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)"
-                      }} />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "var(--radius)"
+                          }} 
+                          labelFormatter={(value) => `Time: ${formatTime(value as number)}`}
+                        />
                         <Legend />
                         <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
