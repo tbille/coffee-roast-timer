@@ -21,6 +21,7 @@ const RoastMonitor = ({ onBack }: RoastMonitorProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTemp, setTargetTemp] = useState<string>("200");
   const [currentTemp, setCurrentTemp] = useState<string>("20");
+  const [lastRecordedTemp, setLastRecordedTemp] = useState<string>("20");
   const [roastData, setRoastData] = useState<RoastData[]>([]);
 
   // Timer effect
@@ -34,8 +35,8 @@ const RoastMonitor = ({ onBack }: RoastMonitorProps) => {
     return () => clearInterval(interval);
   }, [isRoasting]);
 
-  // Data recording effect
-  useEffect(() => {
+  // Submit temperature function
+  const handleSubmitTemperature = () => {
     if (isRoasting && elapsedTime > 0) {
       const newDataPoint: RoastData = {
         time: elapsedTime,
@@ -43,8 +44,9 @@ const RoastMonitor = ({ onBack }: RoastMonitorProps) => {
         currentTemp: parseFloat(currentTemp) || 0,
       };
       setRoastData((prev) => [...prev, newDataPoint]);
+      setLastRecordedTemp(currentTemp);
     }
-  }, [elapsedTime, isRoasting, targetTemp, currentTemp]);
+  };
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -134,6 +136,13 @@ const RoastMonitor = ({ onBack }: RoastMonitorProps) => {
                     onChange={(e) => setCurrentTemp(e.target.value)}
                     placeholder="20"
                   />
+                  <Button 
+                    onClick={handleSubmitTemperature}
+                    disabled={!isRoasting}
+                    className="w-full mt-2"
+                  >
+                    Record Temperature
+                  </Button>
                 </div>
                 <div className="pt-2 space-y-2">
                   <div className="flex justify-between text-sm">
