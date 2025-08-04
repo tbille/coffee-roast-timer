@@ -58,7 +58,7 @@ const RoastMonitor = ({
 
   const handleFirstCrack = () => {
     console.log('First crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
-    if (isRoasting && elapsedTime > 0) {
+    if (isRoasting && elapsedTime > 0 && !crackEvents.some(e => e.type === 'first')) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
         targetTemp: parseFloat(targetTemp) || 0,
@@ -67,7 +67,7 @@ const RoastMonitor = ({
       };
       console.log('Adding first crack event:', crackEvent);
       setCrackEvents(prev => {
-        const newEvents = [...prev.filter(e => e.type !== 'first'), crackEvent];
+        const newEvents = [...prev, crackEvent];
         console.log('Updated crack events:', newEvents);
         return newEvents;
       });
@@ -78,7 +78,9 @@ const RoastMonitor = ({
 
   const handleSecondCrack = () => {
     console.log('Second crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
-    if (isRoasting && elapsedTime > 0) {
+    if (isRoasting && elapsedTime > 0 && 
+        crackEvents.some(e => e.type === 'first') && 
+        !crackEvents.some(e => e.type === 'second')) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
         targetTemp: parseFloat(targetTemp) || 0,
@@ -87,7 +89,7 @@ const RoastMonitor = ({
       };
       console.log('Adding second crack event:', crackEvent);
       setCrackEvents(prev => {
-        const newEvents = [...prev.filter(e => e.type !== 'second'), crackEvent];
+        const newEvents = [...prev, crackEvent];
         console.log('Updated crack events:', newEvents);
         return newEvents;
       });
@@ -171,11 +173,21 @@ const RoastMonitor = ({
                 <div className="space-y-2">
                   <Label>Crack Events</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button onClick={handleFirstCrack} disabled={!isRoasting} variant="outline" className="w-full">
-                      First Crack
+                    <Button 
+                      onClick={handleFirstCrack} 
+                      disabled={!isRoasting || crackEvents.some(e => e.type === 'first')} 
+                      variant={crackEvents.some(e => e.type === 'first') ? "secondary" : "outline"} 
+                      className="w-full"
+                    >
+                      {crackEvents.some(e => e.type === 'first') ? "First Crack ✓" : "First Crack"}
                     </Button>
-                    <Button onClick={handleSecondCrack} disabled={!isRoasting} variant="outline" className="w-full">
-                      Second Crack
+                    <Button 
+                      onClick={handleSecondCrack} 
+                      disabled={!isRoasting || !crackEvents.some(e => e.type === 'first') || crackEvents.some(e => e.type === 'second')} 
+                      variant={crackEvents.some(e => e.type === 'second') ? "secondary" : "outline"} 
+                      className="w-full"
+                    >
+                      {crackEvents.some(e => e.type === 'second') ? "Second Crack ✓" : "Second Crack"}
                     </Button>
                   </div>
                 </div>
