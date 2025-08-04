@@ -290,6 +290,20 @@ const RoastMonitor = ({
                </CardContent>
             </Card>
 
+            {/* Benefits Section */}
+            <Card className="shadow-coffee border-accent/20">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-3">
+                  <h3 className="font-semibold text-foreground">Why Track Your Roasts?</h3>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>• Achieve consistent results every time</p>
+                    <p>• Learn from your roasting patterns</p>
+                    <p>• Perfect your favorite profiles</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Temperature Controls */}
             <Card className="shadow-coffee">
               <CardHeader>
