@@ -57,6 +57,7 @@ const RoastMonitor = ({
   };
 
   const handleFirstCrack = () => {
+    console.log('First crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
     if (isRoasting && elapsedTime > 0) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
@@ -64,11 +65,19 @@ const RoastMonitor = ({
         currentTemp: parseFloat(currentTemp) || 0,
         type: 'first'
       };
-      setCrackEvents(prev => [...prev.filter(e => e.type !== 'first'), crackEvent]);
+      console.log('Adding first crack event:', crackEvent);
+      setCrackEvents(prev => {
+        const newEvents = [...prev.filter(e => e.type !== 'first'), crackEvent];
+        console.log('Updated crack events:', newEvents);
+        return newEvents;
+      });
+    } else {
+      console.log('Cannot add first crack - conditions not met');
     }
   };
 
   const handleSecondCrack = () => {
+    console.log('Second crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
     if (isRoasting && elapsedTime > 0) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
@@ -76,7 +85,14 @@ const RoastMonitor = ({
         currentTemp: parseFloat(currentTemp) || 0,
         type: 'second'
       };
-      setCrackEvents(prev => [...prev.filter(e => e.type !== 'second'), crackEvent]);
+      console.log('Adding second crack event:', crackEvent);
+      setCrackEvents(prev => {
+        const newEvents = [...prev.filter(e => e.type !== 'second'), crackEvent];
+        console.log('Updated crack events:', newEvents);
+        return newEvents;
+      });
+    } else {
+      console.log('Cannot add second crack - conditions not met');
     }
   };
 
