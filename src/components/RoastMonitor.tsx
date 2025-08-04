@@ -5,14 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Play, Pause, Square, ArrowLeft } from "lucide-react";
+
 interface RoastData {
   time: number;
   targetTemp: number;
   currentTemp: number;
 }
+
 interface RoastMonitorProps {
   onBack: () => void;
 }
+
 const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
@@ -48,11 +51,13 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+
   const handleStart = () => setIsRoasting(true);
   const handlePause = () => setIsRoasting(false);
   const handleStop = () => {
@@ -62,8 +67,7 @@ const RoastMonitor = ({
     setFirstCrackTime(null);
     setSecondCrackTime(null);
   };
-  
-  
+
   const handleFirstCrack = () => {
     if (isRoasting && !firstCrackTime) {
       setFirstCrackTime(elapsedTime);
@@ -77,7 +81,7 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
-  
+
   const handleSecondCrack = () => {
     if (isRoasting && !secondCrackTime) {
       setSecondCrackTime(elapsedTime);
@@ -91,6 +95,7 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
+
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
@@ -223,7 +228,7 @@ const RoastMonitor = ({
                             x={secondCrackTime} 
                             stroke="hsl(var(--chart-2))" 
                             strokeWidth={2}
-                            strokeDasharray="5 5"
+                            strokeDasharray="3 3"
                             label={{ value: "Second crack", position: "bottom" }}
                           />
                         )}
@@ -243,4 +248,5 @@ const RoastMonitor = ({
       </div>
     </div>;
 };
+
 export default RoastMonitor;
