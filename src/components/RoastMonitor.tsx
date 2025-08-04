@@ -63,15 +63,32 @@ const RoastMonitor = ({
     setSecondCrackTime(null);
   };
   
+  
   const handleFirstCrack = () => {
     if (isRoasting && !firstCrackTime) {
       setFirstCrackTime(elapsedTime);
+      // Add data point to graph
+      const newDataPoint: RoastData = {
+        time: elapsedTime,
+        targetTemp: parseFloat(targetTemp) || 0,
+        currentTemp: parseFloat(currentTemp) || 0
+      };
+      setRoastData(prev => [...prev, newDataPoint]);
+      setLastRecordedTemp(currentTemp);
     }
   };
   
   const handleSecondCrack = () => {
     if (isRoasting && !secondCrackTime) {
       setSecondCrackTime(elapsedTime);
+      // Add data point to graph
+      const newDataPoint: RoastData = {
+        time: elapsedTime,
+        targetTemp: parseFloat(targetTemp) || 0,
+        currentTemp: parseFloat(currentTemp) || 0
+      };
+      setRoastData(prev => [...prev, newDataPoint]);
+      setLastRecordedTemp(currentTemp);
     }
   };
   return <div className="min-h-screen bg-background p-4">
