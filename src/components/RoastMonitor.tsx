@@ -103,6 +103,13 @@ const RoastMonitor = ({
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // Calculate development percentage
+  const calculateDevelopment = (): number => {
+    const firstCrackEvent = crackEvents.find(e => e.type === 'first');
+    if (!firstCrackEvent || elapsedTime === 0) return 0;
+    return 100 - (firstCrackEvent.time / elapsedTime) * 100;
+  };
   const handleStart = () => setIsRoasting(true);
   const handlePause = () => setIsRoasting(false);
   const handleStop = () => {
@@ -261,6 +268,25 @@ const RoastMonitor = ({
                 )}
               </CardContent>
             </Card>
+
+            {/* Development Section - Only show after first crack */}
+            {crackEvents.some(e => e.type === 'first') && (
+              <Card className="shadow-coffee mt-6">
+                <CardHeader>
+                  <CardTitle>Bean Development</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-primary mb-2">
+                      {calculateDevelopment().toFixed(1)}%
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Development since first crack
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
