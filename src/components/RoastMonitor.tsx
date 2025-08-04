@@ -210,23 +210,23 @@ const RoastMonitor = ({
                        <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
                        <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
                        {firstCrackTime && (
-                         <ReferenceLine 
-                           x={firstCrackTime} 
-                           stroke="hsl(var(--destructive))" 
-                           strokeWidth={2}
-                           strokeDasharray="3 3"
-                           label={{ value: "First crack", position: "top" }}
-                         />
-                       )}
-                       {secondCrackTime && (
-                         <ReferenceLine 
-                           x={secondCrackTime} 
-                           stroke="hsl(var(--destructive))" 
-                           strokeWidth={2}
-                           strokeDasharray="3 3"
-                           label={{ value: "Second crack", position: "top" }}
-                         />
-                       )}
+                          <ReferenceLine 
+                            x={firstCrackTime} 
+                            stroke="hsl(var(--destructive))" 
+                            strokeWidth={2}
+                            strokeDasharray="3 3"
+                            label={{ value: "First crack", position: "top" }}
+                          />
+                        )}
+                        {secondCrackTime && (
+                          <ReferenceLine 
+                            x={secondCrackTime} 
+                            stroke="hsl(var(--chart-2))" 
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                            label={{ value: "Second crack", position: "bottom" }}
+                          />
+                        )}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
