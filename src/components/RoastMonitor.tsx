@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Play, Pause, Square, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import SaveRoastDialog from "./SaveRoastDialog";
 interface RoastData {
   time: number;
   targetTemp: number;
@@ -131,20 +132,33 @@ const RoastMonitor = ({
          {/* Header */}
          <div className="flex items-center justify-between mb-6">
            <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
-           <div className="flex items-center gap-4">
-             <span className="text-sm text-muted-foreground">
-               Welcome, {user?.email}
-             </span>
-             <Button 
-               variant="outline" 
-               size="sm"
-               onClick={signOut}
-               className="flex items-center gap-2"
-             >
-               <LogOut className="h-4 w-4" />
-               Sign Out
-             </Button>
-           </div>
+            <div className="flex items-center gap-4">
+              {user ? (
+                <>
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, {user?.email}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={signOut}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/auth'}
+                  className="flex items-center gap-2"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
          </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -172,7 +186,19 @@ const RoastMonitor = ({
                     Stop
                   </Button>
                 </div>
-              </CardContent>
+                
+                 {/* Save Profile Button - Only show when roast is stopped and has data */}
+                 {!isRoasting && elapsedTime > 0 && (
+                   <div className="mt-4">
+                     <SaveRoastDialog 
+                       elapsedTime={elapsedTime}
+                       roastData={roastData}
+                       crackEvents={crackEvents}
+                       disabled={elapsedTime === 0 || roastData.length === 0}
+                     />
+                   </div>
+                 )}
+               </CardContent>
             </Card>
 
             {/* Temperature Controls */}
