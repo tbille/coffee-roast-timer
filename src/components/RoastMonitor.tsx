@@ -3,19 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Play, Pause, Square, ArrowLeft } from "lucide-react";
-
 interface RoastData {
   time: number;
   targetTemp: number;
   currentTemp: number;
 }
-
 interface RoastMonitorProps {
   onBack: () => void;
 }
-
 const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
@@ -25,8 +22,6 @@ const RoastMonitor = ({
   const [currentTemp, setCurrentTemp] = useState<string>("20");
   const [lastRecordedTemp, setLastRecordedTemp] = useState<string>("20");
   const [roastData, setRoastData] = useState<RoastData[]>([]);
-  const [firstCrackTime, setFirstCrackTime] = useState<number | null>(null);
-  const [secondCrackTime, setSecondCrackTime] = useState<number | null>(null);
 
   // Timer effect
   useEffect(() => {
@@ -51,51 +46,18 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
-
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
-
   const handleStart = () => setIsRoasting(true);
   const handlePause = () => setIsRoasting(false);
   const handleStop = () => {
     setIsRoasting(false);
     setElapsedTime(0);
     setRoastData([]);
-    setFirstCrackTime(null);
-    setSecondCrackTime(null);
   };
-
-  const handleFirstCrack = () => {
-    if (isRoasting && !firstCrackTime) {
-      setFirstCrackTime(elapsedTime);
-      // Add data point to graph
-      const newDataPoint: RoastData = {
-        time: elapsedTime,
-        targetTemp: parseFloat(targetTemp) || 0,
-        currentTemp: parseFloat(currentTemp) || 0
-      };
-      setRoastData(prev => [...prev, newDataPoint]);
-      setLastRecordedTemp(currentTemp);
-    }
-  };
-
-  const handleSecondCrack = () => {
-    if (isRoasting && !secondCrackTime) {
-      setSecondCrackTime(elapsedTime);
-      // Add data point to graph
-      const newDataPoint: RoastData = {
-        time: elapsedTime,
-        targetTemp: parseFloat(targetTemp) || 0,
-        currentTemp: parseFloat(currentTemp) || 0
-      };
-      setRoastData(prev => [...prev, newDataPoint]);
-      setLastRecordedTemp(currentTemp);
-    }
-  };
-
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
@@ -154,28 +116,6 @@ const RoastMonitor = ({
                   </Button>
                 </div>
                 
-                {/* Crack Events */}
-                <div className="space-y-2">
-                  <Label>Roast Events</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      onClick={handleFirstCrack} 
-                      disabled={!isRoasting || firstCrackTime !== null}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {firstCrackTime !== null ? `First Crack (${formatTime(firstCrackTime)})` : 'First Crack'}
-                    </Button>
-                    <Button 
-                      onClick={handleSecondCrack} 
-                      disabled={!isRoasting || secondCrackTime !== null}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {secondCrackTime !== null ? `Second Crack (${formatTime(secondCrackTime)})` : 'Second Crack'}
-                    </Button>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -191,16 +131,11 @@ const RoastMonitor = ({
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={roastData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis 
-                        dataKey="time" 
-                        stroke="hsl(var(--foreground))" 
-                        tickFormatter={formatTime}
-                        label={{
-                          value: 'Time (MM:SS)',
-                          position: 'insideBottom',
-                          offset: -10
-                        }} 
-                      />
+                      <XAxis dataKey="time" stroke="hsl(var(--foreground))" label={{
+                      value: 'Time (seconds)',
+                      position: 'insideBottom',
+                      offset: -10
+                    }} />
                       <YAxis stroke="hsl(var(--foreground))" label={{
                       value: 'Temperature (°C)',
                       angle: -90,
@@ -211,27 +146,9 @@ const RoastMonitor = ({
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "var(--radius)"
                     }} />
-                       <Legend />
-                       <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
-                       <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
-                       {firstCrackTime && (
-                          <ReferenceLine 
-                            x={firstCrackTime} 
-                            stroke="hsl(var(--destructive))" 
-                            strokeWidth={2}
-                            strokeDasharray="3 3"
-                            label={{ value: "First crack", position: "top" }}
-                          />
-                        )}
-                        {secondCrackTime && (
-                          <ReferenceLine 
-                            x={secondCrackTime} 
-                            stroke="hsl(var(--chart-2))" 
-                            strokeWidth={2}
-                            strokeDasharray="3 3"
-                            label={{ value: "Second crack", position: "bottom" }}
-                          />
-                        )}
+                      <Legend />
+                      <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
+                      <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -248,5 +165,4 @@ const RoastMonitor = ({
       </div>
     </div>;
 };
-
 export default RoastMonitor;
