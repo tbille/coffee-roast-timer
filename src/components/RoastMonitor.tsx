@@ -215,7 +215,7 @@ const RoastMonitor = ({
                 <CardTitle>Temperature Graph</CardTitle>
               </CardHeader>
               <CardContent>
-                {isRoasting ? (
+                {isRoasting || roastData.length > 0 ? (
                   <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={roastData}>
