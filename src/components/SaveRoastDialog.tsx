@@ -183,7 +183,7 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
             
             
             <div>
-              <Label htmlFor="roast-process">Roast Process</Label>
+              <Label htmlFor="roast-process">Process</Label>
               <Input
                 id="roast-process"
                 value={formData.roastProcess}
