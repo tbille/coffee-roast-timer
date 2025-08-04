@@ -1,14 +1,23 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import HomePage from "@/components/HomePage";
+import RoastMonitor from "@/components/RoastMonitor";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  const [currentView, setCurrentView] = useState<"home" | "roast">("home");
+
+  const handleStartRoast = () => {
+    setCurrentView("roast");
+  };
+
+  const handleBackToHome = () => {
+    setCurrentView("home");
+  };
+
+  if (currentView === "roast") {
+    return <RoastMonitor onBack={handleBackToHome} />;
+  }
+
+  return <HomePage onStartRoast={handleStartRoast} />;
 };
 
 export default Index;

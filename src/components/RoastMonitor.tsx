@@ -1,0 +1,225 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { Play, Pause, Square, ArrowLeft } from "lucide-react";
+
+interface RoastData {
+  time: number;
+  targetTemp: number;
+  currentTemp: number;
+}
+
+interface RoastMonitorProps {
+  onBack: () => void;
+}
+
+const RoastMonitor = ({ onBack }: RoastMonitorProps) => {
+  const [isRoasting, setIsRoasting] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [targetTemp, setTargetTemp] = useState<string>("200");
+  const [currentTemp, setCurrentTemp] = useState<string>("20");
+  const [roastData, setRoastData] = useState<RoastData[]>([]);
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRoasting) {
+      interval = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRoasting]);
+
+  // Data recording effect
+  useEffect(() => {
+    if (isRoasting && elapsedTime > 0) {
+      const newDataPoint: RoastData = {
+        time: elapsedTime,
+        targetTemp: parseFloat(targetTemp) || 0,
+        currentTemp: parseFloat(currentTemp) || 0,
+      };
+      setRoastData((prev) => [...prev, newDataPoint]);
+    }
+  }, [elapsedTime, isRoasting, targetTemp, currentTemp]);
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleStart = () => setIsRoasting(true);
+  const handlePause = () => setIsRoasting(false);
+  const handleStop = () => {
+    setIsRoasting(false);
+    setElapsedTime(0);
+    setRoastData([]);
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="container mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+          <h1 className="text-3xl font-bold text-foreground">Roast Monitor</h1>
+          <div></div>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Controls Panel */}
+          <div className="space-y-6">
+            {/* Timer Card */}
+            <Card className="shadow-coffee">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">Roast Timer</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="text-6xl font-mono font-bold text-primary mb-4">
+                  {formatTime(elapsedTime)}
+                </div>
+                <div className="flex gap-2 justify-center">
+                  {!isRoasting ? (
+                    <Button onClick={handleStart} className="flex items-center gap-2">
+                      <Play className="h-4 w-4" />
+                      Start
+                    </Button>
+                  ) : (
+                    <Button onClick={handlePause} variant="secondary" className="flex items-center gap-2">
+                      <Pause className="h-4 w-4" />
+                      Pause
+                    </Button>
+                  )}
+                  <Button onClick={handleStop} variant="destructive" className="flex items-center gap-2">
+                    <Square className="h-4 w-4" />
+                    Stop
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Temperature Controls */}
+            <Card className="shadow-coffee">
+              <CardHeader>
+                <CardTitle>Temperature Control</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="target-temp">Target Temperature (°C)</Label>
+                  <Input
+                    id="target-temp"
+                    type="number"
+                    value={targetTemp}
+                    onChange={(e) => setTargetTemp(e.target.value)}
+                    placeholder="200"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="current-temp">Current Temperature (°C)</Label>
+                  <Input
+                    id="current-temp"
+                    type="number"
+                    value={currentTemp}
+                    onChange={(e) => setCurrentTemp(e.target.value)}
+                    placeholder="20"
+                  />
+                </div>
+                <div className="pt-2 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Target:</span>
+                    <span className="font-semibold text-temperature-hot">{targetTemp}°C</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Current:</span>
+                    <span className="font-semibold text-primary">{currentTemp}°C</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Difference:</span>
+                    <span className={`font-semibold ${
+                      Math.abs(parseFloat(currentTemp) - parseFloat(targetTemp)) <= 5 
+                        ? "text-green-600" 
+                        : "text-orange-500"
+                    }`}>
+                      {Math.abs(parseFloat(currentTemp) - parseFloat(targetTemp)).toFixed(1)}°C
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Graph Panel */}
+          <div className="lg:col-span-2">
+            <Card className="shadow-coffee h-full">
+              <CardHeader>
+                <CardTitle>Temperature Graph</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={roastData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="hsl(var(--foreground))"
+                        label={{ value: 'Time (seconds)', position: 'insideBottom', offset: -10 }}
+                      />
+                      <YAxis 
+                        stroke="hsl(var(--foreground))"
+                        label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "var(--radius)"
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="targetTemp"
+                        stroke="hsl(var(--temperature-hot))"
+                        strokeWidth={2}
+                        name="Target Temperature"
+                        strokeDasharray="5 5"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="currentTemp"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        name="Current Temperature"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                {roastData.length === 0 && (
+                  <div className="flex items-center justify-center h-96 text-muted-foreground">
+                    <div className="text-center">
+                      <p className="text-lg mb-2">Start roasting to see the temperature graph</p>
+                      <p className="text-sm">Data points will appear as you monitor your roast</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RoastMonitor;

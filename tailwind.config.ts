@@ -52,6 +52,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Coffee roasting specific colors
+				coffee: {
+					bean: 'hsl(var(--coffee-bean))',
+					light: 'hsl(var(--roast-light))',
+					medium: 'hsl(var(--roast-medium))',
+					dark: 'hsl(var(--roast-dark))'
+				},
+				temperature: {
+					hot: 'hsl(var(--temperature-hot))',
+					warm: 'hsl(var(--temperature-warm))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
