@@ -91,6 +91,9 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
         description: "Your roast profile has been saved successfully!"
       });
 
+      // Clear the persisted roast state after successful save
+      localStorage.removeItem('roastTimerState');
+
       setOpen(false);
       setFormData({
         beansName: "",

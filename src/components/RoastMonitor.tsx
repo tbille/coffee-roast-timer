@@ -51,6 +51,39 @@ const RoastMonitor = ({
     }
   }, [searchParams]);
 
+  // Load persisted roast state on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('roastTimerState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        setElapsedTime(state.elapsedTime || 0);
+        setTargetTemp(state.targetTemp || "200");
+        setCurrentTemp(state.currentTemp || "20");
+        setLastRecordedTemp(state.lastRecordedTemp || "20");
+        setRoastData(state.roastData || []);
+        setCrackEvents(state.crackEvents || []);
+        setIsRoasting(false); // Never auto-resume roasting for safety
+      } catch (error) {
+        console.error('Error loading saved roast state:', error);
+      }
+    }
+  }, []);
+
+  // Save roast state to localStorage whenever it changes
+  useEffect(() => {
+    const state = {
+      elapsedTime,
+      targetTemp,
+      currentTemp,
+      lastRecordedTemp,
+      roastData,
+      crackEvents,
+      isRoasting: false // Don't persist running state for safety
+    };
+    localStorage.setItem('roastTimerState', JSON.stringify(state));
+  }, [elapsedTime, targetTemp, currentTemp, lastRecordedTemp, roastData, crackEvents]);
+
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -165,12 +198,15 @@ const RoastMonitor = ({
     setRoastData([]);
     setCrackEvents([]);
     setIsRoasting(true);
+    // Clear any persisted state when starting fresh
+    localStorage.removeItem('roastTimerState');
   };
   
   const handlePause = () => setIsRoasting(false);
   
   const handleStop = () => {
     setIsRoasting(false);
+    // State is automatically saved via useEffect
   };
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
