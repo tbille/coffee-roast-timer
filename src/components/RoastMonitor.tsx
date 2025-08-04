@@ -19,8 +19,9 @@ interface CrackEvent {
 }
 
 interface RoastMonitorProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
+
 const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
@@ -125,15 +126,10 @@ const RoastMonitor = ({
   };
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="outline" onClick={onBack} className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Button>
-          <h1 className="text-3xl font-bold text-foreground">Roast Monitor</h1>
-          <div></div>
-        </div>
+         {/* Header */}
+         <div className="flex items-center justify-center mb-6">
+           <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
+         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Controls Panel */}
