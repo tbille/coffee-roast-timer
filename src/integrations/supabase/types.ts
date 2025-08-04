@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      roast_profiles: {
+        Row: {
+          beans_name: string
+          crack_events: Json
+          created_at: string
+          duration_seconds: number
+          farm_name: string | null
+          final_weight: number | null
+          id: string
+          initial_weight: number | null
+          origin: string | null
+          temperature_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          beans_name: string
+          crack_events?: Json
+          created_at?: string
+          duration_seconds: number
+          farm_name?: string | null
+          final_weight?: number | null
+          id?: string
+          initial_weight?: number | null
+          origin?: string | null
+          temperature_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          beans_name?: string
+          crack_events?: Json
+          created_at?: string
+          duration_seconds?: number
+          farm_name?: string | null
+          final_weight?: number | null
+          id?: string
+          initial_weight?: number | null
+          origin?: string | null
+          temperature_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
