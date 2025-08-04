@@ -25,6 +25,7 @@ export type Database = {
           id: string
           initial_weight: number | null
           origin: string | null
+          roast_process: string | null
           temperature_data: Json
           updated_at: string
           user_id: string
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           initial_weight?: number | null
           origin?: string | null
+          roast_process?: string | null
           temperature_data?: Json
           updated_at?: string
           user_id: string
@@ -53,6 +55,7 @@ export type Database = {
           id?: string
           initial_weight?: number | null
           origin?: string | null
+          roast_process?: string | null
           temperature_data?: Json
           updated_at?: string
           user_id?: string

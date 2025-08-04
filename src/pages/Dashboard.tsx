@@ -24,6 +24,7 @@ interface RoastProfile {
   beans_name: string;
   origin?: string;
   farm_name?: string;
+  roast_process?: string;
   initial_weight?: number;
   final_weight?: number;
   duration_seconds: number;
@@ -236,6 +237,12 @@ const Dashboard = () => {
                   {profile.farm_name && (
                     <div className="text-sm text-muted-foreground">
                       Farm: {profile.farm_name}
+                    </div>
+                  )}
+                  
+                  {profile.roast_process && (
+                    <div className="text-sm">
+                      <span className="font-medium">Process:</span> {profile.roast_process}
                     </div>
                   )}
                   

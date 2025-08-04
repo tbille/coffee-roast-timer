@@ -45,7 +45,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
     origin: "",
     farmName: "",
     initialWeight: "",
-    finalWeight: ""
+    finalWeight: "",
+    roastProcess: ""
   });
 
   const handleSave = async () => {
@@ -77,6 +78,7 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
           beans_name: formData.beansName.trim(),
           origin: formData.origin.trim() || null,
           farm_name: formData.farmName.trim() || null,
+          roast_process: formData.roastProcess.trim() || null,
           initial_weight: formData.initialWeight ? parseFloat(formData.initialWeight) : null,
           final_weight: formData.finalWeight ? parseFloat(formData.finalWeight) : null,
           duration_seconds: elapsedTime,
@@ -100,7 +102,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
         origin: "",
         farmName: "",
         initialWeight: "",
-        finalWeight: ""
+        finalWeight: "",
+        roastProcess: ""
       });
     } catch (error) {
       console.error('Error saving roast profile:', error);
@@ -175,6 +178,17 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
                 value={formData.origin}
                 onChange={(e) => setFormData(prev => ({ ...prev, origin: e.target.value }))}
                 placeholder="e.g., Ethiopia"
+              />
+            </div>
+            
+            
+            <div>
+              <Label htmlFor="roast-process">Roast Process</Label>
+              <Input
+                id="roast-process"
+                value={formData.roastProcess}
+                onChange={(e) => setFormData(prev => ({ ...prev, roastProcess: e.target.value }))}
+                placeholder="e.g., Light City, Medium Dark, French"
               />
             </div>
             
