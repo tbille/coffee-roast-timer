@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Play, Pause, Square, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 interface RoastData {
   time: number;
   targetTemp: number;
@@ -28,6 +31,8 @@ const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
   const { signOut, user } = useAuth();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isRoasting, setIsRoasting] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [targetTemp, setTargetTemp] = useState<string>("200");
@@ -35,6 +40,16 @@ const RoastMonitor = ({
   const [lastRecordedTemp, setLastRecordedTemp] = useState<string>("20");
   const [roastData, setRoastData] = useState<RoastData[]>([]);
   const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
+  const [referenceProfile, setReferenceProfile] = useState<RoastData[] | null>(null);
+  const [referenceProfileName, setReferenceProfileName] = useState<string>("");
+
+  // Load reference profile if specified in URL
+  useEffect(() => {
+    const referenceId = searchParams.get('reference');
+    if (referenceId) {
+      loadReferenceProfile(referenceId);
+    }
+  }, [searchParams]);
 
   // Timer effect
   useEffect(() => {
@@ -46,6 +61,36 @@ const RoastMonitor = ({
     }
     return () => clearInterval(interval);
   }, [isRoasting]);
+
+  const loadReferenceProfile = async (profileId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('roast_profiles')
+        .select('*')
+        .eq('id', profileId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Convert the stored JSON data back to RoastData format
+        const tempData = Array.isArray(data.temperature_data) ? data.temperature_data as unknown as RoastData[] : [];
+        setReferenceProfile(tempData);
+        setReferenceProfileName(data.beans_name);
+        toast({
+          title: "Reference Profile Loaded",
+          description: `Loaded "${data.beans_name}" as reference. Try to replicate this roast!`
+        });
+      }
+    } catch (error) {
+      console.error('Error loading reference profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load reference profile.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Submit temperature function
   const handleSubmitTemperature = () => {
@@ -115,7 +160,7 @@ const RoastMonitor = ({
     return 100 - (firstCrackEvent.time / elapsedTime) * 100;
   };
   const handleStart = () => {
-    // Reset everything when starting a new roast
+    // Reset everything when starting a new roast (but keep reference profile)
     setElapsedTime(0);
     setRoastData([]);
     setCrackEvents([]);
@@ -258,7 +303,14 @@ const RoastMonitor = ({
           <div className="lg:col-span-2">
             <Card className="shadow-coffee h-full">
               <CardHeader>
-                <CardTitle>Temperature Graph</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Temperature Graph</span>
+                  {referenceProfile && (
+                    <span className="text-sm font-normal text-muted-foreground">
+                      Reference: {referenceProfileName}
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {isRoasting || roastData.length > 0 ? (
@@ -277,10 +329,10 @@ const RoastMonitor = ({
                           tickFormatter={formatTime}
                         />
                         <YAxis stroke="hsl(var(--foreground))" label={{
-                        value: 'Temperature (°C)',
-                        angle: -90,
-                        position: 'insideLeft'
-                      }} />
+                          value: 'Temperature (°C)',
+                          angle: -90,
+                          position: 'insideLeft'
+                        }} />
                         <Tooltip 
                           contentStyle={{
                             backgroundColor: "hsl(var(--card))",
@@ -290,8 +342,27 @@ const RoastMonitor = ({
                           labelFormatter={(value) => `Time: ${formatTime(value as number)}`}
                         />
                         <Legend />
+                        
+                        {/* Reference profile line (dotted) */}
+                        {referenceProfile && (
+                          <Line 
+                            type="monotone" 
+                            dataKey="currentTemp" 
+                            stroke="hsl(var(--muted-foreground))" 
+                            strokeWidth={2} 
+                            name={`Reference: ${referenceProfileName}`}
+                            strokeDasharray="8 4" 
+                            data={referenceProfile}
+                            connectNulls={false}
+                            dot={false}
+                          />
+                        )}
+                        
+                        {/* Current roast lines */}
                         <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
+                        
+                        {/* Crack events */}
                         {crackEvents.map((crack, index) => (
                           <ReferenceLine 
                             key={`${crack.type}-${index}`}
@@ -312,8 +383,39 @@ const RoastMonitor = ({
                 ) : (
                   <div className="flex items-center justify-center h-96 text-muted-foreground">
                     <div className="text-center">
-                      <p className="text-lg mb-2">Start roasting to see the temperature graph</p>
-                      <p className="text-sm">Data points will appear as you monitor your roast</p>
+                      <p className="text-lg mb-2">
+                        {referenceProfile ? "Start roasting to see your progress against the reference" : "Start roasting to see the temperature graph"}
+                      </p>
+                      <p className="text-sm">
+                        {referenceProfile ? `Reference profile: ${referenceProfileName}` : "Data points will appear as you monitor your roast"}
+                      </p>
+                      {referenceProfile && (
+                        <div className="mt-4 p-4 bg-muted rounded-lg">
+                          <div className="h-32 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={referenceProfile}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                <XAxis 
+                                  dataKey="time" 
+                                  stroke="hsl(var(--foreground))" 
+                                  tickFormatter={formatTime}
+                                  fontSize={10}
+                                />
+                                <YAxis stroke="hsl(var(--foreground))" fontSize={10} />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="currentTemp" 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  strokeWidth={2} 
+                                  strokeDasharray="8 4" 
+                                  dot={false}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">Reference Profile Preview</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

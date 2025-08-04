@@ -174,7 +174,11 @@ const Dashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {profiles.map((profile) => (
-              <Card key={profile.id} className="shadow-coffee">
+              <Card 
+                key={profile.id} 
+                className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/?reference=${profile.id}`)}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -187,7 +191,12 @@ const Dashboard = () => {
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
