@@ -74,24 +74,37 @@ const RoastProfileDetails = () => {
   const fetchProfile = async () => {
     if (!id) return;
     try {
-      const { data, error } = await supabase
+      // First get the roast profile
+      const { data: roastData, error: roastError } = await supabase
         .from('roast_profiles')
-        .select(`
-          *,
-          profiles (
-            username
-          )
-        `)
+        .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (roastError) throw roastError;
+      if (!roastData) {
+        setProfile(null);
+        return;
+      }
+
+      // Then get the profile data for the user
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', roastData.user_id)
+        .maybeSingle();
+
+      // Don't throw error if profile doesn't exist, just continue without username
+      if (profileError) {
+        console.warn('Profile not found for user:', roastData.user_id);
+      }
       
       // Parse the JSON data from Supabase
       const processedProfile: RoastProfile = {
-        ...data,
-        temperature_data: Array.isArray(data.temperature_data) ? data.temperature_data as unknown as RoastData[] : [],
-        crack_events: Array.isArray(data.crack_events) ? data.crack_events as unknown as CrackEvent[] : []
+        ...roastData,
+        temperature_data: Array.isArray(roastData.temperature_data) ? roastData.temperature_data as unknown as RoastData[] : [],
+        crack_events: Array.isArray(roastData.crack_events) ? roastData.crack_events as unknown as CrackEvent[] : [],
+        profiles: profileData ? { username: profileData.username } : undefined
       };
       
       setProfile(processedProfile);
