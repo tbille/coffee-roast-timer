@@ -498,7 +498,7 @@ const RoastMonitor = ({
               >
                 <Link to="/discover">
                   <Globe className="mr-2 h-5 w-5" />
-                  Explore Global Roasts
+                  Explore Roasts Profiles
                 </Link>
               </Button>
             </div>
