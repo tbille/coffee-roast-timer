@@ -198,7 +198,7 @@ const RoastProfileDetails = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Metadata and Notes */}
+          {/* Metadata */}
           <div className="space-y-6">
             {/* Profile Metadata */}
             <Card className="shadow-coffee">
@@ -286,74 +286,12 @@ const RoastProfileDetails = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Notes Section */}
-            <Card className="shadow-coffee">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Notes</CardTitle>
-                {!isEditingNotes ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditingNotes(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSaveNotes}
-                      disabled={savingNotes}
-                      className="flex items-center gap-2"
-                    >
-                      <Save className="h-4 w-4" />
-                      {savingNotes ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditingNotes(false);
-                        setNotes(profile.notes || "");
-                      }}
-                      className="flex items-center gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {isEditingNotes ? (
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes about this roast (taste notes, adjustments for next time, etc.)"
-                    className="min-h-32"
-                  />
-                ) : (
-                  <div className="min-h-20">
-                    {profile.notes ? (
-                      <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground italic">
-                        No notes yet. Click Edit to add some!
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Temperature Graph */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-coffee h-full">
+          {/* Temperature Graph and Notes */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Temperature Graph */}
+            <Card className="shadow-coffee">
               <CardHeader>
                 <CardTitle>Temperature Profile</CardTitle>
               </CardHeader>
@@ -434,6 +372,69 @@ const RoastProfileDetails = () => {
                       <p className="text-lg">No temperature data available</p>
                       <p className="text-sm">This profile doesn't have recorded temperature points.</p>
                     </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Notes Section */}
+            <Card className="shadow-coffee">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Notes</CardTitle>
+                {!isEditingNotes ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingNotes(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSaveNotes}
+                      disabled={savingNotes}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {savingNotes ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditingNotes(false);
+                        setNotes(profile.notes || "");
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                {isEditingNotes ? (
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add notes about this roast (taste notes, adjustments for next time, etc.)"
+                    className="min-h-32"
+                  />
+                ) : (
+                  <div className="min-h-20">
+                    {profile.notes ? (
+                      <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        No notes yet. Click Edit to add some!
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
