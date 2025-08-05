@@ -3,10 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +51,16 @@ const RoastProfileDetails = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notes, setNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+  const [editedMetadata, setEditedMetadata] = useState({
+    beans_name: "",
+    origin: "",
+    farm_name: "",
+    roast_process: "",
+    initial_weight: 0,
+    final_weight: 0
+  });
+  const [savingMetadata, setSavingMetadata] = useState(false);
 
   useEffect(() => {
     if (!id || !user) return;
@@ -76,6 +87,14 @@ const RoastProfileDetails = () => {
       
       setProfile(processedProfile);
       setNotes(processedProfile.notes || "");
+      setEditedMetadata({
+        beans_name: processedProfile.beans_name,
+        origin: processedProfile.origin || "",
+        farm_name: processedProfile.farm_name || "",
+        roast_process: processedProfile.roast_process || "",
+        initial_weight: processedProfile.initial_weight || 0,
+        final_weight: processedProfile.final_weight || 0
+      });
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -119,6 +138,66 @@ const RoastProfileDetails = () => {
     }
   };
 
+  const handleSaveMetadata = async () => {
+    if (!profile) return;
+    
+    setSavingMetadata(true);
+    try {
+      const { error } = await supabase
+        .from('roast_profiles')
+        .update({
+          beans_name: editedMetadata.beans_name,
+          origin: editedMetadata.origin || null,
+          farm_name: editedMetadata.farm_name || null,
+          roast_process: editedMetadata.roast_process || null,
+          initial_weight: editedMetadata.initial_weight || null,
+          final_weight: editedMetadata.final_weight || null
+        })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setProfile({ 
+        ...profile, 
+        beans_name: editedMetadata.beans_name,
+        origin: editedMetadata.origin || undefined,
+        farm_name: editedMetadata.farm_name || undefined,
+        roast_process: editedMetadata.roast_process || undefined,
+        initial_weight: editedMetadata.initial_weight || undefined,
+        final_weight: editedMetadata.final_weight || undefined
+      });
+      setIsEditingMetadata(false);
+      toast({
+        title: "Metadata saved",
+        description: "Your roast details have been updated successfully."
+      });
+    } catch (error) {
+      console.error('Error saving metadata:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save metadata.",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingMetadata(false);
+    }
+  };
+
+  const handleUseAsReference = () => {
+    navigate('/dashboard', { 
+      state: { 
+        referenceProfile: {
+          beans_name: profile?.beans_name,
+          origin: profile?.origin,
+          farm_name: profile?.farm_name,
+          roast_process: profile?.roast_process,
+          initial_weight: profile?.initial_weight,
+          temperature_data: profile?.temperature_data
+        }
+      }
+    });
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -129,9 +208,7 @@ const RoastProfileDetails = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
@@ -192,9 +269,19 @@ const RoastProfileDetails = () => {
             </Button>
             <h1 className="text-3xl font-bold text-foreground">{profile.beans_name}</h1>
           </div>
-          <Badge variant="secondary">
-            {formatDate(profile.created_at)}
-          </Badge>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handleUseAsReference}
+              className="flex items-center gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              Use as Reference
+            </Button>
+            <Badge variant="secondary">
+              {formatDate(profile.created_at)}
+            </Badge>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -202,30 +289,110 @@ const RoastProfileDetails = () => {
           <div className="space-y-6">
             {/* Profile Metadata */}
             <Card className="shadow-coffee">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Roast Details</CardTitle>
+                {!isEditingMetadata ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingMetadata(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSaveMetadata}
+                      disabled={savingMetadata}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {savingMetadata ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditingMetadata(false);
+                        setEditedMetadata({
+                          beans_name: profile.beans_name,
+                          origin: profile.origin || "",
+                          farm_name: profile.farm_name || "",
+                          roast_process: profile.roast_process || "",
+                          initial_weight: profile.initial_weight || 0,
+                          final_weight: profile.final_weight || 0
+                        });
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
+                  <Label className="text-sm font-medium">Bean Name</Label>
+                  {isEditingMetadata ? (
+                    <Input
+                      value={editedMetadata.beans_name}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, beans_name: e.target.value })}
+                      placeholder="Bean name"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{profile.beans_name}</p>
+                  )}
+                </div>
+
+                <div>
                   <Label className="text-sm font-medium">Bean Origin</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.origin || "Not specified"}
-                  </p>
+                  {isEditingMetadata ? (
+                    <Input
+                      value={editedMetadata.origin}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, origin: e.target.value })}
+                      placeholder="Origin (e.g., Ethiopia)"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.origin || "Not specified"}
+                    </p>
+                  )}
                 </div>
                 
-                {profile.farm_name && (
-                  <div>
-                    <Label className="text-sm font-medium">Farm</Label>
-                    <p className="text-sm text-muted-foreground">{profile.farm_name}</p>
-                  </div>
-                )}
+                <div>
+                  <Label className="text-sm font-medium">Farm</Label>
+                  {isEditingMetadata ? (
+                    <Input
+                      value={editedMetadata.farm_name}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, farm_name: e.target.value })}
+                      placeholder="Farm name"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.farm_name || "Not specified"}
+                    </p>
+                  )}
+                </div>
                 
-                {profile.roast_process && (
-                  <div>
-                    <Label className="text-sm font-medium">Process</Label>
-                    <p className="text-sm text-muted-foreground">{profile.roast_process}</p>
-                  </div>
-                )}
+                <div>
+                  <Label className="text-sm font-medium">Process</Label>
+                  {isEditingMetadata ? (
+                    <Input
+                      value={editedMetadata.roast_process}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, roast_process: e.target.value })}
+                      placeholder="Processing method"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.roast_process || "Not specified"}
+                    </p>
+                  )}
+                </div>
                 
                 <div>
                   <Label className="text-sm font-medium">Duration</Label>
@@ -234,19 +401,37 @@ const RoastProfileDetails = () => {
                   </p>
                 </div>
 
-                {profile.initial_weight && (
-                  <div>
-                    <Label className="text-sm font-medium">Initial Weight</Label>
-                    <p className="text-sm text-muted-foreground">{profile.initial_weight}g</p>
-                  </div>
-                )}
+                <div>
+                  <Label className="text-sm font-medium">Initial Weight</Label>
+                  {isEditingMetadata ? (
+                    <Input
+                      type="number"
+                      value={editedMetadata.initial_weight || ""}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, initial_weight: Number(e.target.value) || 0 })}
+                      placeholder="Initial weight in grams"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.initial_weight ? `${profile.initial_weight}g` : "Not specified"}
+                    </p>
+                  )}
+                </div>
 
-                {profile.final_weight && (
-                  <div>
-                    <Label className="text-sm font-medium">Final Weight</Label>
-                    <p className="text-sm text-muted-foreground">{profile.final_weight}g</p>
-                  </div>
-                )}
+                <div>
+                  <Label className="text-sm font-medium">Final Weight</Label>
+                  {isEditingMetadata ? (
+                    <Input
+                      type="number"
+                      value={editedMetadata.final_weight || ""}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, final_weight: Number(e.target.value) || 0 })}
+                      placeholder="Final weight in grams"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.final_weight ? `${profile.final_weight}g` : "Not specified"}
+                    </p>
+                  )}
+                </div>
 
                 {profile.initial_weight && profile.final_weight && (
                   <div>
@@ -327,7 +512,7 @@ const RoastProfileDetails = () => {
                           }}
                           labelFormatter={(value) => `Time: ${formatTime(value as number)}`}
                         />
-                        <Legend />
+                        <Legend wrapperStyle={{ paddingTop: '20px' }} />
                         
                         <Line 
                           type="monotone" 
