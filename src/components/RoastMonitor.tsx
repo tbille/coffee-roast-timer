@@ -308,19 +308,6 @@ const RoastMonitor = ({
                 </CardContent>
               </Card>
 
-              {/* Marketing content moved here */}
-              <Card className="shadow-coffee border-accent/20">
-                <CardContent className="pt-6">
-                  <div className="text-center space-y-3">
-                    <h3 className="font-semibold text-foreground">Why Track Your Roasts?</h3>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>• Achieve consistent results every time</p>
-                      <p>• Learn from your roasting patterns</p>
-                      <p>• Perfect your favorite profiles</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Bean Development Section - Only show after first crack */}
               {crackEvents.some(e => e.type === 'first') && (
@@ -535,6 +522,18 @@ const RoastMonitor = ({
               </CardContent>
             </Card>
 
+          </div>
+        </div>
+        
+        {/* Hero Section */}
+        <div className="mt-16 py-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
+          <div className="text-center space-y-6 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground">Why Track Your Roasts?</h2>
+            <div className="text-lg text-muted-foreground space-y-3">
+              <p>• Achieve consistent results every time</p>
+              <p>• Learn from your roasting patterns</p>
+              <p>• Perfect your favorite profiles</p>
+            </div>
           </div>
         </div>
       </div>
