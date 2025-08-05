@@ -35,6 +35,42 @@ export type Database = {
         }
         Relationships: []
       }
+      roast_profile_likes: {
+        Row: {
+          created_at: string
+          id: string
+          roast_profile_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          roast_profile_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          roast_profile_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roast_profile_likes_roast_profile_id_fkey"
+            columns: ["roast_profile_id"]
+            isOneToOne: false
+            referencedRelation: "roast_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roast_profile_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roast_profiles: {
         Row: {
           beans_name: string

@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X, Copy } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface RoastData {
   time: number;
@@ -49,6 +51,7 @@ const RoastProfileDetails = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const [profile, setProfile] = useState<RoastProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +68,71 @@ const RoastProfileDetails = () => {
     final_weight: 0
   });
   const [savingMetadata, setSavingMetadata] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+  // Fetch likes count and user's like status
+  const { data: likesData } = useQuery({
+    queryKey: ['roast-profile-likes', id],
+    queryFn: async () => {
+      if (!id) return { count: 0, userHasLiked: false };
+      
+      const { data: likes, error } = await supabase
+        .from('roast_profile_likes')
+        .select('user_id')
+        .eq('roast_profile_id', id);
+
+      if (error) throw error;
+
+      const count = likes?.length || 0;
+      const userHasLiked = user ? likes?.some(like => like.user_id === user.id) || false : false;
+
+      return { count, userHasLiked };
+    },
+    enabled: !!id,
+  });
+
+  // Mutation for toggling likes
+  const likeMutation = useMutation({
+    mutationFn: async ({ action }: { action: 'like' | 'unlike' }) => {
+      if (!user || !id) throw new Error('User not authenticated');
+
+      if (action === 'like') {
+        const { error } = await supabase
+          .from('roast_profile_likes')
+          .insert({ user_id: user.id, roast_profile_id: id });
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('roast_profile_likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('roast_profile_id', id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roast-profile-likes', id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update like status.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleLikeClick = () => {
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    const action = likesData?.userHasLiked ? 'unlike' : 'like';
+    likeMutation.mutate({ action });
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -294,6 +362,15 @@ const RoastProfileDetails = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <Button
+              variant={likesData?.userHasLiked ? "default" : "outline"}
+              onClick={handleLikeClick}
+              disabled={likeMutation.isPending}
+              className="flex items-center gap-2 text-xs sm:text-sm"
+            >
+              <ThumbsUp className={`h-3 w-3 sm:h-4 sm:w-4 ${likesData?.userHasLiked ? 'fill-current' : ''}`} />
+              {likesData?.count || 0}
+            </Button>
             <Button
               variant="outline"
               onClick={handleUseAsReference}
@@ -651,6 +728,26 @@ const RoastProfileDetails = () => {
           </div>
         </div>
       </div>
+      
+      {/* Auth Dialog for Guest Users */}
+      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign in to like profiles</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need to be signed in to like roast profiles. Create an account or sign in to start liking profiles and save your favorites.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => setShowAuthDialog(false)}>
+              Cancel
+            </Button>
+            <AlertDialogAction onClick={() => navigate('/auth')}>
+              Sign in / Create Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
