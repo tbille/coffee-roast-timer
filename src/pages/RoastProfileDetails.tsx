@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -291,6 +291,41 @@ const RoastProfileDetails = () => {
     });
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = `Check out this coffee roast profile: ${profile?.beans_name}`;
+    
+    // Try native share API first (mobile devices)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: `${profile?.beans_name} - A coffee roast profile`,
+          url: shareUrl,
+        });
+        return;
+      } catch (error) {
+        // User cancelled or error occurred, fall back to clipboard
+      }
+    }
+    
+    // Fallback to clipboard API
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link copied!",
+        description: "Profile link copied to clipboard. Share it with your friends!",
+      });
+    } catch (error) {
+      // Final fallback - show the URL in a toast
+      toast({
+        title: "Share this profile",
+        description: shareUrl,
+        duration: 10000,
+      });
+    }
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -370,6 +405,14 @@ const RoastProfileDetails = () => {
             >
               <ThumbsUp className={`h-3 w-3 sm:h-4 sm:w-4 ${likesData?.userHasLiked ? 'fill-current' : ''}`} />
               {likesData?.count || 0}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleShare}
+              className="flex items-center gap-2 text-xs sm:text-sm"
+            >
+              <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              Share
             </Button>
             <Button
               variant="outline"
