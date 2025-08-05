@@ -25,7 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Trash2, User } from "lucide-react";
+import { Settings, Trash2, User, Lock } from "lucide-react";
 
 interface UserSettingsDialogProps {
   trigger: React.ReactNode;
@@ -39,6 +39,12 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
   const [username, setUsername] = useState("");
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
   const [originalUsername, setOriginalUsername] = useState("");
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   // Fetch user profile on component mount
   useEffect(() => {
@@ -108,7 +114,78 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
     }
   };
 
+  const handleUpdatePassword = async () => {
+    if (!user) return;
 
+    // Validate passwords
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all password fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation password must match.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      // Clear password fields
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully."
+      });
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const resetPasswordFields = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  // Reset password fields when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      resetPasswordFields();
+    }
+  }, [isOpen]);
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
     try {
@@ -188,6 +265,57 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
               {isUpdatingUsername ? "Updating..." : "Update Username"}
             </Button>
           </div>
+
+          {/* Password Change Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              <h3 className="text-sm font-medium">Change Password</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  placeholder="Enter current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Password must be at least 6 characters long.
+              </p>
+            </div>
+            <Button
+              onClick={handleUpdatePassword}
+              disabled={isUpdatingPassword || !currentPassword || !newPassword || !confirmPassword}
+              className="w-full"
+            >
+              {isUpdatingPassword ? "Updating..." : "Update Password"}
+            </Button>
+          </div>
+
           {/* Delete Account Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
