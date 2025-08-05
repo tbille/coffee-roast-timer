@@ -12,7 +12,15 @@ const Footer = () => {
           >
             toto
           </a>{" "}
-          and lovable
+          and{" "}
+          <a 
+            href="https://lovable.dev" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+          >
+            lovable
+          </a>
         </p>
       </div>
     </footer>
