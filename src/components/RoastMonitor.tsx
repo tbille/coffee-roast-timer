@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import coffeeRoastingHero from "@/assets/coffee-roasting-hero.jpg";
+import homeRoasterImage from "@/assets/home-coffee-roaster.jpg";
+import { processHomeRoasterImage } from "@/utils/processHomeRoasterImage";
 interface RoastData {
   time: number;
   targetTemp: number;
@@ -45,6 +46,7 @@ const RoastMonitor = ({
   const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
   const [referenceProfile, setReferenceProfile] = useState<RoastData[] | null>(null);
   const [referenceProfileName, setReferenceProfileName] = useState<string>("");
+  const [processedImageUrl, setProcessedImageUrl] = useState<string>(homeRoasterImage);
 
   // Load reference profile if specified in URL
   useEffect(() => {
@@ -53,6 +55,20 @@ const RoastMonitor = ({
       loadReferenceProfile(referenceId);
     }
   }, [searchParams]);
+
+  // Process the home roaster image to remove background
+  useEffect(() => {
+    const processImage = async () => {
+      try {
+        const processedUrl = await processHomeRoasterImage();
+        setProcessedImageUrl(processedUrl);
+      } catch (error) {
+        console.error('Failed to process image:', error);
+        // Keep original image as fallback
+      }
+    };
+    processImage();
+  }, []);
 
   // Load persisted roast state on component mount
   useEffect(() => {
@@ -426,8 +442,8 @@ const RoastMonitor = ({
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="flex justify-center">
                 <img 
-                  src={coffeeRoastingHero} 
-                  alt="Coffee roasting temperature monitoring" 
+                  src={processedImageUrl} 
+                  alt="Home coffee roaster for temperature monitoring" 
                   className="rounded-lg max-w-full h-auto"
                 />
               </div>
