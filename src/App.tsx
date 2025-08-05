@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import RoastProfileDetails from "./pages/RoastProfileDetails";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -27,6 +28,11 @@ const App = () => (
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile/:id" element={
+                  <ProtectedRoute>
+                    <RoastProfileDetails />
                   </ProtectedRoute>
                 } />
                 <Route path="/" element={<Index />} />

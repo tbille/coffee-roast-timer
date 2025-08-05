@@ -24,6 +24,7 @@ export type Database = {
           final_weight: number | null
           id: string
           initial_weight: number | null
+          notes: string | null
           origin: string | null
           roast_process: string | null
           temperature_data: Json
@@ -39,6 +40,7 @@ export type Database = {
           final_weight?: number | null
           id?: string
           initial_weight?: number | null
+          notes?: string | null
           origin?: string | null
           roast_process?: string | null
           temperature_data?: Json
@@ -54,6 +56,7 @@ export type Database = {
           final_weight?: number | null
           id?: string
           initial_weight?: number | null
+          notes?: string | null
           origin?: string | null
           roast_process?: string | null
           temperature_data?: Json

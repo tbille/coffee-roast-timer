@@ -178,7 +178,7 @@ const Dashboard = () => {
               <Card 
                 key={profile.id} 
                 className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/?reference=${profile.id}`)}
+                onClick={() => navigate(`/profile/${profile.id}`)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
