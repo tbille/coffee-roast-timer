@@ -15,23 +15,25 @@ interface RoastData {
   targetTemp: number;
   currentTemp: number;
 }
-
 interface CrackEvent {
   time: number;
   targetTemp: number;
   currentTemp: number;
   type: 'first' | 'second';
 }
-
 interface RoastMonitorProps {
   onBack?: () => void;
 }
-
 const RoastMonitor = ({
   onBack
 }: RoastMonitorProps) => {
-  const { signOut, user } = useAuth();
-  const { toast } = useToast();
+  const {
+    signOut,
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [searchParams] = useSearchParams();
   const [isRoasting, setIsRoasting] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -94,17 +96,13 @@ const RoastMonitor = ({
     }
     return () => clearInterval(interval);
   }, [isRoasting]);
-
   const loadReferenceProfile = async (profileId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('roast_profiles')
-        .select('*')
-        .eq('id', profileId)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('roast_profiles').select('*').eq('id', profileId).single();
       if (error) throw error;
-
       if (data) {
         // Convert the stored JSON data back to RoastData format
         const tempData = Array.isArray(data.temperature_data) ? data.temperature_data as unknown as RoastData[] : [];
@@ -137,9 +135,13 @@ const RoastMonitor = ({
       setLastRecordedTemp(currentTemp);
     }
   };
-
   const handleFirstCrack = () => {
-    console.log('First crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
+    console.log('First crack clicked', {
+      isRoasting,
+      elapsedTime,
+      targetTemp,
+      currentTemp
+    });
     if (isRoasting && elapsedTime > 0 && !crackEvents.some(e => e.type === 'first')) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
@@ -157,12 +159,14 @@ const RoastMonitor = ({
       console.log('Cannot add first crack - conditions not met');
     }
   };
-
   const handleSecondCrack = () => {
-    console.log('Second crack clicked', { isRoasting, elapsedTime, targetTemp, currentTemp });
-    if (isRoasting && elapsedTime > 0 && 
-        crackEvents.some(e => e.type === 'first') && 
-        !crackEvents.some(e => e.type === 'second')) {
+    console.log('Second crack clicked', {
+      isRoasting,
+      elapsedTime,
+      targetTemp,
+      currentTemp
+    });
+    if (isRoasting && elapsedTime > 0 && crackEvents.some(e => e.type === 'first') && !crackEvents.some(e => e.type === 'second')) {
       const crackEvent: CrackEvent = {
         time: elapsedTime,
         targetTemp: parseFloat(targetTemp) || 0,
@@ -179,7 +183,6 @@ const RoastMonitor = ({
       console.log('Cannot add second crack - conditions not met');
     }
   };
-
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -190,7 +193,7 @@ const RoastMonitor = ({
   const calculateDevelopment = (): number => {
     const firstCrackEvent = crackEvents.find(e => e.type === 'first');
     if (!firstCrackEvent || elapsedTime === 0) return 0;
-    return 100 - (firstCrackEvent.time / elapsedTime) * 100;
+    return 100 - firstCrackEvent.time / elapsedTime * 100;
   };
   const handleStart = () => {
     // Reset everything when starting a new roast (but keep reference profile)
@@ -201,14 +204,11 @@ const RoastMonitor = ({
     // Clear any persisted state when starting fresh
     localStorage.removeItem('roastTimerState');
   };
-  
   const handlePause = () => setIsRoasting(false);
-  
   const handleStop = () => {
     setIsRoasting(false);
     // State is automatically saved via useEffect
   };
-
   const handleReset = () => {
     setElapsedTime(0);
     setRoastData([]);
@@ -225,39 +225,20 @@ const RoastMonitor = ({
          <div className="flex items-center justify-between mb-6">
            <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
             <div className="flex items-center gap-4">
-              {user ? (
-                <>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => window.location.href = '/dashboard'}
-                    className="flex items-center gap-2"
-                  >
+              {user ? <>
+                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2">
                     My Profiles
                   </Button>
                   <span className="text-sm text-muted-foreground">
                     Welcome, {user?.email}
                   </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={signOut}
-                    className="flex items-center gap-2"
-                  >
+                  <Button variant="outline" size="sm" onClick={signOut} className="flex items-center gap-2">
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
-                </>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.location.href = '/auth'}
-                  className="flex items-center gap-2"
-                >
+                </> : <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'} className="flex items-center gap-2">
                   Sign In
-                </Button>
-              )}
+                </Button>}
             </div>
          </div>
 
@@ -281,30 +262,19 @@ const RoastMonitor = ({
                       <Pause className="h-4 w-4" />
                       Pause
                     </Button>}
-                  {!isRoasting && elapsedTime > 0 ? (
-                    <Button onClick={handleReset} variant="outline" className="flex items-center gap-2">
+                  {!isRoasting && elapsedTime > 0 ? <Button onClick={handleReset} variant="outline" className="flex items-center gap-2">
                       <RotateCcw className="h-4 w-4" />
                       Reset
-                    </Button>
-                  ) : (
-                    <Button onClick={handleStop} variant="destructive" className="flex items-center gap-2">
+                    </Button> : <Button onClick={handleStop} variant="destructive" className="flex items-center gap-2">
                       <Square className="h-4 w-4" />
                       Stop
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
                 
                  {/* Save Profile Button - Only show when roast is stopped and has data */}
-                 {!isRoasting && elapsedTime > 0 && (
-                   <div className="mt-4">
-                     <SaveRoastDialog 
-                       elapsedTime={elapsedTime}
-                       roastData={roastData}
-                       crackEvents={crackEvents}
-                       disabled={elapsedTime === 0 || roastData.length === 0}
-                     />
-                    </div>
-                  )}
+                 {!isRoasting && elapsedTime > 0 && <div className="mt-4">
+                     <SaveRoastDialog elapsedTime={elapsedTime} roastData={roastData} crackEvents={crackEvents} disabled={elapsedTime === 0 || roastData.length === 0} />
+                    </div>}
                 </CardContent>
               </Card>
 
@@ -331,22 +301,12 @@ const RoastMonitor = ({
                 
                 {/* Crack Events */}
                 <div className="space-y-2">
-                  <Label>Crack Events</Label>
+                  
                   <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      onClick={handleFirstCrack} 
-                      disabled={!isRoasting || crackEvents.some(e => e.type === 'first')} 
-                      variant={crackEvents.some(e => e.type === 'first') ? "secondary" : "outline"} 
-                      className="w-full"
-                    >
+                    <Button onClick={handleFirstCrack} disabled={!isRoasting || crackEvents.some(e => e.type === 'first')} variant={crackEvents.some(e => e.type === 'first') ? "secondary" : "outline"} className="w-full">
                       {crackEvents.some(e => e.type === 'first') ? "First Crack ✓" : "First Crack"}
                     </Button>
-                    <Button 
-                      onClick={handleSecondCrack} 
-                      disabled={!isRoasting || !crackEvents.some(e => e.type === 'first') || crackEvents.some(e => e.type === 'second')} 
-                      variant={crackEvents.some(e => e.type === 'second') ? "secondary" : "outline"} 
-                      className="w-full"
-                    >
+                    <Button onClick={handleSecondCrack} disabled={!isRoasting || !crackEvents.some(e => e.type === 'first') || crackEvents.some(e => e.type === 'second')} variant={crackEvents.some(e => e.type === 'second') ? "secondary" : "outline"} className="w-full">
                       {crackEvents.some(e => e.type === 'second') ? "Second Crack ✓" : "Second Crack"}
                     </Button>
                   </div>
@@ -379,97 +339,55 @@ const RoastMonitor = ({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Temperature Graph</span>
-                  {referenceProfile && (
-                    <span className="text-sm font-normal text-muted-foreground">
+                  {referenceProfile && <span className="text-sm font-normal text-muted-foreground">
                       Reference: {referenceProfileName}
-                    </span>
-                  )}
+                    </span>}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {isRoasting || roastData.length > 0 ? (
-                  <div className="h-96 w-full">
+                {isRoasting || roastData.length > 0 ? <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={roastData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis 
-                          dataKey="time" 
-                          stroke="hsl(var(--foreground))" 
-                          label={{
-                            value: 'Time (MM:SS)',
-                            position: 'insideBottom',
-                            offset: -10
-                          }} 
-                          tickFormatter={formatTime}
-                        />
+                        <XAxis dataKey="time" stroke="hsl(var(--foreground))" label={{
+                      value: 'Time (MM:SS)',
+                      position: 'insideBottom',
+                      offset: -10
+                    }} tickFormatter={formatTime} />
                         <YAxis stroke="hsl(var(--foreground))" label={{
-                          value: 'Temperature (°C)',
-                          angle: -90,
-                          position: 'insideLeft'
-                        }} />
-                        <Tooltip 
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "var(--radius)"
-                          }} 
-                          labelFormatter={(value) => `Time: ${formatTime(value as number)}`}
-                        />
+                      value: 'Temperature (°C)',
+                      angle: -90,
+                      position: 'insideLeft'
+                    }} />
+                        <Tooltip contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)"
+                    }} labelFormatter={value => `Time: ${formatTime(value as number)}`} />
                         <Legend />
                         
                         {/* Reference profile lines (dotted) */}
-                        {referenceProfile && (
-                          <>
-                            <Line 
-                              type="monotone" 
-                              dataKey="currentTemp" 
-                              stroke="hsl(var(--muted-foreground))" 
-                              strokeWidth={2} 
-                              name={`Reference Actual: ${referenceProfileName}`}
-                              strokeDasharray="8 4" 
-                              data={referenceProfile}
-                              connectNulls={false}
-                              dot={false}
-                            />
-                            <Line 
-                              type="monotone" 
-                              dataKey="targetTemp" 
-                              stroke="hsl(var(--muted-foreground))" 
-                              strokeWidth={1.5} 
-                              name={`Reference Target: ${referenceProfileName}`}
-                              strokeDasharray="12 6" 
-                              data={referenceProfile}
-                              connectNulls={false}
-                              dot={false}
-                              opacity={0.7}
-                            />
-                          </>
-                        )}
+                        {referenceProfile && <>
+                            <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--muted-foreground))" strokeWidth={2} name={`Reference Actual: ${referenceProfileName}`} strokeDasharray="8 4" data={referenceProfile} connectNulls={false} dot={false} />
+                            <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} name={`Reference Target: ${referenceProfileName}`} strokeDasharray="12 6" data={referenceProfile} connectNulls={false} dot={false} opacity={0.7} />
+                          </>}
                         
                         {/* Current roast lines */}
                         <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--temperature-hot))" strokeWidth={2} name="Target Temperature" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--primary))" strokeWidth={3} name="Current Temperature" />
                         
                         {/* Crack events */}
-                        {crackEvents.map((crack, index) => (
-                          <ReferenceLine 
-                            key={`${crack.type}-${index}`}
-                            x={crack.time} 
-                            stroke={crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))"} 
-                            strokeDasharray="5 5"
-                            strokeWidth={2}
-                            label={{
-                              value: crack.type === 'first' ? 'First Crack' : 'Second Crack',
-                              position: 'insideTopRight',
-                              style: { fontSize: '12px', fill: crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))" }
-                            }}
-                          />
-                        ))}
+                        {crackEvents.map((crack, index) => <ReferenceLine key={`${crack.type}-${index}`} x={crack.time} stroke={crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))"} strokeDasharray="5 5" strokeWidth={2} label={{
+                      value: crack.type === 'first' ? 'First Crack' : 'Second Crack',
+                      position: 'insideTopRight',
+                      style: {
+                        fontSize: '12px',
+                        fill: crack.type === 'first' ? "hsl(var(--destructive))" : "hsl(var(--warning))"
+                      }
+                    }} />)}
                       </LineChart>
                     </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-96 text-muted-foreground">
+                  </div> : <div className="flex items-center justify-center h-96 text-muted-foreground">
                     <div className="text-center">
                       <p className="text-lg mb-2">
                         {referenceProfile ? "Start roasting to see your progress against the reference" : "Start roasting to see the temperature graph"}
@@ -477,47 +395,22 @@ const RoastMonitor = ({
                       <p className="text-sm">
                         {referenceProfile ? `Reference profile: ${referenceProfileName}` : "Data points will appear as you monitor your roast"}
                       </p>
-                      {referenceProfile && (
-                        <div className="mt-4 p-4 bg-muted rounded-lg">
+                      {referenceProfile && <div className="mt-4 p-4 bg-muted rounded-lg">
                           <div className="h-32 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={referenceProfile}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                <XAxis 
-                                  dataKey="time" 
-                                  stroke="hsl(var(--foreground))" 
-                                  tickFormatter={formatTime}
-                                  fontSize={10}
-                                />
+                                <XAxis dataKey="time" stroke="hsl(var(--foreground))" tickFormatter={formatTime} fontSize={10} />
                                 <YAxis stroke="hsl(var(--foreground))" fontSize={10} />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="currentTemp" 
-                                  stroke="hsl(var(--muted-foreground))" 
-                                  strokeWidth={2} 
-                                  strokeDasharray="8 4" 
-                                  dot={false}
-                                  name="Actual"
-                                />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="targetTemp" 
-                                  stroke="hsl(var(--muted-foreground))" 
-                                  strokeWidth={1.5} 
-                                  strokeDasharray="12 6" 
-                                  dot={false}
-                                  opacity={0.7}
-                                  name="Target"
-                                />
+                                <Line type="monotone" dataKey="currentTemp" stroke="hsl(var(--muted-foreground))" strokeWidth={2} strokeDasharray="8 4" dot={false} name="Actual" />
+                                <Line type="monotone" dataKey="targetTemp" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} strokeDasharray="12 6" dot={false} opacity={0.7} name="Target" />
                               </LineChart>
                             </ResponsiveContainer>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">Reference Profile Preview</p>
-                        </div>
-                      )}
+                        </div>}
                     </div>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
 
