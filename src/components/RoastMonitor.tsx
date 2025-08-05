@@ -303,24 +303,44 @@ const RoastMonitor = ({
                        crackEvents={crackEvents}
                        disabled={elapsedTime === 0 || roastData.length === 0}
                      />
-                   </div>
-                 )}
-               </CardContent>
-            </Card>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            {/* Benefits Section */}
-            <Card className="shadow-coffee border-accent/20">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-3">
-                  <h3 className="font-semibold text-foreground">Why Track Your Roasts?</h3>
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Achieve consistent results every time</p>
-                    <p>• Learn from your roasting patterns</p>
-                    <p>• Perfect your favorite profiles</p>
+              {/* Marketing content moved here */}
+              <Card className="shadow-coffee border-accent/20">
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-3">
+                    <h3 className="font-semibold text-foreground">Why Track Your Roasts?</h3>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Achieve consistent results every time</p>
+                      <p>• Learn from your roasting patterns</p>
+                      <p>• Perfect your favorite profiles</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Bean Development Section - Only show after first crack */}
+              {crackEvents.some(e => e.type === 'first') && (
+                <Card className="shadow-coffee">
+                  <CardHeader>
+                    <CardTitle>Bean Development</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-primary mb-2">
+                        {calculateDevelopment().toFixed(1)}%
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Development since first crack
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
 
             {/* Temperature Controls */}
             <Card className="shadow-coffee">
@@ -515,24 +535,6 @@ const RoastMonitor = ({
               </CardContent>
             </Card>
 
-            {/* Development Section - Only show after first crack */}
-            {crackEvents.some(e => e.type === 'first') && (
-              <Card className="shadow-coffee mt-6">
-                <CardHeader>
-                  <CardTitle>Bean Development</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-primary mb-2">
-                      {calculateDevelopment().toFixed(1)}%
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Development since first crack
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>
