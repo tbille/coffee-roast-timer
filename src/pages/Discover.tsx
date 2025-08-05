@@ -16,6 +16,7 @@ interface RoastProfile {
   origin?: string;
   farm_name?: string;
   roast_process?: string;
+  coffee_roaster?: string;
   initial_weight?: number;
   final_weight?: number;
   duration_seconds: number;
@@ -101,7 +102,8 @@ const Discover = () => {
       profile.beans_name.toLowerCase().includes(query) ||
       profile.origin?.toLowerCase().includes(query) ||
       profile.farm_name?.toLowerCase().includes(query) ||
-      profile.roast_process?.toLowerCase().includes(query)
+      profile.roast_process?.toLowerCase().includes(query) ||
+      profile.coffee_roaster?.toLowerCase().includes(query)
     );
     
     setFilteredProfiles(filtered);
@@ -176,7 +178,7 @@ const Discover = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by bean name, origin, farm, or process..."
+                placeholder="Search by bean name, origin, farm, process, or roaster..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -247,6 +249,12 @@ const Discover = () => {
                   {profile.roast_process && (
                     <div className="text-sm text-muted-foreground">
                       <strong>Process:</strong> {profile.roast_process}
+                    </div>
+                  )}
+                  
+                  {profile.coffee_roaster && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Roaster:</strong> {profile.coffee_roaster}
                     </div>
                   )}
                   
