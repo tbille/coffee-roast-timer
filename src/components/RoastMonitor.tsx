@@ -8,6 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Play, Pause, Square, LogOut, RotateCcw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
+import UserSettingsDialog from "./UserSettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -232,9 +233,13 @@ const RoastMonitor = ({
                   <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2">
                     My Profiles
                   </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Welcome, {user?.email}
-                  </span>
+                  <UserSettingsDialog
+                    trigger={
+                      <button className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+                        Welcome, {user?.email}
+                      </button>
+                    }
+                  />
                   <Button variant="outline" size="sm" onClick={signOut} className="flex items-center gap-2">
                     <LogOut className="h-4 w-4" />
                     Sign Out
