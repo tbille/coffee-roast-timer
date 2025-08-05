@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Mail, Trash2 } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 
 interface UserSettingsDialogProps {
   trigger: React.ReactNode;
@@ -35,44 +33,8 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [newEmail, setNewEmail] = useState(user?.email || "");
-  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
-  const handleEmailUpdate = async () => {
-    if (!newEmail || newEmail === user?.email) {
-      toast({
-        title: "No changes",
-        description: "Please enter a different email address.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsUpdatingEmail(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Email update requested",
-        description: "Please check both your old and new email addresses for confirmation links.",
-      });
-      setIsOpen(false);
-    } catch (error) {
-      console.error('Error updating email:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update email.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsUpdatingEmail(false);
-    }
-  };
 
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
@@ -121,38 +83,13 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
             Account Settings
           </DialogTitle>
           <DialogDescription>
-            Manage your account settings and preferences.
+            Manage your account settings.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          {/* Email Update Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <h3 className="text-sm font-medium">Change Email Address</h3>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">New Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="Enter new email address"
-              />
-            </div>
-            <Button 
-              onClick={handleEmailUpdate}
-              disabled={isUpdatingEmail || !newEmail || newEmail === user?.email}
-              className="w-full"
-            >
-              {isUpdatingEmail ? "Updating..." : "Update Email"}
-            </Button>
-          </div>
-
           {/* Delete Account Section */}
-          <div className="space-y-4 pt-4 border-t">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Trash2 className="h-4 w-4 text-destructive" />
               <h3 className="text-sm font-medium text-destructive">Danger Zone</h3>
