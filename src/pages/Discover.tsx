@@ -1,0 +1,267 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy } from "lucide-react";
+
+interface RoastProfile {
+  id: string;
+  user_id: string;
+  beans_name: string;
+  origin?: string;
+  farm_name?: string;
+  roast_process?: string;
+  initial_weight?: number;
+  final_weight?: number;
+  duration_seconds: number;
+  temperature_data: any;
+  crack_events: any;
+  created_at: string;
+}
+
+const Discover = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [profiles, setProfiles] = useState<RoastProfile[]>([]);
+  const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
+
+  useEffect(() => {
+    filterProfiles();
+  }, [searchQuery, profiles]);
+
+  const fetchProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('roast_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProfiles(data || []);
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load roast profiles.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterProfiles = () => {
+    if (!searchQuery.trim()) {
+      setFilteredProfiles(profiles);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = profiles.filter(profile => 
+      profile.beans_name.toLowerCase().includes(query) ||
+      profile.origin?.toLowerCase().includes(query) ||
+      profile.farm_name?.toLowerCase().includes(query) ||
+      profile.roast_process?.toLowerCase().includes(query)
+    );
+    
+    setFilteredProfiles(filtered);
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getWeightLoss = (initial?: number, final?: number): string => {
+    if (!initial || !final) return "N/A";
+    const loss = initial - final;
+    const percentage = (loss / initial) * 100;
+    return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
+  };
+
+  const handleUseAsReference = (profile: RoastProfile) => {
+    navigate('/', { 
+      state: { 
+        referenceProfile: {
+          beans_name: profile.beans_name,
+          origin: profile.origin,
+          farm_name: profile.farm_name,
+          roast_process: profile.roast_process,
+          initial_weight: profile.initial_weight,
+          temperature_data: profile.temperature_data
+        }
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+        <div className="container mx-auto max-w-6xl w-full">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="text-lg text-foreground">Loading profiles...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+      <div className="container mx-auto max-w-6xl w-full">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <Button variant="outline" size="sm" onClick={() => navigate('/')} className="flex items-center gap-2 self-start text-xs sm:text-sm">
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              Back to Timer
+            </Button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Discover Roast Profiles</h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            {user && (
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="text-xs sm:text-sm">
+                My Profiles
+              </Button>
+            )}
+            <Badge variant="secondary" className="text-xs">
+              {filteredProfiles.length} profile{filteredProfiles.length !== 1 ? 's' : ''}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Search */}
+        <Card className="shadow-coffee mb-6">
+          <CardContent className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by bean name, origin, farm, or process..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Profiles Grid */}
+        {filteredProfiles.length === 0 ? (
+          <Card className="shadow-coffee">
+            <CardContent className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {searchQuery ? "No profiles found" : "No roast profiles yet"}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {searchQuery 
+                    ? "Try adjusting your search terms to find more profiles."
+                    : "Be the first to share a roast profile!"
+                  }
+                </p>
+                {searchQuery && (
+                  <Button variant="outline" onClick={() => setSearchQuery("")}>
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {filteredProfiles.map((profile) => (
+              <Card 
+                key={profile.id} 
+                className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                onClick={() => navigate(`/profile/${profile.id}`)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                      {profile.beans_name}
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      {formatDate(profile.created_at)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.origin || "Unknown origin"}</span>
+                  </div>
+                  
+                  {profile.farm_name && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Farm:</strong> {profile.farm_name}
+                    </div>
+                  )}
+                  
+                  {profile.roast_process && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Process:</strong> {profile.roast_process}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{formatTime(profile.duration_seconds)}</span>
+                    </div>
+                    {profile.initial_weight && profile.final_weight && (
+                      <div className="flex items-center gap-1">
+                        <Scale className="h-4 w-4" />
+                        <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="pt-2 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseAsReference(profile);
+                      }}
+                      className="w-full flex items-center gap-2 text-xs"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Use as Reference
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Discover;

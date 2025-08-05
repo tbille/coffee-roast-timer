@@ -247,6 +247,9 @@ const RoastMonitor = ({
          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/discover'} className="flex items-center gap-2 text-xs sm:text-sm">
+                Discover
+              </Button>
               {user ? <>
                   <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2 text-xs sm:text-sm">
                     My Profiles

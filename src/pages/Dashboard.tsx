@@ -127,6 +127,9 @@ const Dashboard = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Roast Profiles</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <Button variant="outline" size="sm" onClick={() => navigate('/discover')} className="text-xs sm:text-sm">
+              Discover
+            </Button>
             <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-32 sm:max-w-none">
               {user?.email?.split('@')[0]}
             </span>
