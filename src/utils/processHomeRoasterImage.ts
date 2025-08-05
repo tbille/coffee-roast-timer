@@ -1,10 +1,10 @@
 import { removeBackground, loadImage } from './backgroundRemoval';
-import homeRoasterImage from '@/assets/home-coffee-roaster.jpg';
+import geneCbr101Image from '@/assets/gene-cbr101-stylized.jpg';
 
 export const processHomeRoasterImage = async (): Promise<string> => {
   try {
     // Fetch the image as a blob
-    const response = await fetch(homeRoasterImage);
+    const response = await fetch(geneCbr101Image);
     const blob = await response.blob();
     
     // Load as HTMLImageElement
@@ -18,6 +18,6 @@ export const processHomeRoasterImage = async (): Promise<string> => {
   } catch (error) {
     console.error('Error processing home roaster image:', error);
     // Fallback to original image
-    return homeRoasterImage;
+    return geneCbr101Image;
   }
 };

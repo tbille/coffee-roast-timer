@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import homeRoasterImage from "@/assets/home-coffee-roaster.jpg";
+import geneCbr101Image from "@/assets/gene-cbr101-stylized.jpg";
 import { processHomeRoasterImage } from "@/utils/processHomeRoasterImage";
 interface RoastData {
   time: number;
@@ -46,7 +46,7 @@ const RoastMonitor = ({
   const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
   const [referenceProfile, setReferenceProfile] = useState<RoastData[] | null>(null);
   const [referenceProfileName, setReferenceProfileName] = useState<string>("");
-  const [processedImageUrl, setProcessedImageUrl] = useState<string>(homeRoasterImage);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string>(geneCbr101Image);
 
   // Load reference profile if specified in URL
   useEffect(() => {
@@ -443,7 +443,7 @@ const RoastMonitor = ({
               <div className="flex justify-center">
                 <img 
                   src={processedImageUrl} 
-                  alt="Home coffee roaster for temperature monitoring" 
+                  alt="Gene CBR-101 home coffee roaster for temperature monitoring" 
                   className="rounded-lg max-w-full h-auto"
                 />
               </div>
