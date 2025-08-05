@@ -130,23 +130,12 @@ const Discover = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <Button variant="outline" size="sm" onClick={() => navigate('/')} className="flex items-center gap-2 self-start text-xs sm:text-sm">
-              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              Back to Timer
-            </Button>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Discover Roast Profiles</h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {user && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="text-xs sm:text-sm">
-                My Profiles
-              </Button>
-            )}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Discover Roast Profiles</h1>
+          <div className="flex justify-center mt-2">
             <Badge variant="secondary" className="text-xs">
               {filteredProfiles.length} profile{filteredProfiles.length !== 1 ? 's' : ''}
             </Badge>

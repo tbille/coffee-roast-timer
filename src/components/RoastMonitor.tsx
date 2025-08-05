@@ -241,34 +241,11 @@ const RoastMonitor = ({
     setIsRoasting(false);
     localStorage.removeItem('roastTimerState');
   };
-  return <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
-      <div className="container mx-auto max-w-6xl w-full">
+  return <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+      <div className="container mx-auto max-w-6xl">
          {/* Header */}
-         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              <Button variant="outline" size="sm" onClick={() => window.location.href = '/discover'} className="flex items-center gap-2 text-xs sm:text-sm">
-                Discover
-              </Button>
-              {user ? <>
-                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2 text-xs sm:text-sm">
-                    My Profiles
-                  </Button>
-                  <UserSettingsDialog
-                    trigger={
-                      <button className="text-xs sm:text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors truncate max-w-32 sm:max-w-none">
-                        Welcome, {user?.email?.split('@')[0]}
-                      </button>
-                    }
-                  />
-                  <Button variant="outline" size="sm" onClick={signOut} className="flex items-center gap-2 text-xs sm:text-sm">
-                    <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
-                    Sign Out
-                  </Button>
-                </> : <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'} className="flex items-center gap-2 text-xs sm:text-sm">
-                  Sign In
-                </Button>}
-            </div>
+         <div className="mb-6">
+           <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Coffee Roast Monitor</h1>
          </div>
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full">

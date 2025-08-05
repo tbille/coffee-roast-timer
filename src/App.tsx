@@ -11,6 +11,7 @@ import RoastProfileDetails from "./pages/RoastProfileDetails";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <Header />
             <div className="flex-1">
               <Routes>
                 <Route path="/auth" element={<Auth />} />

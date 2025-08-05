@@ -242,7 +242,7 @@ const RoastProfileDetails = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+      <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
@@ -258,25 +258,11 @@ const RoastProfileDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate('/discover');
-                }
-              }}
-              className="flex items-center gap-2 self-start text-xs sm:text-sm"
-            >
-              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              Back
-            </Button>
             <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
