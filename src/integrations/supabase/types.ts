@@ -74,6 +74,7 @@ export type Database = {
       roast_profiles: {
         Row: {
           beans_name: string
+          coffee_roaster: string | null
           crack_events: Json
           created_at: string
           duration_seconds: number
@@ -90,6 +91,7 @@ export type Database = {
         }
         Insert: {
           beans_name: string
+          coffee_roaster?: string | null
           crack_events?: Json
           created_at?: string
           duration_seconds: number
@@ -106,6 +108,7 @@ export type Database = {
         }
         Update: {
           beans_name?: string
+          coffee_roaster?: string | null
           crack_events?: Json
           created_at?: string
           duration_seconds?: number

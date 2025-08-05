@@ -46,7 +46,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
     farmName: "",
     initialWeight: "",
     finalWeight: "",
-    roastProcess: ""
+    roastProcess: "",
+    coffeeRoaster: ""
   });
 
   const handleSave = async () => {
@@ -79,6 +80,7 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
           origin: formData.origin.trim() || null,
           farm_name: formData.farmName.trim() || null,
           roast_process: formData.roastProcess.trim() || null,
+          coffee_roaster: formData.coffeeRoaster.trim() || null,
           initial_weight: formData.initialWeight ? parseFloat(formData.initialWeight) : null,
           final_weight: formData.finalWeight ? parseFloat(formData.finalWeight) : null,
           duration_seconds: elapsedTime,
@@ -103,7 +105,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
         farmName: "",
         initialWeight: "",
         finalWeight: "",
-        roastProcess: ""
+        roastProcess: "",
+        coffeeRoaster: ""
       });
     } catch (error) {
       console.error('Error saving roast profile:', error);
@@ -199,6 +202,16 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
                 value={formData.farmName}
                 onChange={(e) => setFormData(prev => ({ ...prev, farmName: e.target.value }))}
                 placeholder="e.g., Kochere Washing Station"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="coffee-roaster">Coffee Roaster</Label>
+              <Input
+                id="coffee-roaster"
+                value={formData.coffeeRoaster}
+                onChange={(e) => setFormData(prev => ({ ...prev, coffeeRoaster: e.target.value }))}
+                placeholder="e.g., Gene CBR-101, Behmor 1600+"
               />
             </div>
             

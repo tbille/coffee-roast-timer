@@ -44,6 +44,7 @@ interface RoastProfile {
   profiles?: {
     username?: string;
   };
+  coffee_roaster?: string;
 }
 
 const RoastProfileDetails = () => {
@@ -536,6 +537,13 @@ const RoastProfileDetails = () => {
                       {profile.roast_process || "Not specified"}
                     </p>
                   )}
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Coffee Roaster</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.coffee_roaster || "Not specified"}
+                  </p>
                 </div>
                 
                 <div>
