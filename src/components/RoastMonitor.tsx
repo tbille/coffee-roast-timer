@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import geneCbr101Image from "@/assets/gene-cbr101-stylized.jpg";
+
 interface RoastData {
   time: number;
   targetTemp: number;
@@ -422,24 +422,28 @@ const RoastMonitor = ({
         
         {/* Hero Section */}
         <div className="mt-16 py-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-bold text-foreground text-center mb-12">Master Your Coffee Roasting</h2>
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <h2 className="text-4xl font-bold text-foreground">Perfect Your Home Coffee Roasting</h2>
             
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="flex justify-center">
-                <img 
-                  src={geneCbr101Image} 
-                  alt="Gene CBR-101 home coffee roaster for temperature monitoring" 
-                  className="rounded-lg max-w-full h-auto"
-                />
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Whether you're using a Gene CBR-101, Behmor, or any home roasting setup, 
+              master your craft with precise temperature monitoring and roast profiling.
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-8 mt-8 text-left max-w-3xl mx-auto">
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground">Track Every Roast</h3>
+                <p className="text-muted-foreground">
+                  Monitor temperature curves, record crack events, and calculate development ratios 
+                  for consistent results with your home roaster.
+                </p>
               </div>
               
-              <div className="space-y-4 text-muted-foreground">
-                <p className="text-lg">
-                  Track temperature curves and development ratios for consistent, professional results every time.
-                </p>
-                <p>
-                  Monitor first and second crack timing, save successful roast profiles, and compare against proven references to perfect your craft.
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground">Build Your Profile Library</h3>
+                <p className="text-muted-foreground">
+                  Save successful roast profiles and use them as references for future batches. 
+                  Perfect for Gene CBR-101 and other home roasting equipment.
                 </p>
               </div>
             </div>
