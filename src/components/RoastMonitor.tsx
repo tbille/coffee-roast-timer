@@ -465,8 +465,7 @@ const RoastMonitor = ({
             
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Connect with coffee enthusiasts globally. Explore unique roast profiles, 
-              learn new techniques, and get inspired by the creativity of fellow roasters 
-              from different cultures and traditions.
+              learn new techniques, and get inspired by the creativity of fellow roasters.
             </p>
             
             <div className="grid md:grid-cols-2 gap-8 mt-8 text-left max-w-3xl mx-auto">
