@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2, Settings } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import UserSettingsDialog from "@/components/UserSettingsDialog";
 interface RoastProfile {
   id: string;
   beans_name: string;
@@ -210,6 +211,38 @@ const Dashboard = () => {
                 </CardContent>
               </Card>)}
           </div>}
+
+        {/* Settings Section */}
+        <div className="mt-12 pt-8 border-t">
+          <Card className="shadow-coffee">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Account Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Account Management</p>
+                    <p className="text-sm text-muted-foreground">
+                      Manage your account settings and data
+                    </p>
+                  </div>
+                  <UserSettingsDialog
+                    trigger={
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>;
 };

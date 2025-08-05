@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Coffee, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import UserSettingsDialog from "./UserSettingsDialog";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -43,15 +42,11 @@ const Header = () => {
           <NavLink href="/dashboard" className={mobile ? 'w-full text-left' : ''}>
             My Profiles
           </NavLink>
-          <UserSettingsDialog
-            trigger={
-              <button className={`text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors truncate ${
-                mobile ? 'w-full text-left' : 'max-w-32'
-              }`}>
-                {user.email?.split('@')[0]}
-              </button>
-            }
-          />
+          <span className={`text-sm text-muted-foreground truncate ${
+            mobile ? 'w-full text-left' : 'max-w-32'
+          }`}>
+            {user.email?.split('@')[0]}
+          </span>
           {mobile ? (
             <Button
               variant="outline"
