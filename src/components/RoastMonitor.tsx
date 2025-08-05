@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { Play, Pause, Square, LogOut, RotateCcw } from "lucide-react";
+import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import UserSettingsDialog from "./UserSettingsDialog";
@@ -449,6 +449,59 @@ const RoastMonitor = ({
                   Perfect for Gene CBR-101 and other home roasting equipment.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Discovery Section */}
+        <div className="mt-16 py-16 bg-gradient-to-r from-coffee-light/10 to-accent/10 rounded-lg">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <div className="flex justify-center mb-6">
+              <Globe className="h-12 w-12 text-primary" />
+            </div>
+            <h2 className="text-4xl font-bold text-foreground">
+              Discover Roasts from Around the World
+            </h2>
+            
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Connect with coffee enthusiasts globally. Explore unique roast profiles, 
+              learn new techniques, and get inspired by the creativity of fellow roasters 
+              from different cultures and traditions.
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-8 mt-8 text-left max-w-3xl mx-auto">
+              <div className="flex items-center gap-4">
+                <Users className="h-8 w-8 text-primary flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Community Profiles</h3>
+                  <p className="text-muted-foreground">
+                    Browse roast profiles shared by passionate coffee roasters worldwide
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Search className="h-8 w-8 text-primary flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Search & Filter</h3>
+                  <p className="text-muted-foreground">
+                    Find profiles by bean origin, roaster type, or processing method
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <Button 
+                asChild
+                size="lg"
+                className="text-lg px-8 py-6 shadow-warm hover:scale-105 transition-transform"
+              >
+                <Link to="/discover">
+                  <Globe className="mr-2 h-5 w-5" />
+                  Explore Global Roasts
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
