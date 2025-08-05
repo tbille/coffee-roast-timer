@@ -238,8 +238,8 @@ const RoastProfileDetails = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto max-w-6xl">
+      <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+        <div className="container mx-auto max-w-6xl w-full">
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
               <div className="text-lg text-muted-foreground">Profile not found</div>
@@ -254,37 +254,37 @@ const RoastProfileDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+      <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 self-start text-xs sm:text-sm"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               Back to Dashboard
             </Button>
-            <h1 className="text-3xl font-bold text-foreground">{profile.beans_name}</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
               onClick={handleUseAsReference}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
               Use as Reference
             </Button>
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="text-xs">
               {formatDate(profile.created_at)}
             </Badge>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full">
           {/* Metadata */}
           <div className="space-y-6">
             {/* Profile Metadata */}
