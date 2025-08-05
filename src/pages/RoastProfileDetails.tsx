@@ -65,6 +65,7 @@ const RoastProfileDetails = () => {
     origin: "",
     farm_name: "",
     roast_process: "",
+    coffee_roaster: "",
     initial_weight: 0,
     final_weight: 0
   });
@@ -183,6 +184,7 @@ const RoastProfileDetails = () => {
         origin: processedProfile.origin || "",
         farm_name: processedProfile.farm_name || "",
         roast_process: processedProfile.roast_process || "",
+        coffee_roaster: processedProfile.coffee_roaster || "",
         initial_weight: processedProfile.initial_weight || 0,
         final_weight: processedProfile.final_weight || 0
       });
@@ -244,6 +246,7 @@ const RoastProfileDetails = () => {
           origin: editedMetadata.origin || null,
           farm_name: editedMetadata.farm_name || null,
           roast_process: editedMetadata.roast_process || null,
+          coffee_roaster: editedMetadata.coffee_roaster || null,
           initial_weight: editedMetadata.initial_weight || null,
           final_weight: editedMetadata.final_weight || null
         })
@@ -257,6 +260,7 @@ const RoastProfileDetails = () => {
         origin: editedMetadata.origin || undefined,
         farm_name: editedMetadata.farm_name || undefined,
         roast_process: editedMetadata.roast_process || undefined,
+        coffee_roaster: editedMetadata.coffee_roaster || undefined,
         initial_weight: editedMetadata.initial_weight || undefined,
         final_weight: editedMetadata.final_weight || undefined
       });
@@ -468,6 +472,7 @@ const RoastProfileDetails = () => {
                           origin: profile.origin || "",
                           farm_name: profile.farm_name || "",
                           roast_process: profile.roast_process || "",
+                          coffee_roaster: profile.coffee_roaster || "",
                           initial_weight: profile.initial_weight || 0,
                           final_weight: profile.final_weight || 0
                         });
@@ -541,9 +546,17 @@ const RoastProfileDetails = () => {
                 
                 <div>
                   <Label className="text-sm font-medium">Coffee Roaster</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.coffee_roaster || "Not specified"}
-                  </p>
+                  {isEditingMetadata && isOwner ? (
+                    <Input
+                      value={editedMetadata.coffee_roaster}
+                      onChange={(e) => setEditedMetadata({ ...editedMetadata, coffee_roaster: e.target.value })}
+                      placeholder="e.g., Gene CBR-101, Behmor 1600+"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {profile.coffee_roaster || "Not specified"}
+                    </p>
+                  )}
                 </div>
                 
                 <div>
