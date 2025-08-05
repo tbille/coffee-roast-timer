@@ -87,6 +87,15 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/')}
+              className="text-sm"
+            >
+              ← Back to Home
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
           <p className="text-muted-foreground mt-2">Track your perfect roast</p>
         </div>
