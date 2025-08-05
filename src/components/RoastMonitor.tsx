@@ -390,7 +390,7 @@ const RoastMonitor = ({
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "var(--radius)"
                     }} labelFormatter={value => `Time: ${formatTime(value as number)}`} />
-                        <Legend />
+                        <Legend wrapperStyle={{ paddingTop: '20px' }} />
                         
                         {/* Reference profile lines (dotted) */}
                         {referenceProfile && <>
