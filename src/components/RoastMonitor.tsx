@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { Play, Pause, Square, LogOut } from "lucide-react";
+import { Play, Pause, Square, LogOut, RotateCcw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,6 +208,17 @@ const RoastMonitor = ({
     setIsRoasting(false);
     // State is automatically saved via useEffect
   };
+
+  const handleReset = () => {
+    setElapsedTime(0);
+    setRoastData([]);
+    setCrackEvents([]);
+    setTargetTemp("200");
+    setCurrentTemp("20");
+    setLastRecordedTemp("20");
+    setIsRoasting(false);
+    localStorage.removeItem('roastTimerState');
+  };
   return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
          {/* Header */}
@@ -270,10 +281,17 @@ const RoastMonitor = ({
                       <Pause className="h-4 w-4" />
                       Pause
                     </Button>}
-                  <Button onClick={handleStop} variant="destructive" className="flex items-center gap-2">
-                    <Square className="h-4 w-4" />
-                    Stop
-                  </Button>
+                  {!isRoasting && elapsedTime > 0 ? (
+                    <Button onClick={handleReset} variant="outline" className="flex items-center gap-2">
+                      <RotateCcw className="h-4 w-4" />
+                      Reset
+                    </Button>
+                  ) : (
+                    <Button onClick={handleStop} variant="destructive" className="flex items-center gap-2">
+                      <Square className="h-4 w-4" />
+                      Stop
+                    </Button>
+                  )}
                 </div>
                 
                  {/* Save Profile Button - Only show when roast is stopped and has data */}
