@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy } from "lucide-react";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp } from "lucide-react";
 
 interface RoastProfile {
   id: string;
@@ -22,6 +22,7 @@ interface RoastProfile {
   temperature_data: any;
   crack_events: any;
   created_at: string;
+  likes_count: number;
 }
 
 const Discover = () => {
@@ -43,13 +44,40 @@ const Discover = () => {
 
   const fetchProfiles = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch all roast profiles
+      const { data: roastData, error: roastError } = await supabase
         .from('roast_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
 
-      if (error) throw error;
-      setProfiles(data || []);
+      if (roastError) throw roastError;
+
+      // Then fetch likes count for each profile
+      const profilesWithLikes = await Promise.all(
+        (roastData || []).map(async (profile) => {
+          const { data: likesData, error: likesError } = await supabase
+            .from('roast_profile_likes')
+            .select('id')
+            .eq('roast_profile_id', profile.id);
+
+          // Don't throw error if likes query fails, just set count to 0
+          const likes_count = likesError ? 0 : (likesData?.length || 0);
+
+          return {
+            ...profile,
+            likes_count
+          };
+        })
+      );
+
+      // Sort by likes first (descending), then by date (newest first)
+      const sortedProfiles = profilesWithLikes.sort((a, b) => {
+        if (a.likes_count !== b.likes_count) {
+          return b.likes_count - a.likes_count; // More likes first
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // Newer first
+      });
+
+      setProfiles(sortedProfiles);
     } catch (error) {
       console.error('Error fetching profiles:', error);
       toast({
@@ -193,9 +221,15 @@ const Discover = () => {
                     <CardTitle className="text-lg group-hover:text-primary transition-colors">
                       {profile.beans_name}
                     </CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      {formatDate(profile.created_at)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <ThumbsUp className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {formatDate(profile.created_at)}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
