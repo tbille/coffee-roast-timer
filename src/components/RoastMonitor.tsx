@@ -309,24 +309,6 @@ const RoastMonitor = ({
               </Card>
 
 
-              {/* Bean Development Section - Only show after first crack */}
-              {crackEvents.some(e => e.type === 'first') && (
-                <Card className="shadow-coffee">
-                  <CardHeader>
-                    <CardTitle>Bean Development</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-primary mb-2">
-                        {calculateDevelopment().toFixed(1)}%
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Development since first crack
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
 
             {/* Temperature Controls */}
@@ -370,6 +352,23 @@ const RoastMonitor = ({
                   </div>
                 </div>
                 
+              </CardContent>
+            </Card>
+
+            {/* Bean Development Section - Always visible */}
+            <Card className="shadow-coffee">
+              <CardHeader>
+                <CardTitle>Bean Development</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    {calculateDevelopment().toFixed(1)}%
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Development since first crack
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
