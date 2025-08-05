@@ -265,7 +265,13 @@ const RoastProfileDetails = () => {
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate('/discover');
+                }
+              }}
               className="flex items-center gap-2 self-start text-xs sm:text-sm"
             >
               <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
