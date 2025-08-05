@@ -7,18 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 interface RoastProfile {
   id: string;
   beans_name: string;
@@ -32,32 +21,34 @@ interface RoastProfile {
   crack_events: any;
   created_at: string;
 }
-
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const {
+    user,
+    loading
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
-
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-
     if (user) {
       fetchProfiles();
     }
   }, [user, loading, navigate]);
-
   const fetchProfiles = async () => {
     try {
-      const { data, error } = await supabase
-        .from('roast_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from('roast_profiles').select('*').order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
       setProfiles(data || []);
     } catch (error) {
@@ -71,16 +62,12 @@ const Dashboard = () => {
       setLoadingProfiles(false);
     }
   };
-
   const handleDeleteProfile = async (profileId: string) => {
     try {
-      const { error } = await supabase
-        .from('roast_profiles')
-        .delete()
-        .eq('id', profileId);
-
+      const {
+        error
+      } = await supabase.from('roast_profiles').delete().eq('id', profileId);
       if (error) throw error;
-
       setProfiles(prev => prev.filter(p => p.id !== profileId));
       toast({
         title: "Profile Deleted",
@@ -95,13 +82,11 @@ const Dashboard = () => {
       });
     }
   };
-
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
-
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -111,36 +96,25 @@ const Dashboard = () => {
       minute: '2-digit'
     });
   };
-
   const getWeightLoss = (initial?: number, final?: number): string => {
     if (!initial || !final) return "N/A";
     const loss = initial - final;
-    const percentage = (loss / initial) * 100;
+    const percentage = loss / initial * 100;
     return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
   };
-
   if (loading || loadingProfiles) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="text-lg text-foreground">Loading dashboard...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background p-4">
+  return <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={() => navigate('/')} className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Timer
             </Button>
@@ -157,8 +131,7 @@ const Dashboard = () => {
         </div>
 
         {/* Profiles Grid */}
-        {profiles.length === 0 ? (
-          <Card className="shadow-coffee">
+        {profiles.length === 0 ? <Card className="shadow-coffee">
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -171,15 +144,8 @@ const Dashboard = () => {
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {profiles.map((profile) => (
-              <Card 
-                key={profile.id} 
-                className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/profile/${profile.id}`)}
-              >
+          </Card> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {profiles.map(profile => <Card key={profile.id} className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/profile/${profile.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -192,12 +158,7 @@ const Dashboard = () => {
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={e => e.stopPropagation()}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -210,10 +171,7 @@ const Dashboard = () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteProfile(profile.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
+                          <AlertDialogAction onClick={() => handleDeleteProfile(profile.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                             Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -227,67 +185,35 @@ const Dashboard = () => {
                     <span>{formatTime(profile.duration_seconds)}</span>
                   </div>
                   
-                  {profile.origin && (
-                    <div className="flex items-center gap-2 text-sm">
+                  {profile.origin && <div className="flex items-center gap-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span>{profile.origin}</span>
-                    </div>
-                  )}
+                    </div>}
                   
-                  {profile.farm_name && (
-                    <div className="text-sm text-muted-foreground">
+                  {profile.farm_name && <div className="text-sm text-muted-foreground">
                       Farm: {profile.farm_name}
-                    </div>
-                  )}
+                    </div>}
                   
-                  {profile.roast_process && (
-                    <div className="text-sm">
+                  {profile.roast_process && <div className="text-sm">
                       <span className="font-medium">Process:</span> {profile.roast_process}
-                    </div>
-                  )}
+                    </div>}
                   
-                  {(profile.initial_weight || profile.final_weight) && (
-                    <div className="flex items-center gap-2 text-sm">
+                  {(profile.initial_weight || profile.final_weight) && <div className="flex items-center gap-2 text-sm">
                       <Scale className="h-4 w-4 text-muted-foreground" />
                       <div className="flex flex-col">
-                        {profile.initial_weight && (
-                          <span>Initial: {profile.initial_weight}g</span>
-                        )}
-                        {profile.final_weight && (
-                          <span>Final: {profile.final_weight}g</span>
-                        )}
-                        {profile.initial_weight && profile.final_weight && (
-                          <span className="text-muted-foreground text-xs">
+                        {profile.initial_weight && <span>Initial: {profile.initial_weight}g</span>}
+                        {profile.final_weight && <span>Final: {profile.final_weight}g</span>}
+                        {profile.initial_weight && profile.final_weight && <span className="text-muted-foreground text-xs">
                             Loss: {getWeightLoss(profile.initial_weight, profile.final_weight)}
-                          </span>
-                        )}
+                          </span>}
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   
-                  <div className="flex gap-2 pt-2">
-                    {profile.crack_events?.some((e: any) => e.type === 'first') && (
-                      <Badge variant="outline" className="text-xs">
-                        First Crack
-                      </Badge>
-                    )}
-                    {profile.crack_events?.some((e: any) => e.type === 'second') && (
-                      <Badge variant="outline" className="text-xs">
-                        Second Crack
-                      </Badge>
-                    )}
-                    <Badge variant="secondary" className="text-xs">
-                      {profile.temperature_data?.length || 0} data points
-                    </Badge>
-                  </div>
+                  
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+              </Card>)}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
