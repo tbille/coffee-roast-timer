@@ -27,6 +27,7 @@ interface CrackEvent {
 
 interface RoastProfile {
   id: string;
+  user_id: string;
   beans_name: string;
   origin?: string;
   farm_name?: string;
@@ -63,17 +64,17 @@ const RoastProfileDetails = () => {
   const [savingMetadata, setSavingMetadata] = useState(false);
 
   useEffect(() => {
-    if (!id || !user) return;
+    if (!id) return;
     fetchProfile();
-  }, [id, user]);
+  }, [id]);
 
   const fetchProfile = async () => {
+    if (!id) return;
     try {
       const { data, error } = await supabase
         .from('roast_profiles')
         .select('*')
         .eq('id', id)
-        .eq('user_id', user?.id)
         .single();
 
       if (error) throw error;
@@ -102,14 +103,17 @@ const RoastProfileDetails = () => {
         description: "Failed to load roast profile.",
         variant: "destructive"
       });
-      navigate('/dashboard');
+      navigate('/');
     } finally {
       setLoading(false);
     }
   };
 
+  // Check if current user is the owner
+  const isOwner = user?.id === profile?.user_id;
+
   const handleSaveNotes = async () => {
-    if (!profile) return;
+    if (!profile || !isOwner) return;
     
     setSavingNotes(true);
     try {
@@ -139,7 +143,7 @@ const RoastProfileDetails = () => {
   };
 
   const handleSaveMetadata = async () => {
-    if (!profile) return;
+    if (!profile || !isOwner) return;
     
     setSavingMetadata(true);
     try {
@@ -243,8 +247,8 @@ const RoastProfileDetails = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
               <div className="text-lg text-muted-foreground">Profile not found</div>
-              <Button onClick={() => navigate('/dashboard')}>
-                Return to Dashboard
+              <Button onClick={() => navigate('/')}>
+                Return to Home
               </Button>
             </div>
           </div>
@@ -261,11 +265,11 @@ const RoastProfileDetails = () => {
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 self-start text-xs sm:text-sm"
             >
               <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              Back to Dashboard
+              Back
             </Button>
             <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
           </div>
@@ -291,7 +295,7 @@ const RoastProfileDetails = () => {
             <Card className="shadow-coffee">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Roast Details</CardTitle>
-                {!isEditingMetadata ? (
+                {isOwner && !isEditingMetadata ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -301,7 +305,7 @@ const RoastProfileDetails = () => {
                     <Edit className="h-4 w-4" />
                     Edit
                   </Button>
-                ) : (
+                ) : isOwner && (
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -338,7 +342,7 @@ const RoastProfileDetails = () => {
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium">Bean Name</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       value={editedMetadata.beans_name}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, beans_name: e.target.value })}
@@ -351,7 +355,7 @@ const RoastProfileDetails = () => {
 
                 <div>
                   <Label className="text-sm font-medium">Bean Origin</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       value={editedMetadata.origin}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, origin: e.target.value })}
@@ -366,7 +370,7 @@ const RoastProfileDetails = () => {
                 
                 <div>
                   <Label className="text-sm font-medium">Farm</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       value={editedMetadata.farm_name}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, farm_name: e.target.value })}
@@ -381,7 +385,7 @@ const RoastProfileDetails = () => {
                 
                 <div>
                   <Label className="text-sm font-medium">Process</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       value={editedMetadata.roast_process}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, roast_process: e.target.value })}
@@ -403,7 +407,7 @@ const RoastProfileDetails = () => {
 
                 <div>
                   <Label className="text-sm font-medium">Initial Weight</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       type="number"
                       value={editedMetadata.initial_weight || ""}
@@ -419,7 +423,7 @@ const RoastProfileDetails = () => {
 
                 <div>
                   <Label className="text-sm font-medium">Final Weight</Label>
-                  {isEditingMetadata ? (
+                  {isEditingMetadata && isOwner ? (
                     <Input
                       type="number"
                       value={editedMetadata.final_weight || ""}
@@ -566,7 +570,7 @@ const RoastProfileDetails = () => {
             <Card className="shadow-coffee">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Notes</CardTitle>
-                {!isEditingNotes ? (
+                {isOwner && !isEditingNotes ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -576,7 +580,7 @@ const RoastProfileDetails = () => {
                     <Edit className="h-4 w-4" />
                     Edit
                   </Button>
-                ) : (
+                ) : isOwner && (
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -604,7 +608,7 @@ const RoastProfileDetails = () => {
                 )}
               </CardHeader>
               <CardContent>
-                {isEditingNotes ? (
+                {isEditingNotes && isOwner ? (
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -617,7 +621,7 @@ const RoastProfileDetails = () => {
                       <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        No notes yet. Click Edit to add some!
+                        {isOwner ? "No notes yet. Click Edit to add some!" : "No notes available for this roast."}
                       </p>
                     )}
                   </div>
