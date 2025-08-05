@@ -39,6 +39,9 @@ interface RoastProfile {
   crack_events: CrackEvent[];
   notes?: string;
   created_at: string;
+  profiles?: {
+    username?: string;
+  };
 }
 
 const RoastProfileDetails = () => {
@@ -73,7 +76,12 @@ const RoastProfileDetails = () => {
     try {
       const { data, error } = await supabase
         .from('roast_profiles')
-        .select('*')
+        .select(`
+          *,
+          profiles (
+            username
+          )
+        `)
         .eq('id', id)
         .single();
 
@@ -263,7 +271,14 @@ const RoastProfileDetails = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
+            <div>
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
+              {profile.profiles?.username && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  by {profile.profiles.username}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button

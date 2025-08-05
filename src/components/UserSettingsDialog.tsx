@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Trash2 } from "lucide-react";
+import { Settings, Trash2, User } from "lucide-react";
 
 interface UserSettingsDialogProps {
   trigger: React.ReactNode;
@@ -34,6 +36,77 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [username, setUsername] = useState("");
+  const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
+  const [originalUsername, setOriginalUsername] = useState("");
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    if (user && isOpen) {
+      fetchUserProfile();
+    }
+  }, [user, isOpen]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      const currentUsername = data?.username || "";
+      setUsername(currentUsername);
+      setOriginalUsername(currentUsername);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const handleUpdateUsername = async () => {
+    if (!user) return;
+    
+    setIsUpdatingUsername(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ 
+          id: user.id, 
+          username: username.trim() || null 
+        });
+
+      if (error) throw error;
+
+      setOriginalUsername(username);
+      toast({
+        title: "Username updated",
+        description: "Your username has been updated successfully."
+      });
+    } catch (error: any) {
+      console.error('Error updating username:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        toast({
+          title: "Username taken",
+          description: "This username is already taken. Please choose another one.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update username. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsUpdatingUsername(false);
+    }
+  };
 
 
   const handleDeleteAccount = async () => {
@@ -88,6 +161,33 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
         </DialogHeader>
         
         <div className="space-y-6 py-4">
+          {/* Username Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <h3 className="text-sm font-medium">Profile</h3>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username (optional)</Label>
+              <Input
+                id="username"
+                placeholder="Enter a username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                maxLength={50}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your username will be displayed on your public roast profiles.
+              </p>
+            </div>
+            <Button
+              onClick={handleUpdateUsername}
+              disabled={isUpdatingUsername || username === originalUsername}
+              className="w-full"
+            >
+              {isUpdatingUsername ? "Updating..." : "Update Username"}
+            </Button>
+          </div>
           {/* Delete Account Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
