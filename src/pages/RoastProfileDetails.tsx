@@ -184,7 +184,7 @@ const RoastProfileDetails = () => {
   };
 
   const handleUseAsReference = () => {
-    navigate('/dashboard', { 
+    navigate('/', { 
       state: { 
         referenceProfile: {
           beans_name: profile?.beans_name,

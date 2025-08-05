@@ -25,9 +25,19 @@ interface CrackEvent {
 }
 interface RoastMonitorProps {
   onBack?: () => void;
+  referenceProfile?: {
+    beans_name?: string;
+    origin?: string;
+    farm_name?: string;
+    roast_process?: string;
+    initial_weight?: number;
+    temperature_data?: any[];
+  };
 }
+
 const RoastMonitor = ({
-  onBack
+  onBack,
+  referenceProfile: passedReferenceProfile
 }: RoastMonitorProps) => {
   const {
     signOut,
@@ -48,13 +58,21 @@ const RoastMonitor = ({
   const [referenceProfileName, setReferenceProfileName] = useState<string>("");
   
 
-  // Load reference profile if specified in URL
+  // Load reference profile if specified in URL or passed as prop
   useEffect(() => {
     const referenceId = searchParams.get('reference');
     if (referenceId) {
       loadReferenceProfile(referenceId);
+    } else if (passedReferenceProfile?.temperature_data) {
+      // Load reference profile from passed prop
+      setReferenceProfile(passedReferenceProfile.temperature_data as RoastData[]);
+      setReferenceProfileName(passedReferenceProfile.beans_name || "Imported Profile");
+      toast({
+        title: "Reference Profile Loaded",
+        description: `Using "${passedReferenceProfile.beans_name || "profile"}" as reference for your new roast.`
+      });
     }
-  }, [searchParams]);
+  }, [searchParams, passedReferenceProfile]);
 
 
   // Load persisted roast state on component mount
