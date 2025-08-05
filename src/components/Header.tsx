@@ -1,15 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Coffee, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+
+  // Fetch username when user changes
+  useEffect(() => {
+    if (user?.id) {
+      const fetchUsername = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (!error && data) {
+          setUsername(data.username);
+        }
+      };
+      
+      fetchUsername();
+    } else {
+      setUsername(null);
+    }
+  }, [user?.id]);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -45,7 +68,7 @@ const Header = () => {
           <span className={`text-sm text-muted-foreground truncate ${
             mobile ? 'w-full text-left' : 'max-w-32'
           }`}>
-            {user.email?.split('@')[0]}
+            {username || user.email?.split('@')[0]}
           </span>
           {mobile ? (
             <Button
