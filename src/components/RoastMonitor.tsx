@@ -241,34 +241,34 @@ const RoastMonitor = ({
     setIsRoasting(false);
     localStorage.removeItem('roastTimerState');
   };
-  return <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-6xl">
+  return <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+      <div className="container mx-auto max-w-6xl w-full">
          {/* Header */}
-         <div className="flex items-center justify-between mb-6">
-           <h1 className="text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
-            <div className="flex items-center gap-4">
+         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coffee Roast Monitor</h1>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               {user ? <>
-                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/dashboard'} className="flex items-center gap-2 text-xs sm:text-sm">
                     My Profiles
                   </Button>
                   <UserSettingsDialog
                     trigger={
-                      <button className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
-                        Welcome, {user?.email}
+                      <button className="text-xs sm:text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors truncate max-w-32 sm:max-w-none">
+                        Welcome, {user?.email?.split('@')[0]}
                       </button>
                     }
                   />
-                  <Button variant="outline" size="sm" onClick={signOut} className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={signOut} className="flex items-center gap-2 text-xs sm:text-sm">
+                    <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
                     Sign Out
                   </Button>
-                </> : <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'} className="flex items-center gap-2">
+                </> : <Button variant="outline" size="sm" onClick={() => window.location.href = '/auth'} className="flex items-center gap-2 text-xs sm:text-sm">
                   Sign In
                 </Button>}
             </div>
          </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full">
           {/* Controls Panel */}
           <div className="space-y-6">
             {/* Timer Card */}
@@ -363,15 +363,15 @@ const RoastMonitor = ({
           <div className="lg:col-span-2">
             <Card className="shadow-coffee h-full">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Temperature Graph</span>
-                  {referenceProfile && <span className="text-sm font-normal text-muted-foreground">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <span className="text-base sm:text-lg">Temperature Graph</span>
+                  {referenceProfile && <span className="text-xs sm:text-sm font-normal text-muted-foreground truncate">
                       Reference: {referenceProfileName}
                     </span>}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {isRoasting || roastData.length > 0 ? <div className="h-96 w-full">
+                {isRoasting || roastData.length > 0 ? <div className="h-80 sm:h-96 w-full overflow-hidden">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={roastData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -413,12 +413,12 @@ const RoastMonitor = ({
                     }} />)}
                       </LineChart>
                     </ResponsiveContainer>
-                  </div> : <div className="flex items-center justify-center h-96 text-muted-foreground">
+                  </div> : <div className="flex items-center justify-center h-80 sm:h-96 text-muted-foreground px-4">
                     <div className="text-center">
-                      <p className="text-lg mb-2">
+                      <p className="text-base sm:text-lg mb-2">
                         {referenceProfile ? "Start roasting to see your progress against the reference" : "Start roasting to see the temperature graph"}
                       </p>
-                      <p className="text-sm">
+                      <p className="text-xs sm:text-sm">
                         {referenceProfile ? `Reference profile: ${referenceProfileName}` : "Data points will appear as you monitor your roast"}
                       </p>
                       {referenceProfile && <div className="mt-4 p-4 bg-muted rounded-lg">
