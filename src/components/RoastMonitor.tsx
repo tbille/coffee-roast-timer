@@ -419,12 +419,28 @@ const RoastMonitor = ({
         
         {/* Hero Section */}
         <div className="mt-16 py-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg">
-          <div className="text-center space-y-6 max-w-2xl mx-auto">
-            <h2 className="text-4xl font-bold text-foreground">Why Track Your Roasts?</h2>
-            <div className="text-lg text-muted-foreground space-y-3">
-              <p>• Achieve consistent results every time</p>
-              <p>• Learn from your roasting patterns</p>
-              <p>• Perfect your favorite profiles</p>
+          <div className="text-center space-y-6 max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground">Master Coffee Roasting with Professional Temperature Monitoring</h2>
+            <div className="text-lg text-muted-foreground space-y-4">
+              <p className="text-xl mb-6">Transform your home coffee roasting experience with precise temperature tracking, development monitoring, and roast profile management.</p>
+              
+              <div className="grid md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-foreground">Perfect Your Roast Profiles</h3>
+                  <p>• Track temperature curves and development ratios for consistent results</p>
+                  <p>• Monitor first and second crack timing to optimize flavor development</p>
+                  <p>• Save successful roast profiles to replicate your best batches</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-foreground">Advanced Roasting Analytics</h3>
+                  <p>• Real-time temperature graphing with target vs actual tracking</p>
+                  <p>• Calculate development percentage for optimal bean preparation</p>
+                  <p>• Compare new roasts against proven reference profiles</p>
+                </div>
+              </div>
+              
+              <p className="text-base mt-8">Whether you're a home roasting enthusiast or professional coffee roaster, our monitoring tools help you achieve café-quality results by providing the data and insights needed to perfect your craft.</p>
             </div>
           </div>
         </div>
