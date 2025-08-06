@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { type TemperatureUnit } from "@/utils/temperatureConversion";
 import { Save } from "lucide-react";
 
 interface RoastData {
@@ -33,9 +34,10 @@ interface SaveRoastDialogProps {
   roastData: RoastData[];
   crackEvents: CrackEvent[];
   disabled?: boolean;
+  temperatureUnit: TemperatureUnit;
 }
 
-const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: SaveRoastDialogProps) => {
+const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled = false, temperatureUnit }: SaveRoastDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -85,7 +87,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled }: Save
           final_weight: formData.finalWeight ? parseFloat(formData.finalWeight) : null,
           duration_seconds: elapsedTime,
           temperature_data: roastData as any,
-          crack_events: crackEvents as any
+          crack_events: crackEvents as any,
+          temperature_unit: temperatureUnit
         });
 
       if (error) throw error;

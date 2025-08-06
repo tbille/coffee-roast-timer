@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
 import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search, MapPin, Clock, Scale, Copy, ThumbsUp } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import UserSettingsDialog from "./UserSettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
 
 interface RoastData {
   time: number;
@@ -39,6 +41,7 @@ interface RoastProfile {
   crack_events: any;
   created_at: string;
   likes_count: number;
+  temperature_unit?: string;
 }
 
 interface RoastMonitorProps {
@@ -76,6 +79,8 @@ const RoastMonitor = ({
   const [referenceProfile, setReferenceProfile] = useState<RoastData[] | null>(null);
   const [referenceProfileName, setReferenceProfileName] = useState<string>("");
   const [latestProfiles, setLatestProfiles] = useState<RoastProfile[]>([]);
+  const [currentUnit, setCurrentUnit] = useState<TemperatureUnit>('C');
+  const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
   
 
   // Load reference profile if specified in URL or passed as prop
@@ -94,10 +99,34 @@ const RoastMonitor = ({
     }
   }, [searchParams, passedReferenceProfile]);
 
-  // Fetch latest roast profiles
+  // Fetch latest roast profiles and user preferences
   useEffect(() => {
     fetchLatestProfiles();
-  }, []);
+    if (user) {
+      fetchUserPreferences();
+    }
+  }, [user]);
+
+  const fetchUserPreferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('default_temperature_unit')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching user preferences:', error);
+        return;
+      }
+
+      const defaultUnit = data?.default_temperature_unit || 'C';
+      setUserDefaultUnit(defaultUnit as TemperatureUnit);
+      setCurrentUnit(defaultUnit as TemperatureUnit);
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+    }
+  };
 
   const fetchLatestProfiles = async () => {
     try {
@@ -207,10 +236,14 @@ const RoastMonitor = ({
   // Submit temperature function
   const handleSubmitTemperature = () => {
     if (isRoasting && elapsedTime > 0) {
+      // Always store temperatures in Celsius for consistency
+      const targetTempValue = parseFloat(targetTemp) || 0;
+      const currentTempValue = parseFloat(currentTemp) || 0;
+      
       const newDataPoint: RoastData = {
         time: elapsedTime,
-        targetTemp: parseFloat(targetTemp) || 0,
-        currentTemp: parseFloat(currentTemp) || 0
+        targetTemp: currentUnit === 'F' ? convertTemperature(targetTempValue, 'F', 'C') : targetTempValue,
+        currentTemp: currentUnit === 'F' ? convertTemperature(currentTempValue, 'F', 'C') : currentTempValue
       };
       setRoastData(prev => [...prev, newDataPoint]);
       setLastRecordedTemp(currentTemp);
@@ -224,10 +257,13 @@ const RoastMonitor = ({
       currentTemp
     });
     if (isRoasting && elapsedTime > 0 && !crackEvents.some(e => e.type === 'first')) {
+      const targetTempValue = parseFloat(targetTemp) || 0;
+      const currentTempValue = parseFloat(currentTemp) || 0;
+      
       const crackEvent: CrackEvent = {
         time: elapsedTime,
-        targetTemp: parseFloat(targetTemp) || 0,
-        currentTemp: parseFloat(currentTemp) || 0,
+        targetTemp: currentUnit === 'F' ? convertTemperature(targetTempValue, 'F', 'C') : targetTempValue,
+        currentTemp: currentUnit === 'F' ? convertTemperature(currentTempValue, 'F', 'C') : currentTempValue,
         type: 'first'
       };
       console.log('Adding first crack event:', crackEvent);
@@ -248,10 +284,13 @@ const RoastMonitor = ({
       currentTemp
     });
     if (isRoasting && elapsedTime > 0 && crackEvents.some(e => e.type === 'first') && !crackEvents.some(e => e.type === 'second')) {
+      const targetTempValue = parseFloat(targetTemp) || 0;
+      const currentTempValue = parseFloat(currentTemp) || 0;
+      
       const crackEvent: CrackEvent = {
         time: elapsedTime,
-        targetTemp: parseFloat(targetTemp) || 0,
-        currentTemp: parseFloat(currentTemp) || 0,
+        targetTemp: currentUnit === 'F' ? convertTemperature(targetTempValue, 'F', 'C') : targetTempValue,
+        currentTemp: currentUnit === 'F' ? convertTemperature(currentTempValue, 'F', 'C') : currentTempValue,
         type: 'second'
       };
       console.log('Adding second crack event:', crackEvent);
@@ -367,9 +406,9 @@ const RoastMonitor = ({
                 </div>
                 
                  {/* Save Profile Button - Only show when roast is stopped and has data */}
-                 {!isRoasting && elapsedTime > 0 && <div className="mt-4">
-                     <SaveRoastDialog elapsedTime={elapsedTime} roastData={roastData} crackEvents={crackEvents} disabled={elapsedTime === 0 || roastData.length === 0} />
-                    </div>}
+                  {!isRoasting && elapsedTime > 0 && <div className="mt-4">
+                      <SaveRoastDialog elapsedTime={elapsedTime} roastData={roastData} crackEvents={crackEvents} disabled={elapsedTime === 0 || roastData.length === 0} temperatureUnit={currentUnit} />
+                     </div>}
                 </CardContent>
               </Card>
 
@@ -382,17 +421,31 @@ const RoastMonitor = ({
                 <CardTitle>Temperature Control</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="target-temp">Target Temperature (°C)</Label>
-                  <Input id="target-temp" type="number" value={targetTemp} onChange={e => setTargetTemp(e.target.value)} placeholder="200" />
-                </div>
-                <div>
-                  <Label htmlFor="current-temp">Current Temperature (°C)</Label>
-                  <Input id="current-temp" type="number" value={currentTemp} onChange={e => setCurrentTemp(e.target.value)} placeholder="20" />
-                  <Button onClick={handleSubmitTemperature} disabled={!isRoasting} className="w-full mt-2">
-                    Record Temperature
-                  </Button>
-                </div>
+                 {/* Temperature Unit Toggle */}
+                 <div className="flex items-center justify-between">
+                   <Label htmlFor="temp-unit">Temperature Unit</Label>
+                   <div className="flex items-center gap-2">
+                     <span className={`text-sm ${currentUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                     <Switch
+                       id="temp-unit"
+                       checked={currentUnit === 'F'}
+                       onCheckedChange={(checked) => setCurrentUnit(checked ? 'F' : 'C')}
+                     />
+                     <span className={`text-sm ${currentUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                   </div>
+                 </div>
+                 
+                 <div>
+                   <Label htmlFor="target-temp">Target Temperature (°{currentUnit})</Label>
+                   <Input id="target-temp" type="number" value={targetTemp} onChange={e => setTargetTemp(e.target.value)} placeholder={currentUnit === 'C' ? "200" : "392"} />
+                 </div>
+                 <div>
+                   <Label htmlFor="current-temp">Current Temperature (°{currentUnit})</Label>
+                   <Input id="current-temp" type="number" value={currentTemp} onChange={e => setCurrentTemp(e.target.value)} placeholder={currentUnit === 'C' ? "20" : "68"} />
+                   <Button onClick={handleSubmitTemperature} disabled={!isRoasting} className="w-full mt-2">
+                     Record Temperature
+                   </Button>
+                 </div>
                 
                 {/* Crack Events */}
                 <div className="space-y-2">
@@ -440,20 +493,24 @@ const RoastMonitor = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {isRoasting || roastData.length > 0 ? <div className="h-80 sm:h-96 w-full overflow-hidden">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={roastData}>
+                 {isRoasting || roastData.length > 0 ? <div className="h-80 sm:h-96 w-full overflow-hidden">
+                     <ResponsiveContainer width="100%" height="100%">
+                       <LineChart data={roastData.map(point => ({
+                         ...point,
+                         targetTemp: currentUnit === 'F' ? convertTemperature(point.targetTemp, 'C', 'F') : point.targetTemp,
+                         currentTemp: currentUnit === 'F' ? convertTemperature(point.currentTemp, 'C', 'F') : point.currentTemp
+                       }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="time" stroke="hsl(var(--foreground))" label={{
                       value: 'Time (MM:SS)',
                       position: 'insideBottom',
                       offset: -10
                     }} tickFormatter={formatTime} />
-                        <YAxis stroke="hsl(var(--foreground))" label={{
-                      value: 'Temperature (°C)',
-                      angle: -90,
-                      position: 'insideLeft'
-                    }} />
+                         <YAxis stroke="hsl(var(--foreground))" label={{
+                       value: `Temperature (°${currentUnit})`,
+                       angle: -90,
+                       position: 'insideLeft'
+                     }} />
                         <Tooltip contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",

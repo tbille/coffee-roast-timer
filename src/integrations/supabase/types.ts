@@ -17,18 +17,21 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          default_temperature_unit: string
           id: string
           updated_at: string
           username: string | null
         }
         Insert: {
           created_at?: string
+          default_temperature_unit?: string
           id: string
           updated_at?: string
           username?: string | null
         }
         Update: {
           created_at?: string
+          default_temperature_unit?: string
           id?: string
           updated_at?: string
           username?: string | null
@@ -86,6 +89,7 @@ export type Database = {
           origin: string | null
           roast_process: string | null
           temperature_data: Json
+          temperature_unit: string
           updated_at: string
           user_id: string
         }
@@ -103,6 +107,7 @@ export type Database = {
           origin?: string | null
           roast_process?: string | null
           temperature_data?: Json
+          temperature_unit?: string
           updated_at?: string
           user_id: string
         }
@@ -120,6 +125,7 @@ export type Database = {
           origin?: string | null
           roast_process?: string | null
           temperature_data?: Json
+          temperature_unit?: string
           updated_at?: string
           user_id?: string
         }

@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp, Thermometer } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
 
 interface RoastProfile {
   id: string;
@@ -24,6 +27,7 @@ interface RoastProfile {
   crack_events: any;
   created_at: string;
   likes_count: number;
+  temperature_unit?: string;
 }
 
 const Discover = () => {
@@ -34,14 +38,40 @@ const Discover = () => {
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
+  const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
 
   useEffect(() => {
     fetchProfiles();
-  }, []);
+    if (user) {
+      fetchUserPreferences();
+    }
+  }, [user]);
 
   useEffect(() => {
     filterProfiles();
   }, [searchQuery, profiles]);
+
+  const fetchUserPreferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('default_temperature_unit')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching user preferences:', error);
+        return;
+      }
+
+      const defaultUnit = data?.default_temperature_unit || 'C';
+      setUserDefaultUnit(defaultUnit as TemperatureUnit);
+      setViewUnit(defaultUnit as TemperatureUnit);
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+    }
+  };
 
   const fetchProfiles = async () => {
     try {
@@ -172,9 +202,9 @@ const Discover = () => {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search and Controls */}
         <Card className="shadow-coffee mb-6">
-          <CardContent className="p-4">
+          <CardContent className="p-4 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -183,6 +213,23 @@ const Discover = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            
+            {/* Temperature Unit Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Thermometer className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="view-temp-unit" className="text-sm">Temperature Unit</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                <Switch
+                  id="view-temp-unit"
+                  checked={viewUnit === 'F'}
+                  onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
+                />
+                <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+              </div>
             </div>
           </CardContent>
         </Card>

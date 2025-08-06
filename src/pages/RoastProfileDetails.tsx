@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2 } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2, Thermometer } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +47,7 @@ interface RoastProfile {
     username?: string;
   };
   coffee_roaster?: string;
+  temperature_unit?: string;
 }
 
 const RoastProfileDetails = () => {
@@ -71,6 +74,8 @@ const RoastProfileDetails = () => {
   });
   const [savingMetadata, setSavingMetadata] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
+  const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
 
   // Fetch likes count and user's like status
   const { data: likesData } = useQuery({
@@ -139,7 +144,31 @@ const RoastProfileDetails = () => {
   useEffect(() => {
     if (!id) return;
     fetchProfile();
-  }, [id]);
+    if (user) {
+      fetchUserPreferences();
+    }
+  }, [id, user]);
+
+  const fetchUserPreferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('default_temperature_unit')
+        .eq('id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching user preferences:', error);
+        return;
+      }
+
+      const defaultUnit = data?.default_temperature_unit || 'C';
+      setUserDefaultUnit(defaultUnit as TemperatureUnit);
+      setViewUnit(defaultUnit as TemperatureUnit);
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     if (!id) return;
@@ -642,14 +671,37 @@ const RoastProfileDetails = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Temperature Graph */}
             <Card className="shadow-coffee">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Temperature Profile</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Thermometer className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                    <Switch
+                      checked={viewUnit === 'F'}
+                      onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
+                    />
+                    <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {profile.temperature_data && profile.temperature_data.length > 0 ? (
                   <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={profile.temperature_data}>
+                       <LineChart data={profile.temperature_data.map(point => ({
+                         ...point,
+                         targetTemp: profile.temperature_unit === 'F' && viewUnit === 'C' 
+                           ? convertTemperature(point.targetTemp, 'F', 'C')
+                           : profile.temperature_unit === 'C' && viewUnit === 'F'
+                           ? convertTemperature(point.targetTemp, 'C', 'F')
+                           : point.targetTemp,
+                         currentTemp: profile.temperature_unit === 'F' && viewUnit === 'C' 
+                           ? convertTemperature(point.currentTemp, 'F', 'C')
+                           : profile.temperature_unit === 'C' && viewUnit === 'F'
+                           ? convertTemperature(point.currentTemp, 'C', 'F')
+                           : point.currentTemp
+                       }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis 
                           dataKey="time" 
@@ -664,7 +716,7 @@ const RoastProfileDetails = () => {
                         <YAxis 
                           stroke="hsl(var(--foreground))" 
                           label={{
-                            value: 'Temperature (°C)',
+                            value: `Temperature (°${viewUnit})`,
                             angle: -90,
                             position: 'insideLeft'
                           }}

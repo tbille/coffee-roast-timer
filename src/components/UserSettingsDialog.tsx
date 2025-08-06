@@ -25,7 +25,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Trash2, User, Lock } from "lucide-react";
+import { Settings, Trash2, User, Lock, Thermometer } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { type TemperatureUnit } from "@/utils/temperatureConversion";
 
 interface UserSettingsDialogProps {
   trigger: React.ReactNode;
@@ -39,6 +41,9 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
   const [username, setUsername] = useState("");
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
   const [originalUsername, setOriginalUsername] = useState("");
+  const [defaultTempUnit, setDefaultTempUnit] = useState<TemperatureUnit>('C');
+  const [originalTempUnit, setOriginalTempUnit] = useState<TemperatureUnit>('C');
+  const [isUpdatingTempUnit, setIsUpdatingTempUnit] = useState(false);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -57,7 +62,7 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username')
+        .select('username, default_temperature_unit')
         .eq('id', user?.id)
         .single();
 
@@ -67,8 +72,11 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
       }
 
       const currentUsername = data?.username || "";
+      const currentTempUnit = (data?.default_temperature_unit || 'C') as TemperatureUnit;
       setUsername(currentUsername);
       setOriginalUsername(currentUsername);
+      setDefaultTempUnit(currentTempUnit);
+      setOriginalTempUnit(currentTempUnit);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -83,12 +91,14 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
         .from('profiles')
         .upsert({ 
           id: user.id, 
-          username: username.trim() || null 
+          username: username.trim() || null,
+          default_temperature_unit: defaultTempUnit
         });
 
       if (error) throw error;
 
       setOriginalUsername(username);
+      setOriginalTempUnit(defaultTempUnit);
       toast({
         title: "Username updated",
         description: "Your username has been updated successfully."
@@ -259,11 +269,36 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
             </div>
             <Button
               onClick={handleUpdateUsername}
-              disabled={isUpdatingUsername || username === originalUsername}
+              disabled={isUpdatingUsername || (username === originalUsername && defaultTempUnit === originalTempUnit)}
               className="w-full"
             >
-              {isUpdatingUsername ? "Updating..." : "Update Username"}
+              {isUpdatingUsername ? "Updating..." : "Update Profile"}
             </Button>
+          </div>
+
+          {/* Temperature Unit Preference */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Thermometer className="h-4 w-4" />
+              <h3 className="text-sm font-medium">Temperature Preference</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="default-temp-unit">Default Temperature Unit</Label>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${defaultTempUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                  <Switch
+                    id="default-temp-unit"
+                    checked={defaultTempUnit === 'F'}
+                    onCheckedChange={(checked) => setDefaultTempUnit(checked ? 'F' : 'C')}
+                  />
+                  <span className={`text-sm ${defaultTempUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Your preferred temperature unit will be used by default in all roast profiles and displays.
+              </p>
+            </div>
           </div>
 
           {/* Password Change Section */}
