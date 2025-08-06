@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search, MapPin, Clock, Scale, Copy, ThumbsUp } from "lucide-react";
+import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search, MapPin, Clock, Scale, Copy, ThumbsUp, TreePine, Cog, Coffee } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import UserSettingsDialog from "./UserSettingsDialog";
@@ -629,21 +629,21 @@ const RoastMonitor = ({
                         
                         {profile.farm_name && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="w-4 h-4"></div>
+                            <TreePine className="h-4 w-4" />
                             <span><strong>Farm:</strong> {profile.farm_name}</span>
                           </div>
                         )}
                         
                         {profile.roast_process && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="w-4 h-4"></div>
+                            <Cog className="h-4 w-4" />
                             <span><strong>Process:</strong> {profile.roast_process}</span>
                           </div>
                         )}
                         
                         {profile.coffee_roaster && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="w-4 h-4"></div>
+                            <Coffee className="h-4 w-4" />
                             <span><strong>Roaster:</strong> {profile.coffee_roaster}</span>
                           </div>
                         )}
