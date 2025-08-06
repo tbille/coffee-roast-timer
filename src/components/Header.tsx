@@ -39,6 +39,7 @@ const Header = () => {
   const navigationItems = [
     { name: "Home", href: "/", icon: Coffee },
     { name: "Discover", href: "/discover", icon: Coffee },
+    { name: "About", href: "/about", icon: Coffee },
   ];
 
   const NavLink = ({ href, children, className = "", onClick }: { 
