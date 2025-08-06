@@ -24,6 +24,12 @@ export async function generateSitemap(): Promise<string> {
     priority: 0.8
   });
 
+  urls.push({
+    loc: `${baseUrl}/about`,
+    changefreq: 'monthly',
+    priority: 0.7
+  });
+
   // Fetch all public roast profiles
   try {
     const { data: profiles, error } = await supabase

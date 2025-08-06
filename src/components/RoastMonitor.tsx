@@ -603,6 +603,7 @@ const RoastMonitor = ({
                     <Card
                       key={profile.id}
                       className="cursor-pointer hover:shadow-lg transition-all duration-200 group shadow-coffee"
+                      onClick={() => navigate(`/profile/${profile.id}`)}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
