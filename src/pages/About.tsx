@@ -21,7 +21,7 @@ const About = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground leading-relaxed">
-            Hi there! I'm a coffee enthusiast who owns a <strong>Gene CBR-101</strong> home coffee roaster. 
+            Hi there! I'm toto, a coffee enthusiast who owns a <strong>Gene CBR-101</strong> home coffee roaster. 
             Like many coffee lovers, I wanted to dive deeper into the art and science of coffee roasting 
             to truly understand how different variables affect the final cup.
           </p>
