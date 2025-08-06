@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Discover from "./pages/Discover";
 import RoastProfileDetails from "./pages/RoastProfileDetails";
 import NotFound from "./pages/NotFound";
+import Sitemap from "./pages/Sitemap";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
@@ -35,6 +36,7 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="/profile/:id" element={<RoastProfileDetails />} />
+                <Route path="/sitemap.xml" element={<Sitemap />} />
                 <Route path="/" element={<Index />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
