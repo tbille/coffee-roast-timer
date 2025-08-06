@@ -629,21 +629,21 @@ const RoastMonitor = ({
                         
                         {profile.farm_name && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold w-4">Farm:</span>
+                            <span className="font-semibold min-w-[60px]">Farm:</span>
                             <span>{profile.farm_name}</span>
                           </div>
                         )}
                         
                         {profile.roast_process && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold w-4">Process:</span>
+                            <span className="font-semibold min-w-[60px]">Process:</span>
                             <span>{profile.roast_process}</span>
                           </div>
                         )}
                         
                         {profile.coffee_roaster && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold w-4">Roaster:</span>
+                            <span className="font-semibold min-w-[60px]">Roaster:</span>
                             <span>{profile.coffee_roaster}</span>
                           </div>
                         )}
