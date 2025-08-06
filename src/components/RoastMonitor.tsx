@@ -600,83 +600,80 @@ const RoastMonitor = ({
                 </h3>
                 <div className="grid md:grid-cols-3 gap-6">
                   {latestProfiles.map((profile) => (
-                    <Card
-                      key={profile.id}
-                      className="cursor-pointer hover:shadow-lg transition-all duration-200 group shadow-coffee"
-                      onClick={() => navigate(`/profile/${profile.id}`)}
+              <Card 
+                key={profile.id} 
+                className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                onClick={() => navigate(`/profile/${profile.id}`)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                      {profile.beans_name}
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <ThumbsUp className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {formatDate(profile.created_at)}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.origin || "Unknown origin"}</span>
+                  </div>
+                  
+                  {profile.farm_name && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Farm:</strong> {profile.farm_name}
+                    </div>
+                  )}
+                  
+                  {profile.roast_process && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Process:</strong> {profile.roast_process}
+                    </div>
+                  )}
+                  
+                  {profile.coffee_roaster && (
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Roaster:</strong> {profile.coffee_roaster}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{formatTime(profile.duration_seconds)}</span>
+                    </div>
+                    {profile.initial_weight && profile.final_weight && (
+                      <div className="flex items-center gap-1">
+                        <Scale className="h-4 w-4" />
+                        <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="pt-2 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseAsReference(profile);
+                      }}
+                      className="w-full flex items-center gap-2 text-xs"
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                            {profile.beans_name}
-                          </CardTitle>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <ThumbsUp className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {formatDate(profile.created_at)}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span>{profile.origin || "Unknown origin"}</span>
-                        </div>
-                        
-                        {profile.farm_name && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold min-w-[60px]">Farm:</span>
-                            <span>{profile.farm_name}</span>
-                          </div>
-                        )}
-                        
-                        {profile.roast_process && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold min-w-[60px]">Process:</span>
-                            <span>{profile.roast_process}</span>
-                          </div>
-                        )}
-                        
-                        {profile.coffee_roaster && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-semibold min-w-[60px]">Roaster:</span>
-                            <span>{profile.coffee_roaster}</span>
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{formatTime(profile.duration_seconds)}</span>
-                          </div>
-                          {profile.initial_weight && profile.final_weight && (
-                            <div className="flex items-center gap-1">
-                              <Scale className="h-4 w-4" />
-                              <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="pt-2 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUseAsReference(profile);
-                            }}
-                            className="w-full flex items-center gap-2 text-xs"
-                          >
-                            <Copy className="h-3 w-3" />
-                            Use as Reference
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      <Copy className="h-3 w-3" />
+                      Use as Reference
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
                   ))}
                 </div>
               </div>
