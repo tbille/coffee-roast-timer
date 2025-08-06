@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search } from "lucide-react";
+import { Play, Pause, Square, LogOut, RotateCcw, Globe, Users, Search, MapPin, Clock, Scale, Copy, ThumbsUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SaveRoastDialog from "./SaveRoastDialog";
 import UserSettingsDialog from "./UserSettingsDialog";
@@ -23,6 +24,23 @@ interface CrackEvent {
   currentTemp: number;
   type: 'first' | 'second';
 }
+interface RoastProfile {
+  id: string;
+  user_id: string;
+  beans_name: string;
+  origin?: string;
+  farm_name?: string;
+  roast_process?: string;
+  coffee_roaster?: string;
+  initial_weight?: number;
+  final_weight?: number;
+  duration_seconds: number;
+  temperature_data: any;
+  crack_events: any;
+  created_at: string;
+  likes_count: number;
+}
+
 interface RoastMonitorProps {
   onBack?: () => void;
   referenceProfile?: {
@@ -46,6 +64,7 @@ const RoastMonitor = ({
   const {
     toast
   } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isRoasting, setIsRoasting] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -56,6 +75,7 @@ const RoastMonitor = ({
   const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
   const [referenceProfile, setReferenceProfile] = useState<RoastData[] | null>(null);
   const [referenceProfileName, setReferenceProfileName] = useState<string>("");
+  const [latestProfiles, setLatestProfiles] = useState<RoastProfile[]>([]);
   
 
   // Load reference profile if specified in URL or passed as prop
@@ -73,6 +93,45 @@ const RoastMonitor = ({
       });
     }
   }, [searchParams, passedReferenceProfile]);
+
+  // Fetch latest roast profiles
+  useEffect(() => {
+    fetchLatestProfiles();
+  }, []);
+
+  const fetchLatestProfiles = async () => {
+    try {
+      // Fetch latest 3 roast profiles with likes count
+      const { data: roastData, error: roastError } = await supabase
+        .from('roast_profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (roastError) throw roastError;
+
+      if (roastData) {
+        // Get likes count for each profile
+        const profilesWithLikes = await Promise.all(
+          roastData.map(async (profile) => {
+            const { count } = await supabase
+              .from('roast_profile_likes')
+              .select('*', { count: 'exact', head: true })
+              .eq('roast_profile_id', profile.id);
+            
+            return {
+              ...profile,
+              likes_count: count || 0
+            };
+          })
+        );
+
+        setLatestProfiles(profilesWithLikes);
+      }
+    } catch (error) {
+      console.error('Error fetching latest profiles:', error);
+    }
+  };
 
 
   // Load persisted roast state on component mount
@@ -209,6 +268,36 @@ const RoastMonitor = ({
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getWeightLoss = (initial?: number, final?: number): string => {
+    if (!initial || !final) return "N/A";
+    const loss = initial - final;
+    const percentage = (loss / initial) * 100;
+    return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
+  };
+
+  const handleUseAsReference = (profile: RoastProfile) => {
+    navigate('/', { 
+      state: { 
+        referenceProfile: {
+          beans_name: profile.beans_name,
+          origin: profile.origin,
+          farm_name: profile.farm_name,
+          roast_process: profile.roast_process,
+          initial_weight: profile.initial_weight,
+          temperature_data: profile.temperature_data
+        }
+      }
+    });
   };
 
   // Calculate development percentage
@@ -502,6 +591,92 @@ const RoastMonitor = ({
                 </Link>
               </Button>
             </div>
+
+            {/* Latest Roast Profiles */}
+            {latestProfiles.length > 0 && (
+              <div className="mt-12 max-w-6xl mx-auto">
+                <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
+                  Latest Community Roasts
+                </h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {latestProfiles.map((profile) => (
+                    <Card
+                      key={profile.id}
+                      className="cursor-pointer hover:shadow-lg transition-all duration-200 group shadow-coffee"
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                            {profile.beans_name}
+                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <ThumbsUp className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {formatDate(profile.created_at)}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span>{profile.origin || "Unknown origin"}</span>
+                        </div>
+                        
+                        {profile.farm_name && (
+                          <div className="text-sm text-muted-foreground">
+                            <strong>Farm:</strong> {profile.farm_name}
+                          </div>
+                        )}
+                        
+                        {profile.roast_process && (
+                          <div className="text-sm text-muted-foreground">
+                            <strong>Process:</strong> {profile.roast_process}
+                          </div>
+                        )}
+                        
+                        {profile.coffee_roaster && (
+                          <div className="text-sm text-muted-foreground">
+                            <strong>Roaster:</strong> {profile.coffee_roaster}
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{formatTime(profile.duration_seconds)}</span>
+                          </div>
+                          {profile.initial_weight && profile.final_weight && (
+                            <div className="flex items-center gap-1">
+                              <Scale className="h-4 w-4" />
+                              <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUseAsReference(profile);
+                            }}
+                            className="w-full flex items-center gap-2 text-xs"
+                          >
+                            <Copy className="h-3 w-3" />
+                            Use as Reference
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
