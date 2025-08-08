@@ -672,9 +672,6 @@ const RoastMonitor = ({
                         <ThumbsUp className="h-3 w-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        {formatDate(profile.created_at)}
-                      </Badge>
                     </div>
                   </div>
                 </CardHeader>
