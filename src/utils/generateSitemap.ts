@@ -8,7 +8,7 @@ interface SitemapUrl {
 }
 
 export async function generateSitemap(): Promise<string> {
-  const baseUrl = window.location.origin;
+  const baseUrl = "https://roast-timer.com";
   const urls: SitemapUrl[] = [];
 
   // Add static routes
