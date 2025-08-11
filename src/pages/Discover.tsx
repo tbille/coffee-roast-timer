@@ -11,7 +11,6 @@ import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp, Thermo
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
-
 interface RoastProfile {
   id: string;
   user_id: string;
@@ -29,42 +28,40 @@ interface RoastProfile {
   likes_count: number;
   temperature_unit?: string;
 }
-
 const Discover = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
-
   useEffect(() => {
     fetchProfiles();
     if (user) {
       fetchUserPreferences();
     }
   }, [user]);
-
   useEffect(() => {
     filterProfiles();
   }, [searchQuery, profiles]);
-
   const fetchUserPreferences = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('default_temperature_unit')
-        .eq('id', user?.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('default_temperature_unit').eq('id', user?.id).single();
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "not found"
         console.error('Error fetching user preferences:', error);
         return;
       }
-
       const defaultUnit = data?.default_temperature_unit || 'C';
       setUserDefaultUnit(defaultUnit as TemperatureUnit);
       setViewUnit(defaultUnit as TemperatureUnit);
@@ -72,33 +69,29 @@ const Discover = () => {
       console.error('Error fetching user preferences:', error);
     }
   };
-
   const fetchProfiles = async () => {
     try {
       // First fetch all roast profiles
-      const { data: roastData, error: roastError } = await supabase
-        .from('roast_profiles')
-        .select('*');
-
+      const {
+        data: roastData,
+        error: roastError
+      } = await supabase.from('roast_profiles').select('*');
       if (roastError) throw roastError;
 
       // Then fetch likes count for each profile
-      const profilesWithLikes = await Promise.all(
-        (roastData || []).map(async (profile) => {
-          const { data: likesData, error: likesError } = await supabase
-            .from('roast_profile_likes')
-            .select('id')
-            .eq('roast_profile_id', profile.id);
+      const profilesWithLikes = await Promise.all((roastData || []).map(async profile => {
+        const {
+          data: likesData,
+          error: likesError
+        } = await supabase.from('roast_profile_likes').select('id').eq('roast_profile_id', profile.id);
 
-          // Don't throw error if likes query fails, just set count to 0
-          const likes_count = likesError ? 0 : (likesData?.length || 0);
-
-          return {
-            ...profile,
-            likes_count
-          };
-        })
-      );
+        // Don't throw error if likes query fails, just set count to 0
+        const likes_count = likesError ? 0 : likesData?.length || 0;
+        return {
+          ...profile,
+          likes_count
+        };
+      }));
 
       // Sort by likes first (descending), then by date (newest first)
       const sortedProfiles = profilesWithLikes.sort((a, b) => {
@@ -107,7 +100,6 @@ const Discover = () => {
         }
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // Newer first
       });
-
       setProfiles(sortedProfiles);
     } catch (error) {
       console.error('Error fetching profiles:', error);
@@ -120,31 +112,20 @@ const Discover = () => {
       setLoading(false);
     }
   };
-
   const filterProfiles = () => {
     if (!searchQuery.trim()) {
       setFilteredProfiles(profiles);
       return;
     }
-
     const query = searchQuery.toLowerCase();
-    const filtered = profiles.filter(profile => 
-      profile.beans_name.toLowerCase().includes(query) ||
-      profile.origin?.toLowerCase().includes(query) ||
-      profile.farm_name?.toLowerCase().includes(query) ||
-      profile.roast_process?.toLowerCase().includes(query) ||
-      profile.coffee_roaster?.toLowerCase().includes(query)
-    );
-    
+    const filtered = profiles.filter(profile => profile.beans_name.toLowerCase().includes(query) || profile.origin?.toLowerCase().includes(query) || profile.farm_name?.toLowerCase().includes(query) || profile.roast_process?.toLowerCase().includes(query) || profile.coffee_roaster?.toLowerCase().includes(query));
     setFilteredProfiles(filtered);
   };
-
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
-
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -152,17 +133,15 @@ const Discover = () => {
       day: 'numeric'
     });
   };
-
   const getWeightLoss = (initial?: number, final?: number): string => {
     if (!initial || !final) return "N/A";
     const loss = initial - final;
-    const percentage = (loss / initial) * 100;
+    const percentage = loss / initial * 100;
     return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
   };
-
   const handleUseAsReference = (profile: RoastProfile) => {
-    navigate('/', { 
-      state: { 
+    navigate('/', {
+      state: {
         referenceProfile: {
           beans_name: profile.beans_name,
           origin: profile.origin,
@@ -174,10 +153,8 @@ const Discover = () => {
       }
     });
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
+    return <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
         <div className="container mx-auto max-w-6xl w-full">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -185,12 +162,9 @@ const Discover = () => {
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+  return <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
         <div className="mb-6">
@@ -207,36 +181,16 @@ const Discover = () => {
           <CardContent className="p-4 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by bean name, origin, farm, process, or roaster..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Search by bean name, origin, farm, process, or roaster..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
             {/* Temperature Unit Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Thermometer className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="view-temp-unit" className="text-sm">Temperature Unit</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
-                <Switch
-                  id="view-temp-unit"
-                  checked={viewUnit === 'F'}
-                  onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
-                />
-                <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
-              </div>
-            </div>
+            
           </CardContent>
         </Card>
 
         {/* Profiles Grid */}
-        {filteredProfiles.length === 0 ? (
-          <Card className="shadow-coffee">
+        {filteredProfiles.length === 0 ? <Card className="shadow-coffee">
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -244,27 +198,15 @@ const Discover = () => {
                   {searchQuery ? "No profiles found" : "No roast profiles yet"}
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  {searchQuery 
-                    ? "Try adjusting your search terms to find more profiles."
-                    : "Be the first to share a roast profile!"
-                  }
+                  {searchQuery ? "Try adjusting your search terms to find more profiles." : "Be the first to share a roast profile!"}
                 </p>
-                {searchQuery && (
-                  <Button variant="outline" onClick={() => setSearchQuery("")}>
+                {searchQuery && <Button variant="outline" onClick={() => setSearchQuery("")}>
                     Clear Search
-                  </Button>
-                )}
+                  </Button>}
               </div>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredProfiles.map((profile) => (
-              <Card 
-                key={profile.id} 
-                className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
-                onClick={() => navigate(`/profile/${profile.id}`)}
-              >
+          </Card> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {filteredProfiles.map(profile => <Card key={profile.id} className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => navigate(`/profile/${profile.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg group-hover:text-primary transition-colors">
@@ -275,9 +217,7 @@ const Discover = () => {
                         <ThumbsUp className="h-3 w-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        {formatDate(profile.created_at)}
-                      </Badge>
+                      
                     </div>
                   </div>
                 </CardHeader>
@@ -287,59 +227,42 @@ const Discover = () => {
                     <span>{profile.origin || "Unknown origin"}</span>
                   </div>
                   
-                  {profile.farm_name && (
-                    <div className="text-sm text-muted-foreground">
+                  {profile.farm_name && <div className="text-sm text-muted-foreground">
                       <strong>Farm:</strong> {profile.farm_name}
-                    </div>
-                  )}
+                    </div>}
                   
-                  {profile.roast_process && (
-                    <div className="text-sm text-muted-foreground">
+                  {profile.roast_process && <div className="text-sm text-muted-foreground">
                       <strong>Process:</strong> {profile.roast_process}
-                    </div>
-                  )}
+                    </div>}
                   
-                  {profile.coffee_roaster && (
-                    <div className="text-sm text-muted-foreground">
+                  {profile.coffee_roaster && <div className="text-sm text-muted-foreground">
                       <strong>Roaster:</strong> {profile.coffee_roaster}
-                    </div>
-                  )}
+                    </div>}
                   
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       <span>{formatTime(profile.duration_seconds)}</span>
                     </div>
-                    {profile.initial_weight && profile.final_weight && (
-                      <div className="flex items-center gap-1">
+                    {profile.initial_weight && profile.final_weight && <div className="flex items-center gap-1">
                         <Scale className="h-4 w-4" />
                         <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
-                      </div>
-                    )}
+                      </div>}
                   </div>
                   
                   <div className="pt-2 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUseAsReference(profile);
-                      }}
-                      className="w-full flex items-center gap-2 text-xs"
-                    >
+                    <Button variant="outline" size="sm" onClick={e => {
+                e.stopPropagation();
+                handleUseAsReference(profile);
+              }} className="w-full flex items-center gap-2 text-xs">
                       <Copy className="h-3 w-3" />
                       Use as Reference
                     </Button>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+              </Card>)}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Discover;
