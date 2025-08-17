@@ -26,9 +26,9 @@ All colors MUST be HSL for consistency.
     --secondary: 35 80% 85%;
     --secondary-foreground: 25 45% 25%;
 
-    /* Subtle coffee tones */
-    --muted: 35 20% 90%;
-    --muted-foreground: 25 20% 50%;
+    /* Subtle coffee tones - improved contrast */
+    --muted: 35 25% 88%;
+    --muted-foreground: 25 25% 45%;
 
     /* Golden accent */
     --accent: 45 85% 75%;

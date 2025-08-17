@@ -590,6 +590,7 @@ const RoastProfileDetails = () => {
               onClick={handleLikeClick}
               disabled={likeMutation.isPending}
               className="flex items-center gap-2 text-xs sm:text-sm"
+              aria-label={likesData?.userHasLiked ? `Unlike this roast profile (${likesData?.count || 0} likes)` : `Like this roast profile (${likesData?.count || 0} likes)`}
             >
               <ThumbsUp className={`h-3 w-3 sm:h-4 sm:w-4 ${likesData?.userHasLiked ? 'fill-current' : ''}`} />
               {likesData?.count || 0}
@@ -598,6 +599,7 @@ const RoastProfileDetails = () => {
               variant="outline"
               onClick={handleShare}
               className="flex items-center gap-2 text-xs sm:text-sm"
+              aria-label="Share this roast profile"
             >
               <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
               Share
@@ -606,6 +608,7 @@ const RoastProfileDetails = () => {
               variant="outline"
               onClick={handleUseAsReference}
               className="flex items-center gap-2 text-xs sm:text-sm"
+              aria-label="Use this roast profile as reference for a new roast"
             >
               <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
               Use as Reference
@@ -622,13 +625,14 @@ const RoastProfileDetails = () => {
             {/* Profile Metadata */}
             <Card className="shadow-coffee">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Roast Details</CardTitle>
+                <CardTitle as="h2">Roast Details</CardTitle>
                 {isOwner && !isEditingMetadata ? (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditingMetadata(true)}
                     className="flex items-center gap-2"
+                    aria-label="Edit roast details"
                   >
                     <Edit className="h-4 w-4" />
                     Edit
@@ -641,6 +645,7 @@ const RoastProfileDetails = () => {
                       onClick={handleSaveMetadata}
                       disabled={savingMetadata}
                       className="flex items-center gap-2"
+                      aria-label="Save roast details"
                     >
                       <Save className="h-4 w-4" />
                       {savingMetadata ? "Saving..." : "Save"}
@@ -661,6 +666,7 @@ const RoastProfileDetails = () => {
                         });
                       }}
                       className="flex items-center gap-2"
+                      aria-label="Cancel editing roast details"
                     >
                       <X className="h-4 w-4" />
                       Cancel
@@ -795,7 +801,7 @@ const RoastProfileDetails = () => {
             {/* Bean Development */}
             <Card className="shadow-coffee">
               <CardHeader>
-                <CardTitle>Bean Development</CardTitle>
+                <CardTitle as="h2">Bean Development</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center">
@@ -826,18 +832,19 @@ const RoastProfileDetails = () => {
             {/* Temperature Graph */}
             <Card className="shadow-coffee">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Temperature Profile</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Thermometer className="h-4 w-4 text-muted-foreground" />
+                <CardTitle as="h2">Temperature Profile</CardTitle>
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
-                    <Switch
-                      checked={viewUnit === 'F'}
-                      onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
-                    />
-                    <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                    <Thermometer className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                      <Switch
+                        checked={viewUnit === 'F'}
+                        onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
+                        aria-label="Toggle temperature unit between Celsius and Fahrenheit"
+                      />
+                      <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                    </div>
                   </div>
-                </div>
               </CardHeader>
               <CardContent>
                 {profile.temperature_data && profile.temperature_data.length > 0 ? (
@@ -936,13 +943,14 @@ const RoastProfileDetails = () => {
             {/* Notes Section */}
             <Card className="shadow-coffee">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Notes</CardTitle>
+                <CardTitle as="h2">Notes</CardTitle>
                 {isOwner && !isEditingNotes ? (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditingNotes(true)}
                     className="flex items-center gap-2"
+                    aria-label="Edit roast notes"
                   >
                     <Edit className="h-4 w-4" />
                     Edit
@@ -955,6 +963,7 @@ const RoastProfileDetails = () => {
                       onClick={handleSaveNotes}
                       disabled={savingNotes}
                       className="flex items-center gap-2"
+                      aria-label="Save roast notes"
                     >
                       <Save className="h-4 w-4" />
                       {savingNotes ? "Saving..." : "Save"}
@@ -967,6 +976,7 @@ const RoastProfileDetails = () => {
                         setNotes(profile.notes || "");
                       }}
                       className="flex items-center gap-2"
+                      aria-label="Cancel editing roast notes"
                     >
                       <X className="h-4 w-4" />
                       Cancel
@@ -1009,10 +1019,17 @@ const RoastProfileDetails = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button variant="outline" onClick={() => setShowAuthDialog(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAuthDialog(false)}
+              aria-label="Cancel sign in dialog"
+            >
               Cancel
             </Button>
-            <AlertDialogAction onClick={() => navigate('/auth')}>
+            <AlertDialogAction 
+              onClick={() => navigate('/auth')}
+              aria-label="Go to sign in page"
+            >
               Sign in / Create Account
             </AlertDialogAction>
           </AlertDialogFooter>
