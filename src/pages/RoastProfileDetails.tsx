@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -386,6 +387,59 @@ const RoastProfileDetails = () => {
     return ((profile.initial_weight - profile.final_weight) / profile.initial_weight * 100);
   };
 
+  const generatePageTitle = (): string => {
+    if (!profile) return 'Coffee Roast Profile';
+    
+    const beansName = profile.beans_name;
+    const username = profile.profiles?.username;
+    
+    if (username) {
+      return `${beansName} - Coffee Roast by ${username}`;
+    }
+    
+    return `${beansName} - Coffee Roast Profile`;
+  };
+
+  const generatePageDescription = (): string => {
+    if (!profile) return 'View detailed coffee roast profile with temperature curves and tasting notes.';
+    
+    const parts = [];
+    
+    // Start with "Roast of [beans_name]"
+    parts.push(`Roast of ${profile.beans_name}`);
+    
+    // Add origin if available
+    if (profile.origin) {
+      parts.push(`from ${profile.origin}`);
+    }
+    
+    // Add farm if available
+    if (profile.farm_name) {
+      parts.push(`from ${profile.farm_name} farm`);
+    }
+    
+    // Add username if available
+    if (profile.profiles?.username) {
+      parts.push(`by ${profile.profiles.username}`);
+    }
+    
+    let description = parts.join(' ');
+    
+    // Add additional context
+    if (profile.roast_process) {
+      description += `. ${profile.roast_process} process`;
+    }
+    
+    description += '. View temperature curves, development data, and tasting notes.';
+    
+    // Keep under 160 characters for SEO
+    if (description.length > 160) {
+      description = description.substring(0, 157) + '...';
+    }
+    
+    return description;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4">
@@ -416,8 +470,21 @@ const RoastProfileDetails = () => {
   }
 
   return (
-    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
-      <div className="container mx-auto max-w-6xl w-full">
+    <>
+      <Helmet>
+        <title>{generatePageTitle()}</title>
+        <meta name="description" content={generatePageDescription()} />
+        <meta property="og:title" content={generatePageTitle()} />
+        <meta property="og:description" content={generatePageDescription()} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={generatePageTitle()} />
+        <meta name="twitter:description" content={generatePageDescription()} />
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
+      
+      <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+        <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -864,7 +931,8 @@ const RoastProfileDetails = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </>
   );
 };
 
