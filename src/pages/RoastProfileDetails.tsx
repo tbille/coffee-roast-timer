@@ -469,18 +469,105 @@ const RoastProfileDetails = () => {
     );
   }
 
+  const generateJsonLd = () => {
+    if (!profile) return null;
+    
+    return {
+      "@context": "https://schema.org",
+      "@type": "Recipe",
+      "name": profile.beans_name,
+      "description": generatePageDescription(),
+      "author": {
+        "@type": "Person",
+        "name": profile.profiles?.username || "Coffee Roaster"
+      },
+      "datePublished": profile.created_at,
+      "dateModified": profile.created_at,
+      "recipeCategory": "Coffee Roasting",
+      "cookingMethod": "Coffee Roasting",
+      "recipeCuisine": "Coffee",
+      "keywords": [
+        "coffee roasting",
+        "coffee profile",
+        profile.beans_name,
+        profile.origin,
+        profile.farm_name,
+        "temperature curve"
+      ].filter(Boolean).join(", "),
+      "recipeIngredient": [
+        `${profile.initial_weight ? `${profile.initial_weight}g` : ''} ${profile.beans_name} coffee beans`,
+        profile.origin && `Origin: ${profile.origin}`,
+        profile.farm_name && `Farm: ${profile.farm_name}`
+      ].filter(Boolean),
+      "recipeInstructions": {
+        "@type": "HowToStep",
+        "text": `Roast ${profile.beans_name} beans for ${Math.floor(profile.duration_seconds / 60)} minutes following the temperature curve profile.`
+      },
+      "totalTime": `PT${Math.floor(profile.duration_seconds / 60)}M`,
+      "recipeYield": profile.final_weight ? `${profile.final_weight}g roasted coffee` : "Roasted coffee beans",
+      "aggregateRating": likesData?.count ? {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": likesData.count.toString()
+      } : undefined
+    };
+  };
+
   return (
     <>
       <Helmet>
         <title>{generatePageTitle()}</title>
         <meta name="description" content={generatePageDescription()} />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content={profile?.profiles?.username || 'Coffee Roaster'} />
+        <meta name="keywords" content={[
+          'coffee roasting',
+          'coffee profile', 
+          profile?.beans_name,
+          profile?.origin,
+          profile?.farm_name,
+          'temperature curve',
+          'coffee development',
+          'roast analysis'
+        ].filter(Boolean).join(', ')} />
+        
+        {/* Open Graph tags */}
         <meta property="og:title" content={generatePageTitle()} />
         <meta property="og:description" content={generatePageDescription()} />
         <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:site_name" content="Roast Timer - Coffee Roasting Profiles" />
+        <meta property="og:locale" content="en_US" />
+        
+        {/* Article-specific Open Graph */}
+        {profile?.created_at && (
+          <>
+            <meta property="article:published_time" content={profile.created_at} />
+            <meta property="article:modified_time" content={profile.created_at} />
+          </>
+        )}
+        {profile?.profiles?.username && (
+          <meta property="article:author" content={profile.profiles.username} />
+        )}
+        <meta property="article:section" content="Coffee Roasting" />
+        <meta property="article:tag" content="coffee roasting" />
+        {profile?.origin && <meta property="article:tag" content={profile.origin} />}
+        
+        {/* Twitter Cards */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@roasttimer" />
         <meta name="twitter:title" content={generatePageTitle()} />
         <meta name="twitter:description" content={generatePageDescription()} />
+        
+        {/* Canonical URL */}
         <link rel="canonical" href={window.location.href} />
+        
+        {/* JSON-LD Structured Data */}
+        {profile && (
+          <script type="application/ld+json">
+            {JSON.stringify(generateJsonLd())}
+          </script>
+        )}
       </Helmet>
       
       <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
