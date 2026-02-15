@@ -30,6 +30,10 @@ interface Profile {
   coffee_roaster?: string;
   created_at: string;
   duration_seconds: number;
+  user_id: string;
+  profiles?: {
+    username?: string;
+  };
 }
 
 interface ProfileSelectorProps {
@@ -60,7 +64,7 @@ export const ProfileSelector = ({
     if (open) {
       fetchProfiles();
     }
-  }, [open, user]);
+  }, [open]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -72,21 +76,20 @@ export const ProfileSelector = ({
           (p) =>
             p.beans_name.toLowerCase().includes(query) ||
             p.origin?.toLowerCase().includes(query) ||
-            p.coffee_roaster?.toLowerCase().includes(query)
+            p.coffee_roaster?.toLowerCase().includes(query) ||
+            p.profiles?.username?.toLowerCase().includes(query)
         )
       );
     }
   }, [searchQuery, profiles]);
 
   const fetchProfiles = async () => {
-    if (!user) return;
     setLoading(true);
 
     try {
       const { data, error } = await supabase
         .from('roast_profiles')
-        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds')
-        .eq('user_id', user.id)
+        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds, user_id, profiles(username)')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -163,7 +166,7 @@ export const ProfileSelector = ({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search by beans, origin, or coffee roaster..."
+          placeholder="Search by beans, origin, roaster, or user..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9 pr-9"
@@ -209,6 +212,9 @@ export const ProfileSelector = ({
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm truncate">{profile.beans_name}</h4>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                        {profile.profiles?.username && (
+                          <span className="font-medium">by {profile.profiles.username}</span>
+                        )}
                         {profile.origin && <span>{profile.origin}</span>}
                         {profile.coffee_roaster && <span>{profile.coffee_roaster}</span>}
                         <span>{formatDuration(profile.duration_seconds)}</span>
@@ -251,7 +257,7 @@ export const ProfileSelector = ({
           <DialogHeader>
             <DialogTitle>Select Profiles to Compare</DialogTitle>
             <DialogDescription>
-              Choose up to 2 profiles to compare side by side.
+              Choose up to 2 profiles from any user to compare side by side.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-hidden">{content}</div>
@@ -266,7 +272,7 @@ export const ProfileSelector = ({
         <DrawerHeader>
           <DrawerTitle>Select Profiles to Compare</DrawerTitle>
           <DrawerDescription>
-            Choose up to 2 profiles to compare side by side.
+            Choose up to 2 profiles from any user to compare side by side.
           </DrawerDescription>
         </DrawerHeader>
         <div className="px-4 flex-1 overflow-hidden pb-4">{content}</div>
