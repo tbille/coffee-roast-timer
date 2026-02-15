@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2, Thermometer } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2, Thermometer, GitCompare } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
 import { useAuth } from "@/hooks/useAuth";
@@ -617,6 +617,17 @@ const RoastProfileDetails = () => {
               <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
               Use as Reference
             </Button>
+            {isOwner && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/compare?ids=${id}`)}
+                className="flex items-center gap-2 text-xs sm:text-sm"
+                aria-label="Compare this profile with others"
+              >
+                <GitCompare className="h-3 w-3 sm:h-4 sm:w-4" />
+                Compare
+              </Button>
+            )}
             <Badge variant="secondary" className="text-xs">
               {formatDate(profile.created_at)}
             </Badge>

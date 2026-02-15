@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2, Settings } from "lucide-react";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2, Settings, GitCompare } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UserSettingsDialog from "@/components/UserSettingsDialog";
 interface RoastProfile {
@@ -121,10 +121,21 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">My Roast Profiles</h1>
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-center items-center gap-4 mt-2">
             <Badge variant="secondary" className="text-xs">
               {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
             </Badge>
+            {profiles.length >= 2 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/compare')}
+                className="flex items-center gap-2"
+              >
+                <GitCompare className="h-4 w-4" />
+                Compare Profiles
+              </Button>
+            )}
           </div>
         </div>
 

@@ -19,6 +19,7 @@ import Footer from "@/components/Footer";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Discover = lazy(() => import("./pages/Discover"));
 const RoastProfileDetails = lazy(() => import("./pages/RoastProfileDetails"));
+const ComparisonPage = lazy(() => import("./components/comparison/ComparisonPage").then(m => ({ default: m.ComparisonPage })));
 
 // Simple loading component
 const PageLoader = () => (
@@ -58,6 +59,13 @@ const App = () => (
                   <Suspense fallback={<PageLoader />}>
                     <RoastProfileDetails />
                   </Suspense>
+                } />
+                <Route path="/compare" element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <ComparisonPage />
+                    </Suspense>
+                  </ProtectedRoute>
                 } />
                 <Route path="/about" element={<About />} />
                 <Route path="/sitemap.xml" element={<Sitemap />} />
