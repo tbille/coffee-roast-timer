@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { CuppingNotesCard } from "@/components/cupping/CuppingNotesCard";
+import { CuppingNotesForm } from "@/components/cupping/CuppingNotesForm";
 
 interface RoastData {
   time: number;
@@ -77,6 +79,7 @@ const RoastProfileDetails = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
+  const [showCuppingForm, setShowCuppingForm] = useState(false);
 
   // Fetch likes count and user's like status
   const { data: likesData } = useQuery({
@@ -1005,9 +1008,25 @@ const RoastProfileDetails = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Cupping & Tasting Notes */}
+            <CuppingNotesCard 
+              profile={profile}
+              onEdit={() => setShowCuppingForm(true)}
+              isOwner={isOwner}
+            />
           </div>
         </div>
       </div>
+
+      {/* Cupping Notes Form Dialog/Sheet */}
+      {isOwner && (
+        <CuppingNotesForm
+          profile={profile}
+          open={showCuppingForm}
+          onOpenChange={setShowCuppingForm}
+        />
+      )}
       
       {/* Auth Dialog for Guest Users */}
       <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
