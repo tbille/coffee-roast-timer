@@ -51,6 +51,7 @@ interface RoastProfile {
   };
   coffee_roaster?: string;
   temperature_unit?: TemperatureUnit;
+  environmental_notes?: string;
 }
 
 const RoastProfileDetails = () => {
@@ -1020,6 +1021,18 @@ const RoastProfileDetails = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Environmental Notes */}
+            {profile.environmental_notes && (
+              <Card className="shadow-coffee">
+                <CardHeader>
+                  <CardTitle as="h2">Environmental Conditions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm whitespace-pre-wrap">{profile.environmental_notes}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Cupping & Tasting Notes */}
             <CuppingNotesCard 

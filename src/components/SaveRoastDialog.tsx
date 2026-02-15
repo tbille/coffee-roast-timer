@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -49,7 +50,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled = false
     initialWeight: "",
     finalWeight: "",
     roastProcess: "",
-    coffeeRoaster: ""
+    coffeeRoaster: "",
+    environmentalNotes: ""
   });
 
   const handleSave = async () => {
@@ -88,7 +90,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled = false
           duration_seconds: elapsedTime,
           temperature_data: roastData as any,
           crack_events: crackEvents as any,
-          temperature_unit: temperatureUnit
+          temperature_unit: temperatureUnit,
+          environmental_notes: formData.environmentalNotes.trim() || null
         });
 
       if (error) throw error;
@@ -109,7 +112,8 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled = false
         initialWeight: "",
         finalWeight: "",
         roastProcess: "",
-        coffeeRoaster: ""
+        coffeeRoaster: "",
+        environmentalNotes: ""
       });
     } catch (error) {
       console.error('Error saving roast profile:', error);
@@ -216,6 +220,21 @@ const SaveRoastDialog = ({ elapsedTime, roastData, crackEvents, disabled = false
                 onChange={(e) => setFormData(prev => ({ ...prev, coffeeRoaster: e.target.value }))}
                 placeholder="e.g., Gene CBR-101, Behmor 1600+"
               />
+            </div>
+            
+            <div>
+              <Label htmlFor="environmental-notes">Environmental Notes</Label>
+              <Textarea
+                id="environmental-notes"
+                value={formData.environmentalNotes}
+                onChange={(e) => setFormData(prev => ({ ...prev, environmentalNotes: e.target.value }))}
+                placeholder="e.g., Room temp 72°F, 45% humidity, windy day"
+                rows={3}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Optional: Record environmental conditions during the roast
+              </p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
