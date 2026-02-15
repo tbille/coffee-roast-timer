@@ -27,7 +27,7 @@ interface Profile {
   id: string;
   beans_name: string;
   origin?: string;
-  roaster?: string;
+  coffee_roaster?: string;
   created_at: string;
   duration_seconds: number;
 }
@@ -72,7 +72,7 @@ export const ProfileSelector = ({
           (p) =>
             p.beans_name.toLowerCase().includes(query) ||
             p.origin?.toLowerCase().includes(query) ||
-            p.roaster?.toLowerCase().includes(query)
+            p.coffee_roaster?.toLowerCase().includes(query)
         )
       );
     }
@@ -85,11 +85,16 @@ export const ProfileSelector = ({
     try {
       const { data, error } = await supabase
         .from('roast_profiles')
-        .select('id, beans_name, origin, roaster, created_at, duration_seconds')
+        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error fetching profiles:', error);
+        throw error;
+      }
+
+      console.log('Fetched profiles for selector:', data?.length || 0);
 
       // Filter out excluded profile if provided
       const filtered = excludeId
@@ -100,9 +105,10 @@ export const ProfileSelector = ({
       setFilteredProfiles(filtered);
     } catch (error) {
       console.error('Error fetching profiles:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: 'Error',
-        description: 'Failed to load profiles.',
+        description: `Failed to load profiles: ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {
@@ -157,7 +163,7 @@ export const ProfileSelector = ({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search by beans, origin, or roaster..."
+          placeholder="Search by beans, origin, or coffee roaster..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9 pr-9"
@@ -204,7 +210,7 @@ export const ProfileSelector = ({
                       <h4 className="font-semibold text-sm truncate">{profile.beans_name}</h4>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
                         {profile.origin && <span>{profile.origin}</span>}
-                        {profile.roaster && <span>{profile.roaster}</span>}
+                        {profile.coffee_roaster && <span>{profile.coffee_roaster}</span>}
                         <span>{formatDuration(profile.duration_seconds)}</span>
                         <span>{formatDate(profile.created_at)}</span>
                       </div>
