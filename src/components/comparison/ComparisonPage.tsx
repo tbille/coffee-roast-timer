@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useProfileComparison } from '@/hooks/useProfileComparison';
-import { calculateProfileStatistics } from '@/utils/roastStatistics';
 import { ProfileCard } from './ProfileCard';
 import { ComparisonChart } from './ComparisonChart';
 import { ComparisonStats } from './ComparisonStats';
 import { ProfileSelector } from './ProfileSelector';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const ComparisonPage = () => {
@@ -61,11 +60,12 @@ export const ComparisonPage = () => {
   }
 
   if (error) {
+    console.error('Profile comparison error:', error);
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <Alert variant="destructive">
           <AlertDescription>
-            Failed to load profiles for comparison. Please try again.
+            Failed to load profiles for comparison: {error instanceof Error ? error.message : 'Unknown error'}
           </AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/dashboard')} className="mt-4">
@@ -76,12 +76,12 @@ export const ComparisonPage = () => {
     );
   }
 
-  const profile1 = profiles?.[0];
-  const profile2 = profiles?.[1];
+  const comparisonProfile1 = profiles?.[0];
+  const comparisonProfile2 = profiles?.[1];
 
-  // Calculate statistics for both profiles
-  const stats1 = profile1 ? calculateProfileStatistics(profile1) : null;
-  const stats2 = profile2 ? calculateProfileStatistics(profile2) : null;
+  // Extract statistics from comparison profiles
+  const stats1 = comparisonProfile1?.statistics || null;
+  const stats2 = comparisonProfile2?.statistics || null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -121,33 +121,19 @@ export const ComparisonPage = () => {
         <>
           {/* Profile Cards - Responsive Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {profile1 && (
-              <div className="relative">
-                <ProfileCard profile={profile1} colorIndex={0} />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8"
-                  onClick={() => handleRemoveProfile(profile1.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+            {comparisonProfile1 && (
+              <ProfileCard 
+                comparisonProfile={comparisonProfile1} 
+                onRemove={() => handleRemoveProfile(comparisonProfile1.profile.id)}
+              />
             )}
-            {profile2 && (
-              <div className="relative">
-                <ProfileCard profile={profile2} colorIndex={1} />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8"
-                  onClick={() => handleRemoveProfile(profile2.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+            {comparisonProfile2 && (
+              <ProfileCard 
+                comparisonProfile={comparisonProfile2} 
+                onRemove={() => handleRemoveProfile(comparisonProfile2.profile.id)}
+              />
             )}
-            {profile1 && !profile2 && (
+            {comparisonProfile1 && !comparisonProfile2 && (
               <Button
                 variant="outline"
                 className="h-full min-h-[200px] border-dashed"
@@ -160,7 +146,7 @@ export const ComparisonPage = () => {
           </div>
 
           {/* Temperature Chart */}
-          {profile1 && (
+          {comparisonProfile1 && (
             <div className="mb-6">
               <ComparisonChart profiles={profiles || []} />
             </div>
@@ -170,7 +156,7 @@ export const ComparisonPage = () => {
           {stats1 && (
             <ComparisonStats
               stats={[stats1, stats2]}
-              profileNames={[profile1?.beans_name || 'Profile 1', profile2?.beans_name || null]}
+              profileNames={[comparisonProfile1?.profile.beans_name || 'Profile 1', comparisonProfile2?.profile.beans_name || null]}
             />
           )}
         </>

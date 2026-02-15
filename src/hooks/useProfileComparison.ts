@@ -14,11 +14,19 @@ export function useProfileComparison(profileIds: string[]) {
 
       const { data, error } = await supabase
         .from('roast_profiles')
-        .select('*, profiles(username)')
+        .select('*')
         .in('id', profileIds)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('No profiles found for IDs:', profileIds);
+        return [];
+      }
 
       return (data || []).map((profile: any, index) => {
         // Parse JSON fields
