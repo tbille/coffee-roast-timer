@@ -19,7 +19,7 @@ export interface RoastStatistics {
   firstCrackTemp?: number;
   secondCrackTime?: number;
   secondCrackTemp?: number;
-  finalTemp: number;
+  finalTemp: number | null;
   weightLossPercent?: number;
   developmentTime?: number;
   developmentRatio?: number;
@@ -34,7 +34,9 @@ export const calculateRoastStatistics = (
 ): RoastStatistics => {
   const firstCrack = crackEvents.find((c) => c.type === 'first');
   const secondCrack = crackEvents.find((c) => c.type === 'second');
-  const finalTemp = temperatureData[temperatureData.length - 1]?.currentTemp || 0;
+  const finalTemp = temperatureData.length > 0 
+    ? temperatureData[temperatureData.length - 1]?.currentTemp ?? null
+    : null;
 
   const developmentTime = firstCrack
     ? durationSeconds - firstCrack.time
@@ -72,7 +74,8 @@ export const formatPercentage = (value?: number): string => {
   return value !== undefined ? `${value.toFixed(1)}%` : 'N/A';
 };
 
-export const formatTemperature = (temp: number, decimals: number = 1): string => {
+export const formatTemperature = (temp: number | null | undefined, decimals: number = 1): string => {
+  if (temp === null || temp === undefined) return 'N/A';
   return `${temp.toFixed(decimals)}°`;
 };
 

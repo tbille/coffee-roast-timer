@@ -62,10 +62,14 @@ export const ComparisonStats = ({ stats, profileNames }: ComparisonStatsProps) =
     },
     {
       label: 'Final Temperature',
-      value1: formatTemperature(stats1.finalTemp),
-      value2: stats2 ? formatTemperature(stats2.finalTemp) : null,
-      diff: stats2 ? calculateDiff(stats1.finalTemp, stats2.finalTemp) + '°' : undefined,
-      isDifferent: stats2 ? Math.abs(stats1.finalTemp - stats2.finalTemp) > 5 : false,
+      value1: stats1.finalTemp ? formatTemperature(stats1.finalTemp) : 'N/A',
+      value2: stats2 && stats2.finalTemp ? formatTemperature(stats2.finalTemp) : stats2 ? 'N/A' : null,
+      diff: stats2 && stats1.finalTemp && stats2.finalTemp 
+        ? calculateDiff(stats1.finalTemp, stats2.finalTemp) + '°' 
+        : undefined,
+      isDifferent: stats2 && stats1.finalTemp && stats2.finalTemp 
+        ? Math.abs(stats1.finalTemp - stats2.finalTemp) > 5 
+        : false,
     },
     {
       label: 'Development Time',
