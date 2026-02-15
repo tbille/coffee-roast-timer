@@ -18,16 +18,16 @@ ADD COLUMN IF NOT EXISTS environmental_notes TEXT;
 CREATE INDEX IF NOT EXISTS idx_roast_profiles_flavor_tags 
 ON roast_profiles USING GIN (flavor_tags);
 
--- Create storage bucket for roast photos
+-- Create storage bucket for roast photos (PUBLIC access)
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
 VALUES (
   'roast-photos', 
   'roast-photos', 
-  true,
+  true,  -- IMPORTANT: Must be true for public read access
   5242880,
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = true;
 
 -- RLS Policies for storage bucket
 DROP POLICY IF EXISTS "Anyone can view roast photos" ON storage.objects;
