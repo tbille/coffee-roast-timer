@@ -70,10 +70,22 @@ export function CuppingNotesCard({ profile, onEdit, isOwner }: CuppingNotesCardP
         {/* Photo */}
         {profile.roasted_bean_photo_url && (
           <div className="relative">
+            {console.log('Photo URL:', profile.roasted_bean_photo_url)}
             <img
               src={profile.roasted_bean_photo_url}
               alt="Roasted beans"
               className="w-full max-w-md rounded-lg border"
+              onError={(e) => {
+                console.error('Failed to load image:', profile.roasted_bean_photo_url);
+                // Show error message instead of broken image
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.innerHTML = `<div class="text-sm text-red-600 p-4 border border-red-300 rounded-lg">Failed to load photo. URL: ${profile.roasted_bean_photo_url}</div>`;
+                }
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully:', profile.roasted_bean_photo_url);
+              }}
             />
           </div>
         )}
