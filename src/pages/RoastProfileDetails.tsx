@@ -50,7 +50,7 @@ interface RoastProfile {
     username?: string;
   };
   coffee_roaster?: string;
-  temperature_unit?: string;
+  temperature_unit?: TemperatureUnit;
 }
 
 const RoastProfileDetails = () => {
@@ -207,7 +207,8 @@ const RoastProfileDetails = () => {
         ...roastData,
         temperature_data: Array.isArray(roastData.temperature_data) ? roastData.temperature_data as unknown as RoastData[] : [],
         crack_events: Array.isArray(roastData.crack_events) ? roastData.crack_events as unknown as CrackEvent[] : [],
-        profiles: profileData ? { username: profileData.username } : undefined
+        profiles: profileData ? { username: profileData.username } : undefined,
+        temperature_unit: (roastData.temperature_unit || 'C') as TemperatureUnit
       };
       
       setProfile(processedProfile);

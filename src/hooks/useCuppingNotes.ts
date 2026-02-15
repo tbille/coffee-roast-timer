@@ -31,7 +31,7 @@ export function useUpdateCuppingNotes(profileId: string) {
       
       const { data, error } = await supabase
         .from('roast_profiles')
-        .update(cuppingNotes)
+        .update(cuppingNotes as any)
         .eq('id', profileId)
         .select()
         .single();
