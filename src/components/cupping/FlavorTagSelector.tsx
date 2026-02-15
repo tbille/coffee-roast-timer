@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -79,34 +79,36 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
-          <Command>
+          <Command className="overflow-hidden">
             <CommandInput
               placeholder="Search flavors..."
               value={search}
               onValueChange={setSearch}
             />
-            <CommandEmpty>No flavors found.</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {filtered.map((tag) => {
-                const isSelected = selected.includes(tag);
-                return (
-                  <CommandItem
-                    key={tag}
-                    onSelect={() => toggleTag(tag)}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <div 
-                      className={`h-4 w-4 border rounded flex items-center justify-center ${
-                        isSelected ? 'bg-primary border-primary' : 'border-gray-300'
-                      }`}
+            <CommandList className="max-h-64">
+              <CommandEmpty>No flavors found.</CommandEmpty>
+              <CommandGroup>
+                {filtered.map((tag) => {
+                  const isSelected = selected.includes(tag);
+                  return (
+                    <CommandItem
+                      key={tag}
+                      onSelect={() => toggleTag(tag)}
+                      className="flex items-center gap-2 cursor-pointer"
                     >
-                      {isSelected && <Check className="h-3 w-3 text-white" />}
-                    </div>
-                    {tag}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+                      <div 
+                        className={`h-4 w-4 border rounded flex items-center justify-center ${
+                          isSelected ? 'bg-primary border-primary' : 'border-gray-300'
+                        }`}
+                      >
+                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                      </div>
+                      {tag}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
