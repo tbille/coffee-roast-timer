@@ -87,22 +87,57 @@ export const ProfileSelector = ({
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
+      // First, fetch roast profiles
+      const { data: roastData, error: roastError } = await supabase
         .from('roast_profiles')
-        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds, user_id, profiles(username)')
+        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds, user_id')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Supabase error fetching profiles:', error);
-        throw error;
+      if (roastError) {
+        console.error('Supabase error fetching profiles:', roastError);
+        throw roastError;
       }
 
-      console.log('Fetched profiles for selector:', data?.length || 0);
+      console.log('Fetched roast profiles:', roastData?.length || 0);
+
+      if (!roastData || roastData.length === 0) {
+        setProfiles([]);
+        setFilteredProfiles([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(roastData.map(p => p.user_id))];
+      
+      // Fetch usernames for those users
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.warn('Could not fetch usernames:', profilesError);
+        // Continue without usernames
+      }
+
+      // Create a map of user_id to username
+      const usernameMap = new Map(
+        (profilesData || []).map(p => [p.id, p.username])
+      );
+
+      // Combine the data
+      const combined = roastData.map(profile => ({
+        ...profile,
+        profiles: {
+          username: usernameMap.get(profile.user_id)
+        }
+      }));
 
       // Filter out excluded profile if provided
       const filtered = excludeId
-        ? (data || []).filter((p) => p.id !== excludeId)
-        : data || [];
+        ? combined.filter((p) => p.id !== excludeId)
+        : combined;
 
       setProfiles(filtered);
       setFilteredProfiles(filtered);
