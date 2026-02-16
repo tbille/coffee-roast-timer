@@ -62,7 +62,7 @@ export function RoasterSelectorCTA() {
           value={selectedRoaster}
           onValueChange={(value) => setSelectedRoaster(value as RoasterType)}
         >
-          <SelectTrigger className="w-full h-16 text-base">
+          <SelectTrigger className="w-full h-14 text-base">
             <SelectValue placeholder="Choose your coffee roaster..." />
           </SelectTrigger>
           <SelectContent>
@@ -82,7 +82,7 @@ export function RoasterSelectorCTA() {
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
           size="lg"
-          className="flex-1 h-16 text-base font-semibold"
+          className="flex-1 h-14 text-base font-semibold"
           onClick={handleStartRoasting}
           disabled={!selectedRoaster}
         >
@@ -92,7 +92,7 @@ export function RoasterSelectorCTA() {
         <Button
           size="lg"
           variant="outline"
-          className="flex-1 h-16 text-base"
+          className="flex-1 h-14 text-base"
           onClick={handleBrowseProfiles}
         >
           Browse Profiles
