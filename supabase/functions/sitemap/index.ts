@@ -35,8 +35,20 @@ Deno.serve(async (req) => {
     });
 
     urls.push({
+      loc: `${baseUrl}/roast`,
+      changefreq: 'weekly',
+      priority: 0.9
+    });
+
+    urls.push({
       loc: `${baseUrl}/discover`,
       changefreq: 'daily',
+      priority: 0.8
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to`,
+      changefreq: 'monthly',
       priority: 0.8
     });
 
@@ -44,6 +56,68 @@ Deno.serve(async (req) => {
       loc: `${baseUrl}/about`,
       changefreq: 'monthly',
       priority: 0.7
+    });
+
+    // How-To Guide Pages
+    urls.push({
+      loc: `${baseUrl}/how-to/getting-started`,
+      changefreq: 'monthly',
+      priority: 0.7
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/using-profiles`,
+      changefreq: 'monthly',
+      priority: 0.7
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/cupping-notes`,
+      changefreq: 'monthly',
+      priority: 0.7
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/development-ratios`,
+      changefreq: 'monthly',
+      priority: 0.7
+    });
+
+    // Roaster-Specific Guides
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/gene-cafe-cbr-101`,
+      changefreq: 'monthly',
+      priority: 0.6
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/behmor-2000ab`,
+      changefreq: 'monthly',
+      priority: 0.6
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/freshroast-sr800`,
+      changefreq: 'monthly',
+      priority: 0.6
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/kaldi-wide`,
+      changefreq: 'monthly',
+      priority: 0.6
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/hottop-kn-8828`,
+      changefreq: 'monthly',
+      priority: 0.6
+    });
+
+    urls.push({
+      loc: `${baseUrl}/how-to/roasters/popcorn-popper`,
+      changefreq: 'monthly',
+      priority: 0.6
     });
 
     // Fetch all public roast profiles
