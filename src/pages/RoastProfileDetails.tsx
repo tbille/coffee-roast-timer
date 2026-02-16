@@ -7,10 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from "recharts";
-import { ArrowLeft, Edit, Save, X, Copy, ThumbsUp, Share2, Thermometer, GitCompare } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, ReferenceArea } from "recharts";
+import { Edit, Save, X, Copy, Thermometer } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
+import { convertTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +21,15 @@ import { CuppingNotesForm } from "@/components/cupping/CuppingNotesForm";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { getRoasterBadgeClasses } from "@/utils/roasterColors";
 import type { RoasterType } from "@/types/roaster.types";
+import { RoasterSettingsDisplay } from "@/components/roast/RoasterSettingsDisplay";
+import { VerticalRoastTimeline } from "@/components/roast/VerticalRoastTimeline";
+import { CompactStatsBadges } from "@/components/roast/CompactStatsBadges";
+import { ProfileActionsMenu } from "@/components/roast/ProfileActionsMenu";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { calculateDevelopmentStats } from "@/utils/developmentCalculations";
+import { enrichProfileWithGuidance } from "@/utils/migrateExistingProfiles";
+import { getTemperatureGraphContextNote, shouldShowTemperatureGraphByDefault } from "@/utils/roasterDisplay";
+import type { RoastProfile as RoastProfileType, RoasterSettings, RoastMilestone, DevelopmentStats } from "@/types/roast.types";
 
 interface RoastData {
   time: number;
@@ -56,6 +65,9 @@ interface RoastProfile {
   temperature_unit?: TemperatureUnit;
   environmental_notes?: string;
   roaster_type?: RoasterType;
+  roaster_settings?: RoasterSettings;
+  milestones?: RoastMilestone[];
+  development_stats?: DevelopmentStats;
 }
 
 const RoastProfileDetails = () => {
@@ -85,6 +97,7 @@ const RoastProfileDetails = () => {
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
   const [showCuppingForm, setShowCuppingForm] = useState(false);
+  const [showTemperatureGraph, setShowTemperatureGraph] = useState(true);
 
   // Fetch likes count and user's like status
   const { data: likesData } = useQuery({
@@ -158,6 +171,15 @@ const RoastProfileDetails = () => {
     }
   }, [id, user]);
 
+  // Initialize temperature graph visibility based on roaster type
+  useEffect(() => {
+    if (profile?.roaster_type) {
+      const hasTemperatureData = profile.temperature_data && profile.temperature_data.length > 0;
+      const showByDefault = shouldShowTemperatureGraphByDefault(profile.roaster_type, hasTemperatureData);
+      setShowTemperatureGraph(showByDefault);
+    }
+  }, [profile?.roaster_type]);
+
   const fetchUserPreferences = async () => {
     try {
       const { data, error } = await supabase
@@ -216,7 +238,10 @@ const RoastProfileDetails = () => {
         temperature_unit: (roastData.temperature_unit || 'C') as TemperatureUnit
       };
       
-      setProfile(processedProfile);
+      // Enrich profile with replication guidance if missing (for backward compatibility)
+      const enrichedProfile = enrichProfileWithGuidance(processedProfile);
+      
+      setProfile(enrichedProfile);
       setNotes(processedProfile.notes || "");
       setEditedMetadata({
         beans_name: processedProfile.beans_name,
@@ -594,9 +619,10 @@ const RoastProfileDetails = () => {
       <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
         <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <div>
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Title Row */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
                 {profile.roaster_type && (
@@ -611,298 +637,320 @@ const RoastProfileDetails = () => {
                 </p>
               )}
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <Button
-              variant={likesData?.userHasLiked ? "default" : "outline"}
-              onClick={handleLikeClick}
-              disabled={likeMutation.isPending}
-              className="flex items-center gap-2 text-xs sm:text-sm"
-              aria-label={likesData?.userHasLiked ? `Unlike this roast profile (${likesData?.count || 0} likes)` : `Like this roast profile (${likesData?.count || 0} likes)`}
-            >
-              <ThumbsUp className={`h-3 w-3 sm:h-4 sm:w-4 ${likesData?.userHasLiked ? 'fill-current' : ''}`} />
-              {likesData?.count || 0}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleShare}
-              className="flex items-center gap-2 text-xs sm:text-sm"
-              aria-label="Share this roast profile"
-            >
-              <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
-              Share
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleUseAsReference}
-              className="flex items-center gap-2 text-xs sm:text-sm"
-              aria-label="Use this roast profile as reference for a new roast"
-            >
-              <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-              Use as Reference
-            </Button>
-            {isOwner && (
+            <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="outline"
-                onClick={() => navigate(`/compare?ids=${id}`)}
-                className="flex items-center gap-2 text-xs sm:text-sm"
-                aria-label="Compare this profile with others"
+                variant="default"
+                onClick={handleUseAsReference}
+                className="flex items-center gap-2 text-sm"
+                aria-label="Use this roast profile as reference for a new roast"
               >
-                <GitCompare className="h-3 w-3 sm:h-4 sm:w-4" />
-                Compare
+                <Copy className="h-4 w-4" />
+                Use as Reference
               </Button>
-            )}
-            <Badge variant="secondary" className="text-xs">
-              {formatDate(profile.created_at)}
-            </Badge>
+              <ProfileActionsMenu
+                userHasLiked={likesData?.userHasLiked || false}
+                likesCount={likesData?.count || 0}
+                onLike={handleLikeClick}
+                onShare={handleShare}
+                onCompare={isOwner ? () => navigate(`/compare?ids=${id}`) : undefined}
+                isOwner={isOwner}
+                isLikePending={likeMutation.isPending}
+              />
+              <Badge variant="secondary" className="text-xs">
+                {formatDate(profile.created_at)}
+              </Badge>
+            </div>
           </div>
+          
+          {/* Stats Badges Row */}
+          <CompactStatsBadges
+            origin={profile.origin}
+            farmName={profile.farm_name}
+            roastProcess={profile.roast_process}
+            roasterType={profile.roaster_type}
+            durationSeconds={profile.duration_seconds}
+            initialWeight={profile.initial_weight}
+            finalWeight={profile.final_weight}
+            developmentPercent={calculateDevelopment()}
+          />
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full">
-          {/* Metadata */}
-          <div className="space-y-6">
-            {/* Profile Metadata */}
-            <Card className="shadow-coffee">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle as="h2">Roast Details</CardTitle>
-                {isOwner && !isEditingMetadata ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditingMetadata(true)}
-                    className="flex items-center gap-2"
-                    aria-label="Edit roast details"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                ) : isOwner && (
-                  <div className="flex gap-2">
+        {/* MAIN CONTENT: Single Column Layout */}
+        <div className="space-y-6 w-full">
+          {/* Roaster Settings Display */}
+          {profile.roaster_type && (
+            <RoasterSettingsDisplay
+              roaster_type={profile.roaster_type}
+              roaster_settings={profile.roaster_settings}
+              development_stats={profile.development_stats || calculateDevelopmentStats(
+                profile.duration_seconds,
+                profile.milestones,
+                profile.crack_events
+              )}
+              initial_weight={profile.initial_weight}
+              duration_seconds={profile.duration_seconds}
+            />
+          )}
+
+          {/* Vertical Timeline with Integrated Sensory Checkpoints */}
+          {profile.roaster_type && (
+            <VerticalRoastTimeline
+              duration_seconds={profile.duration_seconds}
+              milestones={profile.milestones}
+              roaster_settings={profile.roaster_settings}
+            />
+          )}
+
+          {/* Edit Metadata Section - Only for owners */}
+          {isOwner && (
+              <div className="border rounded-lg p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Edit Roast Details</h3>
+                  {isEditingMetadata ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSaveMetadata}
+                        disabled={savingMetadata}
+                        className="flex items-center gap-2"
+                        aria-label="Save roast details"
+                      >
+                        <Save className="h-4 w-4" />
+                        {savingMetadata ? "Saving..." : "Save"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingMetadata(false);
+                          setEditedMetadata({
+                            beans_name: profile.beans_name,
+                            origin: profile.origin || "",
+                            farm_name: profile.farm_name || "",
+                            roast_process: profile.roast_process || "",
+                            coffee_roaster: profile.coffee_roaster || "",
+                            initial_weight: profile.initial_weight || 0,
+                            final_weight: profile.final_weight || 0
+                          });
+                        }}
+                        className="flex items-center gap-2"
+                        aria-label="Cancel editing roast details"
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleSaveMetadata}
-                      disabled={savingMetadata}
+                      onClick={() => setIsEditingMetadata(true)}
                       className="flex items-center gap-2"
-                      aria-label="Save roast details"
+                      aria-label="Edit roast details"
                     >
-                      <Save className="h-4 w-4" />
-                      {savingMetadata ? "Saving..." : "Save"}
+                      <Edit className="h-4 w-4" />
+                      Edit
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditingMetadata(false);
-                        setEditedMetadata({
-                          beans_name: profile.beans_name,
-                          origin: profile.origin || "",
-                          farm_name: profile.farm_name || "",
-                          roast_process: profile.roast_process || "",
-                          coffee_roaster: profile.coffee_roaster || "",
-                          initial_weight: profile.initial_weight || 0,
-                          final_weight: profile.final_weight || 0
-                        });
-                      }}
-                      className="flex items-center gap-2"
-                      aria-label="Cancel editing roast details"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium">Bean Name</Label>
-                  {isEditingMetadata && isOwner ? (
+                  )
+                }
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Bean Name</Label>
                     <Input
                       value={editedMetadata.beans_name}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, beans_name: e.target.value })}
                       placeholder="Bean name"
+                      disabled={!isEditingMetadata}
                     />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{profile.beans_name}</p>
-                  )}
-                </div>
+                  </div>
 
-                <div>
-                  <Label className="text-sm font-medium">Bean Origin</Label>
-                  {isEditingMetadata && isOwner ? (
+                  <div>
+                    <Label className="text-sm font-medium">Bean Origin</Label>
                     <Input
                       value={editedMetadata.origin}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, origin: e.target.value })}
                       placeholder="Origin (e.g., Ethiopia)"
+                      disabled={!isEditingMetadata}
                     />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.origin || "Not specified"}
-                    </p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium">Farm</Label>
-                  {isEditingMetadata && isOwner ? (
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Farm</Label>
                     <Input
                       value={editedMetadata.farm_name}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, farm_name: e.target.value })}
                       placeholder="Farm name"
+                      disabled={!isEditingMetadata}
                     />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.farm_name || "Not specified"}
-                    </p>
-                  )}
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium">Process</Label>
-                  {isEditingMetadata && isOwner ? (
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium">Process</Label>
                     <Input
                       value={editedMetadata.roast_process}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, roast_process: e.target.value })}
                       placeholder="Processing method"
+                      disabled={!isEditingMetadata}
                     />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.roast_process || "Not specified"}
-                    </p>
-                  )}
-                </div>
-                
-                {profile.roaster_type && (
-                  <div>
-                    <Label className="text-sm font-medium">Coffee Roaster</Label>
-                    <p className="text-sm font-semibold text-primary">
-                      {getRoasterDisplayName(profile.roaster_type)}
-                    </p>
-                    {getRoasterDescription(profile.roaster_type) && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {getRoasterDescription(profile.roaster_type)}
-                      </p>
-                    )}
                   </div>
-                )}
-                
-                {!profile.roaster_type && (
-                  <div>
-                    <Label className="text-sm font-medium">Coffee Roaster</Label>
-                    {isEditingMetadata && isOwner ? (
+                  
+                  {!profile.roaster_type && (
+                    <div>
+                      <Label className="text-sm font-medium">Coffee Roaster</Label>
                       <Input
                         value={editedMetadata.coffee_roaster}
                         onChange={(e) => setEditedMetadata({ ...editedMetadata, coffee_roaster: e.target.value })}
                         placeholder="e.g., Gene CBR-101, Behmor 1600+"
+                        disabled={!isEditingMetadata}
                       />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        {profile.coffee_roaster || "Not specified"}
-                      </p>
-                    )}
-                  </div>
-                )}
-                
-                <div>
-                  <Label className="text-sm font-medium">Duration</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {formatTime(profile.duration_seconds)}
-                  </p>
-                </div>
+                    </div>
+                  )}
 
-                <div>
-                  <Label className="text-sm font-medium">Initial Weight</Label>
-                  {isEditingMetadata && isOwner ? (
+                  <div>
+                    <Label className="text-sm font-medium">Initial Weight</Label>
                     <Input
                       type="number"
                       value={editedMetadata.initial_weight || ""}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, initial_weight: Number(e.target.value) || 0 })}
                       placeholder="Initial weight in grams"
+                      disabled={!isEditingMetadata}
                     />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.initial_weight ? `${profile.initial_weight}g` : "Not specified"}
-                    </p>
-                  )}
-                </div>
+                  </div>
 
-                <div>
-                  <Label className="text-sm font-medium">Final Weight</Label>
-                  {isEditingMetadata && isOwner ? (
+                  <div>
+                    <Label className="text-sm font-medium">Final Weight</Label>
                     <Input
                       type="number"
                       value={editedMetadata.final_weight || ""}
                       onChange={(e) => setEditedMetadata({ ...editedMetadata, final_weight: Number(e.target.value) || 0 })}
                       placeholder="Final weight in grams"
+                      disabled={!isEditingMetadata}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+        </div>
+
+        {/* BOTTOM SECTION: Notes, Reference & Analysis (Full Width) */}
+        <div className="space-y-6 mt-6">
+            {/* Notes Section - For all users */}
+            {(isOwner || profile.notes) && (
+              isOwner ? (
+                <div className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Notes</h3>
+                    {!isEditingNotes ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditingNotes(true)}
+                        className="flex items-center gap-2"
+                        aria-label="Edit roast notes"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSaveNotes}
+                          disabled={savingNotes}
+                          className="flex items-center gap-2"
+                          aria-label="Save roast notes"
+                        >
+                          <Save className="h-4 w-4" />
+                          {savingNotes ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setIsEditingNotes(false);
+                            setNotes(profile.notes || "");
+                          }}
+                          className="flex items-center gap-2"
+                          aria-label="Cancel editing roast notes"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {isEditingNotes ? (
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add notes about this roast (taste notes, adjustments for next time, etc.)"
+                      className="min-h-32"
                     />
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.final_weight ? `${profile.final_weight}g` : "Not specified"}
-                    </p>
-                  )}
-                </div>
-
-                {profile.initial_weight && profile.final_weight && (
-                  <div>
-                    <Label className="text-sm font-medium">Weight Loss</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {calculateWeightLoss().toFixed(1)}%
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Bean Development */}
-            <Card className="shadow-coffee">
-              <CardHeader>
-                <CardTitle as="h2">Bean Development</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">
-                    {calculateDevelopment().toFixed(1)}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Development since first crack
-                  </p>
-                  
-                  {profile.crack_events && profile.crack_events.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      {profile.crack_events.map((crack, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span className="capitalize">{crack.type} Crack</span>
-                          <span>{formatTime(crack.time)}</span>
-                        </div>
-                      ))}
+                    <div className="min-h-20">
+                      {profile.notes ? (
+                        <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">
+                          No notes yet. Click Edit to add some!
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              ) : (
+                <CollapsibleCard title="Notes" defaultOpen={false}>
+                  <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
+                </CollapsibleCard>
+              )
+            )}
 
-          {/* Temperature Graph and Notes */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Temperature Graph */}
-            <Card className="shadow-coffee">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle as="h2">Temperature Profile</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="h-4 w-4 text-muted-foreground" />
+            {/* Environmental Notes - Collapsible */}
+            {profile.environmental_notes && (
+              <CollapsibleCard title="Environmental Conditions" defaultOpen={false}>
+                <p className="text-sm whitespace-pre-wrap">{profile.environmental_notes}</p>
+              </CollapsibleCard>
+            )}
+
+            {/* Temperature Graph - Conditional based on roaster type, wrapped in CollapsibleCard */}
+            {profile.roaster_type && (() => {
+              const hasTemperatureData = profile.temperature_data && profile.temperature_data.length > 0;
+              const showByDefault = shouldShowTemperatureGraphByDefault(profile.roaster_type, hasTemperatureData);
+              const contextNote = getTemperatureGraphContextNote(profile.roaster_type);
+              
+              if (!hasTemperatureData) return null;
+              
+              return (
+                <CollapsibleCard
+                  title={
+                    <div>
+                      <div>Temperature Profile</div>
+                      {contextNote && (
+                        <p className="text-xs text-muted-foreground mt-1 font-normal leading-relaxed">
+                          💡 {contextNote}
+                        </p>
+                      )}
+                    </div>
+                  }
+                  defaultOpen={showByDefault}
+                  headerActions={
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
-                      <Switch
-                        checked={viewUnit === 'F'}
-                        onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
-                        aria-label="Toggle temperature unit between Celsius and Fahrenheit"
-                      />
-                      <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                      <Thermometer className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm ${viewUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
+                        <Switch
+                          checked={viewUnit === 'F'}
+                          onCheckedChange={(checked) => setViewUnit(checked ? 'F' : 'C')}
+                          aria-label="Toggle temperature unit between Celsius and Fahrenheit"
+                        />
+                        <span className={`text-sm ${viewUnit === 'F' ? 'font-medium' : 'text-muted-foreground'}`}>°F</span>
+                      </div>
                     </div>
-                  </div>
-              </CardHeader>
-              <CardContent>
-                {profile.temperature_data && profile.temperature_data.length > 0 ? (
+                  }
+                >
                   <div className="h-96 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                        <LineChart data={profile.temperature_data.map(point => ({
@@ -917,9 +965,54 @@ const RoastProfileDetails = () => {
                            : profile.temperature_unit === 'C' && viewUnit === 'F'
                            ? convertTemperature(point.currentTemp, 'C', 'F')
                            : point.currentTemp
-                       }))}>
+                        }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis 
+                        
+                        {/* Phase shading backgrounds */}
+                        {(() => {
+                          const yellowingTime = profile.milestones?.find(m => m.event_type === 'yellowing')?.time_seconds;
+                          const firstCrackTime = profile.milestones?.find(m => m.event_type === 'first_crack')?.time_seconds || 
+                                                 profile.crack_events?.find(e => e.type === 'first')?.time;
+                          
+                          return (
+                            <>
+                              {/* Drying phase (0 to yellowing) - Light green */}
+                              {yellowingTime && (
+                                <ReferenceArea
+                                  x1={0}
+                                  x2={yellowingTime}
+                                  fill="hsl(142 76% 36%)"
+                                  fillOpacity={0.08}
+                                  label={{ value: 'Drying', position: 'insideTop', fill: 'hsl(142 76% 36%)', fontSize: 11 }}
+                                />
+                              )}
+                              
+                              {/* Maillard phase (yellowing to first crack) - Yellow */}
+                              {yellowingTime && firstCrackTime && (
+                                <ReferenceArea
+                                  x1={yellowingTime}
+                                  x2={firstCrackTime}
+                                  fill="hsl(48 96% 53%)"
+                                  fillOpacity={0.08}
+                                  label={{ value: 'Maillard', position: 'insideTop', fill: 'hsl(48 96% 53%)', fontSize: 11 }}
+                                />
+                              )}
+                              
+                              {/* Development phase (first crack to end) - Orange */}
+                              {firstCrackTime && (
+                                <ReferenceArea
+                                  x1={firstCrackTime}
+                                  x2={profile.duration_seconds}
+                                  fill="hsl(24 95% 53%)"
+                                  fillOpacity={0.08}
+                                  label={{ value: 'Development', position: 'insideTop', fill: 'hsl(24 95% 53%)', fontSize: 11 }}
+                                />
+                              )}
+                            </>
+                          );
+                        })()}
+                        
+                        <XAxis
                           dataKey="time" 
                           stroke="hsl(var(--foreground))" 
                           label={{
@@ -984,94 +1077,9 @@ const RoastProfileDetails = () => {
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-center h-96 text-muted-foreground">
-                    <div className="text-center">
-                      <p className="text-lg">No temperature data available</p>
-                      <p className="text-sm">This profile doesn't have recorded temperature points.</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Notes Section */}
-            <Card className="shadow-coffee">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle as="h2">Notes</CardTitle>
-                {isOwner && !isEditingNotes ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditingNotes(true)}
-                    className="flex items-center gap-2"
-                    aria-label="Edit roast notes"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                ) : isOwner && (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSaveNotes}
-                      disabled={savingNotes}
-                      className="flex items-center gap-2"
-                      aria-label="Save roast notes"
-                    >
-                      <Save className="h-4 w-4" />
-                      {savingNotes ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditingNotes(false);
-                        setNotes(profile.notes || "");
-                      }}
-                      className="flex items-center gap-2"
-                      aria-label="Cancel editing roast notes"
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {isEditingNotes && isOwner ? (
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add notes about this roast (taste notes, adjustments for next time, etc.)"
-                    className="min-h-32"
-                  />
-                ) : (
-                  <div className="min-h-20">
-                    {profile.notes ? (
-                      <p className="text-sm whitespace-pre-wrap">{profile.notes}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground italic">
-                        {isOwner ? "No notes yet. Click Edit to add some!" : "No notes available for this roast."}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Environmental Notes */}
-            {profile.environmental_notes && (
-              <Card className="shadow-coffee">
-                <CardHeader>
-                  <CardTitle as="h2">Environmental Conditions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap">{profile.environmental_notes}</p>
-                </CardContent>
-              </Card>
-            )}
+                </CollapsibleCard>
+              );
+            })()}
 
             {/* Cupping & Tasting Notes */}
             <CuppingNotesCard 
@@ -1079,7 +1087,6 @@ const RoastProfileDetails = () => {
               onEdit={() => setShowCuppingForm(true)}
               isOwner={isOwner}
             />
-          </div>
         </div>
       </div>
 
