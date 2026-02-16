@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, ArrowRight, MapPin, Scale, Copy, ThumbsUp } from 'lucide-react';
+import { Clock, ArrowRight, MapPin, Scale, ThumbsUp } from 'lucide-react';
 import { getRoasterBadgeClasses } from '@/utils/roasterColors';
 import { ROASTER_SPECS } from '@/utils/roasterRegistry';
 import type { RoasterType } from '@/types/roaster.types';
@@ -48,22 +48,6 @@ export function LatestRoasts() {
     if (!roasterType) return "Unknown";
     const roaster = ROASTER_SPECS[roasterType];
     return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
-  };
-
-  const handleUseAsReference = (profile: RoastProfile, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate('/', {
-      state: {
-        referenceProfile: {
-          beans_name: profile.beans_name,
-          origin: profile.origin,
-          farm_name: profile.farm_name,
-          roast_process: profile.roast_process,
-          initial_weight: profile.initial_weight,
-          temperature_data: profile.temperature_data
-        }
-      }
-    });
   };
 
   // Fetch latest 4 roasts
@@ -186,18 +170,6 @@ export function LatestRoasts() {
                         <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
                       </div>
                     )}
-                  </div>
-                  
-                  <div className="pt-2 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => handleUseAsReference(profile, e)}
-                      className="w-full flex items-center gap-2 text-xs"
-                    >
-                      <Copy className="h-3 w-3" />
-                      Use as Reference
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp, Thermometer } from "lucide-react";
+import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, ThumbsUp, Thermometer } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
@@ -181,21 +181,6 @@ const Discover = () => {
     const percentage = loss / initial * 100;
     return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
   };
-  const handleUseAsReference = (profile: RoastProfile) => {
-    navigate('/', {
-      state: {
-        referenceProfile: {
-          beans_name: profile.beans_name,
-          origin: profile.origin,
-          farm_name: profile.farm_name,
-          roast_process: profile.roast_process,
-          initial_weight: profile.initial_weight,
-          temperature_data: profile.temperature_data
-        }
-      }
-    });
-  };
-
   const getRoasterDisplayName = (roasterType?: RoasterType): string => {
     if (!roasterType) return "Unknown";
     const roaster = ROASTER_SPECS[roasterType];
@@ -309,16 +294,6 @@ const Discover = () => {
                         <Scale className="h-4 w-4" />
                         <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
                       </div>}
-                  </div>
-                  
-                  <div className="pt-2 border-t">
-                    <Button variant="outline" size="sm" onClick={e => {
-                e.stopPropagation();
-                handleUseAsReference(profile);
-              }} className="w-full flex items-center gap-2 text-xs">
-                      <Copy className="h-3 w-3" />
-                      Use as Reference
-                    </Button>
                   </div>
                 </CardContent>
               </Card>)}
