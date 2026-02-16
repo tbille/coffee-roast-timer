@@ -34,3 +34,11 @@ dist-ssr
 *SPRINT*.md
 roaster-research.md
 *.backup
+
+# Documentation and scripts (local development only)
+docs/
+scripts/
+
+# Supabase temporary files
+supabase/.branches/
+supabase/.temp/
