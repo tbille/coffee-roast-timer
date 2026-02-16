@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ThumbsUp, Share2, GitCompare, MoreVertical } from "lucide-react";
+import { ThumbsUp, Share2, GitCompare, MoreVertical, Copy } from "lucide-react";
 
 interface ProfileActionsMenuProps {
   userHasLiked: boolean;
@@ -14,6 +14,7 @@ interface ProfileActionsMenuProps {
   onLike: () => void;
   onShare: () => void;
   onCompare?: () => void;
+  onUseAsReference?: () => void;
   isOwner: boolean;
   isLikePending?: boolean;
 }
@@ -24,6 +25,7 @@ export function ProfileActionsMenu({
   onLike,
   onShare,
   onCompare,
+  onUseAsReference,
   isOwner,
   isLikePending = false,
 }: ProfileActionsMenuProps) {
@@ -41,6 +43,15 @@ export function ProfileActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
+        {onUseAsReference && (
+          <>
+            <DropdownMenuItem onClick={onUseAsReference}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Use as Reference</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onClick={onLike} disabled={isLikePending}>
           <ThumbsUp className={`mr-2 h-4 w-4 ${userHasLiked ? 'fill-current' : ''}`} />
           <span>{userHasLiked ? 'Unlike' : 'Like'} ({likesCount})</span>

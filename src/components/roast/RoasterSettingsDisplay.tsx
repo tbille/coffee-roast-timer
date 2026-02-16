@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Clock, Flame, Wind } from "lucide-react";
+import { Settings, Clock, Flame, Wind, Bean } from "lucide-react";
 import { type RoasterSettings, type DevelopmentStats } from "@/types/roast.types";
 import { type RoasterType } from "@/types/roaster.types";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
@@ -11,7 +11,13 @@ interface RoasterSettingsDisplayProps {
   roaster_settings?: RoasterSettings;
   development_stats?: DevelopmentStats;
   initial_weight?: number;
+  final_weight?: number;
   duration_seconds: number;
+  // Coffee bean metadata
+  beans_name: string;
+  origin?: string;
+  farm_name?: string;
+  roast_process?: string;
   className?: string;
 }
 
@@ -151,7 +157,12 @@ export function RoasterSettingsDisplay({
   roaster_settings,
   development_stats,
   initial_weight,
+  final_weight,
   duration_seconds,
+  beans_name,
+  origin,
+  farm_name,
+  roast_process,
   className
 }: RoasterSettingsDisplayProps) {
   const roasterSpec = ROASTER_SPECS[roaster_type];
@@ -161,16 +172,53 @@ export function RoasterSettingsDisplay({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Roaster Setup
+          Roast Profile
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Roaster Info */}
-        <div>
-          <h3 className="font-semibold text-lg">{roasterSpec?.displayName || roaster_type}</h3>
-          {roasterSpec?.manufacturer && (
-            <p className="text-sm text-muted-foreground">{roasterSpec.manufacturer}</p>
-          )}
+        {/* Two-column layout for Coffee Details and Roaster */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b">
+          {/* Coffee Details - Left Column */}
+          <div>
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Bean className="h-4 w-4" />
+              Coffee Details
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="font-medium">{beans_name}</div>
+              {[farm_name, origin].filter(Boolean).join(', ') && (
+                <div className="text-muted-foreground">
+                  📍 {[farm_name, origin].filter(Boolean).join(', ')}
+                </div>
+              )}
+              <div className="flex flex-col gap-1 text-muted-foreground">
+                {roast_process && <span>🏭 {roast_process}</span>}
+                {initial_weight && final_weight && (
+                  <span className="font-mono">
+                    {initial_weight}g → {final_weight}g 
+                    {(() => {
+                      const loss = ((initial_weight - final_weight) / initial_weight * 100).toFixed(1);
+                      return ` (-${loss}%)`;
+                    })()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Roaster Info - Right Column */}
+          <div>
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Roaster
+            </h4>
+            <div>
+              <h3 className="font-semibold text-lg">{roasterSpec?.displayName || roaster_type}</h3>
+              {roasterSpec?.manufacturer && (
+                <p className="text-sm text-muted-foreground">{roasterSpec.manufacturer}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Basic Info */}

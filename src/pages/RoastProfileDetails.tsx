@@ -625,11 +625,6 @@ const RoastProfileDetails = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
-                {profile.roaster_type && (
-                  <Badge className={`text-sm ${getRoasterBadgeClasses(profile.roaster_type)}`}>
-                    {getRoasterDisplayName(profile.roaster_type)}
-                  </Badge>
-                )}
               </div>
               {profile.profiles?.username && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -638,21 +633,13 @@ const RoastProfileDetails = () => {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="default"
-                onClick={handleUseAsReference}
-                className="flex items-center gap-2 text-sm"
-                aria-label="Use this roast profile as reference for a new roast"
-              >
-                <Copy className="h-4 w-4" />
-                Use as Reference
-              </Button>
               <ProfileActionsMenu
                 userHasLiked={likesData?.userHasLiked || false}
                 likesCount={likesData?.count || 0}
                 onLike={handleLikeClick}
                 onShare={handleShare}
                 onCompare={isOwner ? () => navigate(`/compare?ids=${id}`) : undefined}
+                onUseAsReference={handleUseAsReference}
                 isOwner={isOwner}
                 isLikePending={likeMutation.isPending}
               />
@@ -664,13 +651,7 @@ const RoastProfileDetails = () => {
           
           {/* Stats Badges Row */}
           <CompactStatsBadges
-            origin={profile.origin}
-            farmName={profile.farm_name}
-            roastProcess={profile.roast_process}
-            roasterType={profile.roaster_type}
             durationSeconds={profile.duration_seconds}
-            initialWeight={profile.initial_weight}
-            finalWeight={profile.final_weight}
             developmentPercent={calculateDevelopment()}
           />
         </div>
@@ -688,7 +669,12 @@ const RoastProfileDetails = () => {
                 profile.crack_events
               )}
               initial_weight={profile.initial_weight}
+              final_weight={profile.final_weight}
               duration_seconds={profile.duration_seconds}
+              beans_name={profile.beans_name}
+              origin={profile.origin}
+              farm_name={profile.farm_name}
+              roast_process={profile.roast_process}
             />
           )}
 
