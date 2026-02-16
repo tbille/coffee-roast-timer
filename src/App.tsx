@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
-import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
+import RoastTimer from "./pages/RoastTimer";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -57,18 +58,27 @@ const App = () => (
               <Header />
               <div className="flex-1">
               <Routes>
+                {/* Landing Page */}
+                <Route path="/" element={<LandingPage />} />
+                
+                {/* Roast Timer */}
+                <Route path="/roast" element={<RoastTimer />} />
+                
+                {/* Auth & User Pages */}
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/discover" element={
-                  <Suspense fallback={<PageLoader />}>
-                    <Discover />
-                  </Suspense>
-                } />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <Dashboard />
                     </Suspense>
                   </ProtectedRoute>
+                } />
+                
+                {/* Discovery & Profiles */}
+                <Route path="/discover" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Discover />
+                  </Suspense>
                 } />
                 <Route path="/profile/:id" element={
                   <Suspense fallback={<PageLoader />}>
@@ -82,6 +92,8 @@ const App = () => (
                     </Suspense>
                   </ProtectedRoute>
                 } />
+                
+                {/* Info Pages */}
                 <Route path="/about" element={<About />} />
                 
                 {/* How To pages */}
@@ -98,7 +110,6 @@ const App = () => (
                 <Route path="/how-to/roasters/popcorn-popper" element={<PopcornPopper />} />
                 
                 <Route path="/sitemap.xml" element={<Sitemap />} />
-                <Route path="/" element={<Index />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
