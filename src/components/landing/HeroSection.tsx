@@ -37,7 +37,7 @@ export function HeroSection() {
       
       <div className="container max-w-6xl mx-auto">
         {/* Quick Stats Badge */}
-        <div className="flex justify-center mb-8">
+        <div className="hidden md:flex justify-center mb-8">
           <Badge variant="secondary" className="px-4 py-2 text-sm gap-2">
             <Coffee className="h-4 w-4" />
             <span>6 Roasters Supported</span>
