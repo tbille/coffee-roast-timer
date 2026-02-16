@@ -16,6 +16,19 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+// How To pages
+import HowTo from "./pages/how-to/HowTo";
+import GettingStarted from "./pages/how-to/GettingStarted";
+import UsingProfiles from "./pages/how-to/UsingProfiles";
+import CuppingNotes from "./pages/how-to/CuppingNotes";
+import DevelopmentRatios from "./pages/how-to/DevelopmentRatios";
+import GeneCafeCBR101 from "./pages/how-to/roasters/GeneCafeCBR101";
+import Behmor2000AB from "./pages/how-to/roasters/Behmor2000AB";
+import FreshRoastSR800 from "./pages/how-to/roasters/FreshRoastSR800";
+import KaldiWide from "./pages/how-to/roasters/KaldiWide";
+import HottopKN8828 from "./pages/how-to/roasters/HottopKN8828";
+import PopcornPopper from "./pages/how-to/roasters/PopcornPopper";
+
 // Lazy load heavy routes to reduce initial bundle size
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Discover = lazy(() => import("./pages/Discover"));
@@ -70,6 +83,20 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="/about" element={<About />} />
+                
+                {/* How To pages */}
+                <Route path="/how-to" element={<HowTo />} />
+                <Route path="/how-to/getting-started" element={<GettingStarted />} />
+                <Route path="/how-to/using-profiles" element={<UsingProfiles />} />
+                <Route path="/how-to/cupping-notes" element={<CuppingNotes />} />
+                <Route path="/how-to/development-ratios" element={<DevelopmentRatios />} />
+                <Route path="/how-to/roasters/gene-cafe-cbr-101" element={<GeneCafeCBR101 />} />
+                <Route path="/how-to/roasters/behmor-2000ab" element={<Behmor2000AB />} />
+                <Route path="/how-to/roasters/freshroast-sr800" element={<FreshRoastSR800 />} />
+                <Route path="/how-to/roasters/kaldi-wide" element={<KaldiWide />} />
+                <Route path="/how-to/roasters/hottop-kn-8828" element={<HottopKN8828 />} />
+                <Route path="/how-to/roasters/popcorn-popper" element={<PopcornPopper />} />
+                
                 <Route path="/sitemap.xml" element={<Sitemap />} />
                 <Route path="/" element={<Index />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
