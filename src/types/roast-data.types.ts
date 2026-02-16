@@ -138,6 +138,36 @@ export interface VisualCue {
 }
 
 /**
+ * Hottop KN-8828: Advanced roaster with automatic/manual modes
+ * Supports Artisan import/export and advanced metrics
+ */
+export interface HottopRoastData extends BaseRoastData {
+  mode: 'hottop-advanced';
+  roastMode: HottopMode;            // Automatic or manual mode
+  temperatureData: HottopTempDataPoint[];
+  manualControls?: HottopManualControl[]; // If manual mode
+  artisanImported?: boolean;        // Was data imported from Artisan
+  artisanFilePath?: string;         // Original Artisan CSV path
+}
+
+export type HottopMode = 'auto-light' | 'auto-medium' | 'auto-dark' | 'manual';
+
+export interface HottopTempDataPoint {
+  time: number;                     // Seconds elapsed from start
+  beanTemp: number;                 // Bean temperature in Celsius
+  environmentalTemp?: number;       // Environmental/inlet temp (optional)
+  rateOfRise?: number;              // RoR in °C/min (calculated)
+  timestamp: number;                // Unix timestamp of recording
+}
+
+export interface HottopManualControl {
+  time: number;                     // Seconds elapsed from start
+  heatPercent: number;              // Heat power 0-100%
+  fanPercent: number;               // Fan speed 0-100%
+  timestamp: number;                // Unix timestamp of change
+}
+
+/**
  * Union type for all roast data modes
  * Discriminated by 'mode' property for type-safe handling
  */
@@ -146,7 +176,8 @@ export type RoastData =
   | ProfileBasedRoastData
   | HeatFanRoastData
   | ManualRoastData
-  | PopcornPopperData;
+  | PopcornPopperData
+  | HottopRoastData;
 
 /**
  * Type guard utilities
@@ -170,4 +201,8 @@ export function isManualData(data: RoastData): data is ManualRoastData {
 
 export function isPopcornPopperData(data: RoastData): data is PopcornPopperData {
   return data.mode === 'manual-simple' && 'visualCues' in data;
+}
+
+export function isHottopData(data: RoastData): data is HottopRoastData {
+  return data.mode === 'hottop-advanced';
 }

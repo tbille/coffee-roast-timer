@@ -431,8 +431,24 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     ],
     
     // User guidance
-    tips: ['Premium roaster with professional features', 'Excellent for serious home roasters'],
-    warnings: ['Higher price point', 'Steep learning curve'],
+    tips: [
+      'Automatic modes (Light/Medium/Dark) are great for consistent results',
+      'Manual mode gives full control - start with 50% heat and 50% fan',
+      'Watch Rate of Rise (RoR) - should decrease approaching first crack',
+      'Optimal RoR: 8-12°C/min early, 5-8°C/min mid, 3-5°C/min approaching 1C',
+      'Use environmental temp sensor for better roast consistency',
+      'Compatible with Artisan for advanced analysis and profile import',
+      'Keep batches between 200-250g for most even roasting',
+      'RoR slowing too much? Increase heat. Too fast? Reduce heat or increase fan',
+      'First crack typically at 195-205°C depending on bean density',
+      'Development time (after 1C) affects flavor - 15-25% of total time is ideal'
+    ],
+    warnings: [
+      'Premium roaster - requires investment ($1,500-2,000)',
+      'Steeper learning curve than basic roasters',
+      'Manual mode requires understanding of heat/fan interaction',
+      'Regular cleaning essential for consistent performance'
+    ],
     
     // Community
     communitySize: 1200,
