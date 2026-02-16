@@ -9,9 +9,11 @@ import { generateDefaultMilestones, calculateDevelopmentStats } from './developm
  * Check if a profile has the new replication guidance fields
  */
 export function hasReplicationGuidance(profile: RoastProfile): boolean {
-  return !!(profile.milestones && profile.milestones.length > 0) ||
-         !!(profile.roaster_settings && Object.keys(profile.roaster_settings).length > 0) ||
-         !!(profile.development_stats);
+  const hasMilestones = !!(profile.milestones && profile.milestones.length > 0);
+  const hasRoasterSettings = !!(profile.roaster_settings && Object.keys(profile.roaster_settings).length > 0);
+  const hasDevelopmentStats = !!(profile.development_stats && Object.keys(profile.development_stats).length > 0);
+  
+  return hasMilestones || hasRoasterSettings || hasDevelopmentStats;
 }
 
 /**
