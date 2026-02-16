@@ -119,6 +119,25 @@ export interface EnvironmentalData {
 }
 
 /**
+ * Popcorn Popper: Ultra-simple with visual cues
+ * For DIY roasters, emphasizes safety and visual tracking
+ */
+export interface PopcornPopperData extends BaseRoastData {
+  mode: 'manual-simple';
+  temperatureData?: ManualTempDataPoint[]; // Optional (many don't have thermometers)
+  visualCues?: VisualCue[];         // Color progression tracking
+  stirringNotes?: string;           // Free-form stirring notes
+  machineModel?: string;            // Which popcorn popper model
+}
+
+export interface VisualCue {
+  time: number;                     // Seconds elapsed from start
+  color: string;                    // Bean color description
+  notes?: string;                   // Observations
+  timestamp: number;                // Unix timestamp of recording
+}
+
+/**
  * Union type for all roast data modes
  * Discriminated by 'mode' property for type-safe handling
  */
@@ -126,7 +145,8 @@ export type RoastData =
   | DualTempRoastData
   | ProfileBasedRoastData
   | HeatFanRoastData
-  | ManualRoastData;
+  | ManualRoastData
+  | PopcornPopperData;
 
 /**
  * Type guard utilities
@@ -146,4 +166,8 @@ export function isHeatFanData(data: RoastData): data is HeatFanRoastData {
 
 export function isManualData(data: RoastData): data is ManualRoastData {
   return data.mode === 'manual-simple';
+}
+
+export function isPopcornPopperData(data: RoastData): data is PopcornPopperData {
+  return data.mode === 'manual-simple' && 'visualCues' in data;
 }

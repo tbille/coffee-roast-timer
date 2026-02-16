@@ -479,16 +479,25 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Start with very small batches (50-60g)',
-      'Roasts happen quickly - stay attentive',
-      'Use outdoors or with excellent ventilation',
-      'Preheat for 30 seconds before adding beans'
+      '⚠️ NEVER exceed 100g batch size - serious fire risk!',
+      'Start with 50-60g for first roasts, max 75-85g once experienced',
+      'Roasts complete in 4-6 minutes - very fast, watch closely',
+      'Listen for first crack around 3-4 minutes',
+      'Stir occasionally for even roasting',
+      'Cool beans immediately in metal colander after roasting',
+      'Use outdoors or with excellent ventilation (produces smoke)',
+      'Track color progression if you don\'t have a thermometer',
+      'Machine may fail after 50-100 roasts - they\'re not designed for this',
+      'Never leave unattended - fire risk is real'
     ],
     warnings: [
-      'Not designed for coffee roasting - use at own risk',
-      'Limited control over temperature and roast profile',
-      'Very small batch sizes',
-      'Inconsistent results possible'
+      '🔥 FIRE HAZARD: Exceeding 100g can cause overheating and fire',
+      'Not designed for coffee roasting - use at your own risk',
+      'Requires constant supervision - never leave unattended',
+      'Produces significant smoke - outdoor use strongly recommended',
+      'Machine lifespan is limited (50-100 roasts typical)',
+      'No temperature control - results vary',
+      'Chaff can accumulate and ignite - clean after each use'
     ],
     
     // Community
