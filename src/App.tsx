@@ -11,6 +11,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
 import { AuthProvider } from "@/hooks/useAuth";
+import { RoasterProvider } from "@/contexts/RoasterContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -34,13 +35,14 @@ const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-        <div className="min-h-screen flex flex-col">
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Header />
-            <div className="flex-1">
+        <RoasterProvider>
+          <TooltipProvider>
+          <div className="min-h-screen flex flex-col">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Header />
+              <div className="flex-1">
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/discover" element={
@@ -78,6 +80,7 @@ const App = () => (
           </BrowserRouter>
         </div>
         </TooltipProvider>
+        </RoasterProvider>
       </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>

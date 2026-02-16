@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Thermometer } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Play, Pause, Square, RotateCcw } from "lucide-react";
 import { TimerDisplay } from "@/components/roast/shared/TimerDisplay";
 import { CrackEventButtons } from "@/components/roast/shared/CrackEventButtons";
-import { BatchCapacityIndicator } from "@/components/roast/shared/BatchCapacityIndicator";
+import { BatchCapacityBadge } from "@/components/roast/shared/BatchCapacityBadge";
 import { RoasterTips } from "@/components/roast/shared/RoasterTips";
 import { AutoRecordTimer } from "@/components/roast/kaldi/AutoRecordTimer";
 import { EnvironmentalTracker } from "@/components/roast/kaldi/EnvironmentalTracker";
@@ -64,14 +65,6 @@ export function KaldiMode({
     };
   }, [isRunning, isPaused]);
 
-  // Start roast automatically
-  useEffect(() => {
-    if (!isRunning) {
-      startTimeRef.current = Date.now();
-      setIsRunning(true);
-    }
-  }, []);
-
   const handleRecordTemp = () => {
     const temp = parseFloat(currentTemp);
     if (isNaN(temp) || temp < 0 || temp > 300) {
@@ -121,17 +114,9 @@ export function KaldiMode({
 
   const handleVoiceCommand = (command: VoiceCommand) => {
     if (command === 'first-crack') {
-      handleCrackEvent({
-        type: 'first',
-        time: elapsedTime,
-        timestamp: Date.now()
-      });
+      handleFirstCrack();
     } else if (command === 'second-crack') {
-      handleCrackEvent({
-        type: 'second',
-        time: elapsedTime,
-        timestamp: Date.now()
-      });
+      handleSecondCrack();
     }
   };
 
@@ -162,154 +147,263 @@ export function KaldiMode({
     onSave(roastData);
   };
 
-  const handleCrackEvent = (event: CrackEvent) => {
+  const handleFirstCrack = () => {
+    if (crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'first',
+      timestamp: Date.now()
+    };
+    setCrackEvents(prev => [...prev, event]);
+  };
+
+  const handleSecondCrack = () => {
+    if (crackEvents.some(e => e.type === 'second')) return;
+    if (!crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'second',
+      timestamp: Date.now()
+    };
     setCrackEvents(prev => [...prev, event]);
   };
 
   const lastRecordedData = temperatureData[temperatureData.length - 1];
 
+  // Add reset handler
+  const handleReset = () => {
+    setElapsedTime(0);
+    setIsRunning(false);
+    setIsPaused(false);
+    setCurrentTemp('');
+    setTemperatureData([]);
+    setCrackEvents([]);
+    startTimeRef.current = 0;
+    pausedTimeRef.current = 0;
+  };
+
   return (
-    <div className="space-y-6 pb-6">
-      {/* Header */}
-      <Card className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 border-emerald-200 dark:border-emerald-800">
-        <CardContent className="p-4">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground mb-1">
-              KALDI Wide Mode
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Hands-Free Temperature Tracking • Manual Roasting
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Timer */}
-      <TimerDisplay 
-        time={elapsedTime}
-        mode="count-up"
-        label="TIME ELAPSED"
-      />
-
-      {/* Current Temperature Display */}
-      <Card className="border-2 border-primary/20">
-        <CardContent className="p-6">
-          <h3 className="text-sm font-semibold text-center mb-4 text-muted-foreground">
-            CURRENT TEMPERATURE
-          </h3>
-          <div className="text-center space-y-4">
-            <div className="text-5xl font-bold text-primary font-mono">
-              {currentTemp || '---'}°C
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Enter manually or use auto-record
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Voice Input */}
-      <VoiceInput
-        onTemperature={handleVoiceTemperature}
-        onCommand={handleVoiceCommand}
-        disabled={isPaused}
-      />
-
-      {/* Temperature Input */}
+    <div className="space-y-4">
+      {/* Roaster Header */}
       <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="temp-input" className="text-sm font-medium">
-              Temperature Reading (°C)
-            </Label>
-            <div className="flex gap-2">
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl">☕</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">KALDI Wide</h2>
+                <p className="text-sm text-muted-foreground">Manual Temperature Tracking</p>
+              </div>
+            </div>
+            <BatchCapacityBadge 
+              roasterType="kaldi-wide"
+              currentWeight={batchSize}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Two-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        
+        {/* LEFT COLUMN: Timer & Controls */}
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {/* Timer */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground text-center uppercase tracking-wide">
+                Roast Timer
+              </h3>
+              <TimerDisplay 
+                seconds={elapsedTime} 
+                mode="count-up" 
+                size="large"
+              />
+            </div>
+            
+            {/* Control buttons */}
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                {!isRunning ? (
+                  <Button 
+                    onClick={() => {
+                      startTimeRef.current = Date.now();
+                      setIsRunning(true);
+                    }} 
+                    size="lg"
+                    className="flex items-center gap-2 flex-1"
+                  >
+                    <Play className="h-5 w-5" />
+                    Start Roast
+                  </Button>
+                ) : (
+                  <>
+                    {!isPaused ? (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="secondary"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Pause className="h-5 w-5" />
+                        Pause
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="default"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Play className="h-5 w-5" />
+                        Resume
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={handleStop} 
+                      variant="destructive"
+                      size="lg"
+                      className="flex items-center gap-2"
+                    >
+                      <Square className="h-5 w-5" />
+                      Stop
+                    </Button>
+                  </>
+                )}
+              </div>
+              
+              {!isRunning && elapsedTime > 0 && (
+                <Button 
+                  onClick={handleReset} 
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset
+                </Button>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Current Temperature Display */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                🌡️ Current Temperature
+              </Label>
+              <div className="flex items-center justify-center">
+                <div className="text-4xl font-bold font-mono text-primary">
+                  {currentTemp || '---'}°C
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* RIGHT COLUMN: Temperature Tracking */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            
+            {/* Voice Input */}
+            <div>
+              <VoiceInput
+                onTemperature={handleVoiceTemperature}
+                onCommand={handleVoiceCommand}
+                disabled={isPaused || !isRunning}
+              />
+            </div>
+
+            <Separator />
+
+            {/* Temperature Input */}
+            <div className="space-y-2">
+              <Label htmlFor="temp-input" className="text-sm font-medium">
+                Temperature Reading (°C)
+              </Label>
               <Input
                 id="temp-input"
                 type="number"
-                placeholder="e.g., 192"
+                placeholder="192"
                 value={currentTemp}
                 onChange={(e) => setCurrentTemp(e.target.value)}
-                disabled={isPaused}
-                className="text-lg h-14 text-center font-mono"
+                disabled={isPaused || !isRunning}
+                className="text-3xl font-bold font-mono text-center h-16"
                 min="0"
                 max="300"
                 step="1"
               />
+              <Button
+                onClick={handleRecordTemp}
+                className="w-full"
+                disabled={!currentTemp || isPaused || !isRunning}
+              >
+                📝 Record Temperature
+              </Button>
+              {temperatureData.length > 0 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {temperatureData.length} reading{temperatureData.length !== 1 ? 's' : ''} recorded
+                </p>
+              )}
             </div>
-          </div>
 
-          <Button
-            onClick={handleRecordTemp}
-            className="w-full h-14 text-lg font-semibold"
-            disabled={!currentTemp || isPaused}
-            size="lg"
-          >
-            📝 Record Temperature
-          </Button>
+            <Separator />
 
-          {temperatureData.length > 0 && (
-            <div className="text-center text-sm text-muted-foreground">
-              {temperatureData.length} temperature reading{temperatureData.length !== 1 ? 's' : ''} recorded
+            {/* Auto-Record Timer */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">⏱️ Auto-Record</h3>
+              <AutoRecordTimer
+                isEnabled={autoRecordEnabled}
+                onToggle={setAutoRecordEnabled}
+                interval={autoRecordInterval}
+                onIntervalChange={setAutoRecordInterval}
+                onTrigger={handleAutoRecordTrigger}
+                lastRecordedTime={lastRecordedData?.time}
+                lastRecordedTemp={lastRecordedData?.temp}
+                isPaused={isPaused || !isRunning}
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Auto-Record Timer */}
-      <AutoRecordTimer
-        isEnabled={autoRecordEnabled}
-        onToggle={setAutoRecordEnabled}
-        interval={autoRecordInterval}
-        onIntervalChange={setAutoRecordInterval}
-        onTrigger={handleAutoRecordTrigger}
-        lastRecordedTime={lastRecordedData?.time}
-        lastRecordedTemp={lastRecordedData?.temp}
-        isPaused={isPaused}
-      />
+            <Separator />
 
-      {/* Environmental Tracker */}
-      <EnvironmentalTracker
-        data={environmental}
-        onChange={setEnvironmental}
-      />
+            {/* Environmental Tracker */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">🌤️ Environment</h3>
+              <EnvironmentalTracker
+                data={environmental}
+                onChange={setEnvironmental}
+              />
+            </div>
 
-      {/* Crack Events */}
-      <CrackEventButtons
-        elapsedTime={elapsedTime}
-        onCrackEvent={handleCrackEvent}
-        disabled={isPaused}
-      />
+            <Separator />
 
-      {/* Batch Capacity */}
-      {batchSize && (
-        <BatchCapacityIndicator
-          batchSize={batchSize}
-          roasterType="kaldi-wide"
-        />
-      )}
-
-      {/* Tips */}
-      <RoasterTips roasterType="kaldi-wide" />
-
-      {/* Control Buttons */}
-      <div className="flex gap-4 pt-4">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handlePause}
-          className="flex-1"
-        >
-          {isPaused ? '▶️ Resume' : '⏸️ Pause'}
-        </Button>
-        <Button
-          variant="destructive"
-          size="lg"
-          onClick={handleStop}
-          className="flex-1"
-        >
-          ⏹️ Stop & Save
-        </Button>
+            {/* Crack Events */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">🔊 Crack Events</h3>
+              <CrackEventButtons
+                onFirstCrack={handleFirstCrack}
+                onSecondCrack={handleSecondCrack}
+                firstCrackRecorded={crackEvents.some(e => e.type === 'first')}
+                secondCrackRecorded={crackEvents.some(e => e.type === 'second')}
+                disabled={isPaused || !isRunning}
+                variant="inline"
+              />
+            </div>
+            
+          </CardContent>
+        </Card>
+        
       </div>
+      
+      {/* Tips - Collapsible */}
+      <RoasterTips
+        roasterType="kaldi-wide"
+        defaultCollapsed={true}
+      />
     </div>
   );
 }

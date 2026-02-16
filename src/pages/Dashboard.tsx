@@ -9,6 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2, Settings, GitCompare } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UserSettingsDialog from "@/components/UserSettingsDialog";
+import { RoasterFilter } from "@/components/dashboard/RoasterFilter";
+import { ROASTER_SPECS } from "@/utils/roasterRegistry";
+import { getRoasterBadgeClasses } from "@/utils/roasterColors";
+import type { RoasterType } from "@/types/roaster.types";
+
 interface RoastProfile {
   id: string;
   beans_name: string;
@@ -21,6 +26,7 @@ interface RoastProfile {
   temperature_data: any;
   crack_events: any;
   created_at: string;
+  roaster_type?: RoasterType;
 }
 const Dashboard = () => {
   const {
@@ -32,7 +38,9 @@ const Dashboard = () => {
     toast
   } = useToast();
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
+  const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
@@ -42,6 +50,20 @@ const Dashboard = () => {
       fetchProfiles();
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    filterProfiles();
+  }, [profiles, selectedRoaster]);
+
+  const filterProfiles = () => {
+    if (selectedRoaster === "all") {
+      setFilteredProfiles(profiles);
+    } else if (selectedRoaster === "unknown") {
+      setFilteredProfiles(profiles.filter(p => !p.roaster_type));
+    } else {
+      setFilteredProfiles(profiles.filter(p => p.roaster_type === selectedRoaster));
+    }
+  };
   const fetchProfiles = async () => {
     if (!user) return;
     
@@ -109,6 +131,12 @@ const Dashboard = () => {
     const percentage = loss / initial * 100;
     return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
   };
+
+  const getRoasterDisplayName = (roasterType?: RoasterType): string => {
+    if (!roasterType) return "Unknown";
+    const roaster = ROASTER_SPECS[roasterType];
+    return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
+  };
   if (loading || loadingProfiles) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -123,7 +151,7 @@ const Dashboard = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">My Roast Profiles</h1>
           <div className="flex justify-center items-center gap-4 mt-2">
             <Badge variant="secondary" className="text-xs">
-              {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+              {filteredProfiles.length} of {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
             </Badge>
             {profiles.length >= 2 && (
               <Button 
@@ -139,28 +167,56 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Filter Section */}
+        <Card className="shadow-coffee mb-6">
+          <CardContent className="p-4">
+            <RoasterFilter 
+              value={selectedRoaster} 
+              onChange={setSelectedRoaster}
+              className="max-w-md mx-auto"
+            />
+          </CardContent>
+        </Card>
+
         {/* Profiles Grid */}
-        {profiles.length === 0 ? <Card className="shadow-coffee">
+        {filteredProfiles.length === 0 ? <Card className="shadow-coffee">
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No roast profiles yet</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {profiles.length === 0 ? "No roast profiles yet" : "No profiles match this filter"}
+                </h3>
                 <p className="text-muted-foreground mb-4">
-                  Start roasting and save your first profile to see it here!
+                  {profiles.length === 0 
+                    ? "Start roasting and save your first profile to see it here!" 
+                    : "Try selecting a different roaster or view all profiles."}
                 </p>
-                <Button onClick={() => navigate('/')}>
-                  Start Roasting
-                </Button>
+                {profiles.length === 0 ? (
+                  <Button onClick={() => navigate('/')}>
+                    Start Roasting
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={() => setSelectedRoaster("all")}>
+                    Show All Profiles
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {profiles.map(profile => <Card key={profile.id} className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/profile/${profile.id}`)}>
+            {filteredProfiles.map(profile => <Card key={profile.id} className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/profile/${profile.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-bold text-primary">
-                        {profile.beans_name}
-                      </CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <CardTitle className="text-lg font-bold text-primary">
+                          {profile.beans_name}
+                        </CardTitle>
+                        {profile.roaster_type && (
+                          <Badge className={`text-xs ${getRoasterBadgeClasses(profile.roaster_type)}`}>
+                            {getRoasterDisplayName(profile.roaster_type)}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {formatDate(profile.created_at)}
                       </p>

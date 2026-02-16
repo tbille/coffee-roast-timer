@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Development documentation (specs, phases, summaries)
+*SPEC*.md
+*PHASE*.md
+*IMPLEMENTATION*.md
+*SUMMARY*.md
+*PROPOSAL*.md
+*ROADMAP*.md
+*CHECKLIST*.md
+*SPRINT*.md
+roaster-research.md
+*.backup

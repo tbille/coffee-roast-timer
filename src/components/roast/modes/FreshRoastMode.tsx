@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Flame, Wind } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Play, Pause, Square, RotateCcw, Flame, Wind } from "lucide-react";
 import { TimerDisplay } from "@/components/roast/shared/TimerDisplay";
 import { CrackEventButtons } from "@/components/roast/shared/CrackEventButtons";
-import { BatchCapacityIndicator } from "@/components/roast/shared/BatchCapacityIndicator";
+import { BatchCapacityBadge } from "@/components/roast/shared/BatchCapacityBadge";
 import { RoasterTips } from "@/components/roast/shared/RoasterTips";
 import { HeatFanControls } from "@/components/roast/freshroast/HeatFanControls";
 import { SettingChangeHistory } from "@/components/roast/shared/SettingChangeHistory";
@@ -56,14 +57,6 @@ export function FreshRoastMode({
       if (interval) clearInterval(interval);
     };
   }, [isRunning, isPaused]);
-
-  // Start roast automatically
-  useEffect(() => {
-    if (!isRunning) {
-      startTimeRef.current = Date.now();
-      setIsRunning(true);
-    }
-  }, []);
 
   // Record initial settings when roast starts
   useEffect(() => {
@@ -124,7 +117,26 @@ export function FreshRoastMode({
     setFanSpeed(newFan as FanSpeed);
   };
 
-  const handleCrackEvent = (event: CrackEvent) => {
+  const handleFirstCrack = () => {
+    if (crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'first',
+      timestamp: Date.now()
+    };
+    setCrackEvents(prev => [...prev, event]);
+  };
+
+  const handleSecondCrack = () => {
+    if (crackEvents.some(e => e.type === 'second')) return;
+    if (!crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'second',
+      timestamp: Date.now()
+    };
     setCrackEvents(prev => [...prev, event]);
   };
 
@@ -135,127 +147,231 @@ export function FreshRoastMode({
     return lastChange.heatLevel !== heatLevel || lastChange.fanSpeed !== fanSpeed;
   };
 
+  // Add reset handler
+  const handleReset = () => {
+    setElapsedTime(0);
+    setIsRunning(false);
+    setIsPaused(false);
+    setSettingChanges([]);
+    setCrackEvents([]);
+    setHasRecordedInitial(false);
+    startTimeRef.current = 0;
+    pausedTimeRef.current = 0;
+  };
+
   return (
-    <div className="space-y-6 pb-6">
-      {/* Header */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
-        <CardContent className="p-4">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground mb-1">
-              FreshRoast SR800 Mode
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Heat/Fan Control Tracking • Fast Roasts (6-10 min)
-            </p>
+    <div className="space-y-4">
+      {/* Roaster Header */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl">☕</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">FreshRoast SR800</h2>
+                <p className="text-sm text-muted-foreground">Heat/Fan Control Tracking</p>
+              </div>
+            </div>
+            <BatchCapacityBadge 
+              roasterType="freshroast-sr800"
+              currentWeight={batchSize}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Timer */}
-      <TimerDisplay 
-        time={elapsedTime}
-        mode="count-up"
-        label="TIME ELAPSED"
-      />
-
-      {/* Current Settings Display */}
-      <Card className="border-2 border-primary/20">
-        <CardContent className="p-6">
-          <h3 className="text-sm font-semibold text-center mb-4 text-muted-foreground">
-            CURRENT SETTINGS
-          </h3>
-          <div className="flex justify-center items-center gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Flame className="h-5 w-5 text-orange-500" />
-                <span className="text-xs font-medium text-muted-foreground">HEAT</span>
+      {/* Two-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        
+        {/* LEFT COLUMN: Timer & Controls */}
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {/* Timer */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground text-center uppercase tracking-wide">
+                Roast Timer
+              </h3>
+              <TimerDisplay 
+                seconds={elapsedTime} 
+                mode="count-up" 
+                size="large"
+              />
+            </div>
+            
+            {/* Control buttons */}
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                {!isRunning ? (
+                  <Button 
+                    onClick={() => {
+                      startTimeRef.current = Date.now();
+                      setIsRunning(true);
+                    }} 
+                    size="lg"
+                    className="flex items-center gap-2 flex-1"
+                  >
+                    <Play className="h-5 w-5" />
+                    Start Roast
+                  </Button>
+                ) : (
+                  <>
+                    {!isPaused ? (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="secondary"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Pause className="h-5 w-5" />
+                        Pause
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="default"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Play className="h-5 w-5" />
+                        Resume
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={handleStop} 
+                      variant="destructive"
+                      size="lg"
+                      className="flex items-center gap-2"
+                    >
+                      <Square className="h-5 w-5" />
+                      Stop
+                    </Button>
+                  </>
+                )}
               </div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {heatLevel}
+              
+              {!isRunning && elapsedTime > 0 && (
+                <Button 
+                  onClick={handleReset} 
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset
+                </Button>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Current Settings Display */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-center text-muted-foreground uppercase tracking-wide">
+                Current Settings
+              </h3>
+              <div className="flex justify-center items-center gap-8">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Flame className="h-5 w-5 text-orange-500" />
+                    <span className="text-xs font-medium text-muted-foreground">HEAT</span>
+                  </div>
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    {heatLevel}
+                  </div>
+                </div>
+                <div className="h-12 w-px bg-border" />
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Wind className="h-5 w-5 text-cyan-500" />
+                    <span className="text-xs font-medium text-muted-foreground">FAN</span>
+                  </div>
+                  <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+                    {fanSpeed}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="h-12 w-px bg-border" />
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Wind className="h-5 w-5 text-cyan-500" />
-                <span className="text-xs font-medium text-muted-foreground">FAN</span>
-              </div>
-              <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
-                {fanSpeed}
-              </div>
+          </CardContent>
+        </Card>
+        
+        {/* RIGHT COLUMN: Heat/Fan Controls & Tracking */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            
+            {/* Heat Control */}
+            <div>
+              <HeatFanControls
+                type="heat"
+                value={heatLevel}
+                onChange={handleHeatChange}
+                label="HEAT LEVEL"
+                icon={<Flame className="h-4 w-4" />}
+              />
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Heat Control */}
-      <HeatFanControls
-        type="heat"
-        value={heatLevel}
-        onChange={handleHeatChange}
-        label="HEAT LEVEL"
-        icon={<Flame className="h-4 w-4" />}
-      />
+            <Separator />
 
-      {/* Fan Control */}
-      <HeatFanControls
-        type="fan"
-        value={fanSpeed}
-        onChange={handleFanChange}
-        label="FAN SPEED"
-        icon={<Wind className="h-4 w-4" />}
-      />
+            {/* Fan Control */}
+            <div>
+              <HeatFanControls
+                type="fan"
+                value={fanSpeed}
+                onChange={handleFanChange}
+                label="FAN SPEED"
+                icon={<Wind className="h-4 w-4" />}
+              />
+            </div>
 
-      {/* Record Change Button */}
-      <Button
-        onClick={handleRecordChange}
-        className="w-full h-14 text-lg font-semibold"
-        disabled={!hasUnsavedChanges() || isPaused}
-        variant={hasUnsavedChanges() ? "default" : "secondary"}
-      >
-        📝 Record Heat/Fan Change
-      </Button>
+            <Separator />
 
-      {/* Setting Change History */}
-      <SettingChangeHistory changes={settingChanges} maxDisplay={8} />
+            {/* Record Change Button */}
+            <Button
+              onClick={handleRecordChange}
+              className="w-full"
+              disabled={!hasUnsavedChanges() || isPaused || !isRunning}
+              variant={hasUnsavedChanges() ? "default" : "secondary"}
+            >
+              📝 Record Heat/Fan Change
+            </Button>
 
-      {/* Crack Events */}
-      <CrackEventButtons
-        elapsedTime={elapsedTime}
-        onCrackEvent={handleCrackEvent}
-        disabled={isPaused}
-      />
+            {/* Setting Change History */}
+            {settingChanges.length > 0 && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-medium mb-3">📋 Change History</h3>
+                  <SettingChangeHistory changes={settingChanges} maxDisplay={6} />
+                </div>
+              </>
+            )}
 
-      {/* Batch Capacity */}
-      {batchSize && (
-        <BatchCapacityIndicator
-          batchSize={batchSize}
-          roasterType="freshroast-sr800"
-        />
-      )}
+            <Separator />
 
-      {/* Tips */}
-      <RoasterTips roasterType="freshroast-sr800" />
-
-      {/* Control Buttons */}
-      <div className="flex gap-4 pt-4">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handlePause}
-          className="flex-1"
-        >
-          {isPaused ? '▶️ Resume' : '⏸️ Pause'}
-        </Button>
-        <Button
-          variant="destructive"
-          size="lg"
-          onClick={handleStop}
-          className="flex-1"
-        >
-          ⏹️ Stop & Save
-        </Button>
+            {/* Crack Events */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">🔊 Crack Events</h3>
+              <CrackEventButtons
+                onFirstCrack={handleFirstCrack}
+                onSecondCrack={handleSecondCrack}
+                firstCrackRecorded={crackEvents.some(e => e.type === 'first')}
+                secondCrackRecorded={crackEvents.some(e => e.type === 'second')}
+                disabled={isPaused || !isRunning}
+                variant="inline"
+              />
+            </div>
+            
+          </CardContent>
+        </Card>
+        
       </div>
+      
+      {/* Tips - Collapsible */}
+      <RoasterTips
+        roasterType="freshroast-sr800"
+        defaultCollapsed={true}
+      />
     </div>
   );
 }

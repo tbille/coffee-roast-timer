@@ -18,6 +18,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CuppingNotesCard } from "@/components/cupping/CuppingNotesCard";
 import { CuppingNotesForm } from "@/components/cupping/CuppingNotesForm";
+import { ROASTER_SPECS } from "@/utils/roasterRegistry";
+import { getRoasterBadgeClasses } from "@/utils/roasterColors";
+import type { RoasterType } from "@/types/roaster.types";
 
 interface RoastData {
   time: number;
@@ -52,6 +55,7 @@ interface RoastProfile {
   coffee_roaster?: string;
   temperature_unit?: TemperatureUnit;
   environmental_notes?: string;
+  roaster_type?: RoasterType;
 }
 
 const RoastProfileDetails = () => {
@@ -392,6 +396,18 @@ const RoastProfileDetails = () => {
     return ((profile.initial_weight - profile.final_weight) / profile.initial_weight * 100);
   };
 
+  const getRoasterDisplayName = (roasterType?: RoasterType): string => {
+    if (!roasterType) return "Unknown";
+    const roaster = ROASTER_SPECS[roasterType];
+    return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
+  };
+
+  const getRoasterDescription = (roasterType?: RoasterType): string | undefined => {
+    if (!roasterType) return undefined;
+    const roaster = ROASTER_SPECS[roasterType];
+    return roaster?.description;
+  };
+
   const generatePageTitle = (): string => {
     if (!profile) return 'Coffee Roast Profile';
     
@@ -581,7 +597,14 @@ const RoastProfileDetails = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div>
-              <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground break-words">{profile.beans_name}</h1>
+                {profile.roaster_type && (
+                  <Badge className={`text-sm ${getRoasterBadgeClasses(profile.roaster_type)}`}>
+                    {getRoasterDisplayName(profile.roaster_type)}
+                  </Badge>
+                )}
+              </div>
               {profile.profiles?.username && (
                 <p className="text-sm text-muted-foreground mt-1">
                   by {profile.profiles.username}
@@ -749,20 +772,36 @@ const RoastProfileDetails = () => {
                   )}
                 </div>
                 
-                <div>
-                  <Label className="text-sm font-medium">Coffee Roaster</Label>
-                  {isEditingMetadata && isOwner ? (
-                    <Input
-                      value={editedMetadata.coffee_roaster}
-                      onChange={(e) => setEditedMetadata({ ...editedMetadata, coffee_roaster: e.target.value })}
-                      placeholder="e.g., Gene CBR-101, Behmor 1600+"
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {profile.coffee_roaster || "Not specified"}
+                {profile.roaster_type && (
+                  <div>
+                    <Label className="text-sm font-medium">Coffee Roaster</Label>
+                    <p className="text-sm font-semibold text-primary">
+                      {getRoasterDisplayName(profile.roaster_type)}
                     </p>
-                  )}
-                </div>
+                    {getRoasterDescription(profile.roaster_type) && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {getRoasterDescription(profile.roaster_type)}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {!profile.roaster_type && (
+                  <div>
+                    <Label className="text-sm font-medium">Coffee Roaster</Label>
+                    {isEditingMetadata && isOwner ? (
+                      <Input
+                        value={editedMetadata.coffee_roaster}
+                        onChange={(e) => setEditedMetadata({ ...editedMetadata, coffee_roaster: e.target.value })}
+                        placeholder="e.g., Gene CBR-101, Behmor 1600+"
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {profile.coffee_roaster || "Not specified"}
+                      </p>
+                    )}
+                  </div>
+                )}
                 
                 <div>
                   <Label className="text-sm font-medium">Duration</Label>

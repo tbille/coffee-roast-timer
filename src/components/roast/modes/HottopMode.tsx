@@ -4,9 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { Play, Pause, Square, RotateCcw } from 'lucide-react';
 import { TimerDisplay } from "@/components/roast/shared/TimerDisplay";
 import { CrackEventButtons } from "@/components/roast/shared/CrackEventButtons";
-import { BatchCapacityIndicator } from "@/components/roast/shared/BatchCapacityIndicator";
+import { BatchCapacityBadge } from "@/components/roast/shared/BatchCapacityBadge";
 import { RoasterTips } from "@/components/roast/shared/RoasterTips";
 import { ManualControlSliders, type ManualControl } from "@/components/roast/hottop/ManualControlSliders";
 import { AdvancedMetrics, calculateRoR, type AdvancedMetricsData } from "@/components/roast/hottop/AdvancedMetrics";
@@ -66,14 +68,6 @@ export function HottopMode({
       if (interval) clearInterval(interval);
     };
   }, [isRunning, isPaused]);
-
-  // Start roast automatically
-  useEffect(() => {
-    if (!isRunning) {
-      startTimeRef.current = Date.now();
-      setIsRunning(true);
-    }
-  }, []);
 
   // Record initial manual control settings
   useEffect(() => {
@@ -156,7 +150,26 @@ export function HottopMode({
     onSave(roastData);
   };
 
-  const handleCrackEvent = (event: CrackEvent) => {
+  const handleFirstCrack = () => {
+    if (crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'first',
+      timestamp: Date.now()
+    };
+    setCrackEvents(prev => [...prev, event]);
+  };
+
+  const handleSecondCrack = () => {
+    if (crackEvents.some(e => e.type === 'second')) return;
+    if (!crackEvents.some(e => e.type === 'first')) return;
+    
+    const event: CrackEvent = {
+      time: elapsedTime,
+      type: 'second',
+      timestamp: Date.now()
+    };
     setCrackEvents(prev => [...prev, event]);
   };
 
@@ -181,196 +194,292 @@ export function HottopMode({
     timeElapsed: elapsedTime
   };
 
+  // Add reset handler
+  const handleReset = () => {
+    setElapsedTime(0);
+    setIsRunning(false);
+    setIsPaused(false);
+    setBeanTemp('');
+    setEnvironmentalTemp('');
+    setTemperatureData([]);
+    setCrackEvents([]);
+    setManualControls([]);
+    setHasRecordedInitialControl(false);
+    startTimeRef.current = 0;
+    pausedTimeRef.current = 0;
+  };
+
   return (
-    <div className="space-y-6 pb-6">
-      {/* Header */}
-      <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-200 dark:border-purple-800">
-        <CardContent className="p-4">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground mb-1">
-              Hottop KN-8828B-2K+ Mode
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Premium Roaster • Advanced Metrics • Artisan Compatible
-            </p>
+    <div className="space-y-4">
+      {/* Roaster Header */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl">☕</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Hottop KN-8828B-2K+</h2>
+                <p className="text-sm text-muted-foreground">Advanced Temperature Tracking</p>
+              </div>
+            </div>
+            <BatchCapacityBadge 
+              roasterType="hottop-kn8828"
+              currentWeight={batchSize}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Roast Mode Selection */}
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <Label className="text-sm font-medium">Roast Mode</Label>
-          <RadioGroup
-            value={roastMode}
-            onValueChange={(value) => setRoastMode(value as HottopModeType)}
-            disabled={isPaused}
-          >
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                <RadioGroupItem value="auto-light" id="auto-light" />
-                <Label htmlFor="auto-light" className="font-normal cursor-pointer flex-1">
-                  ☀️ Automatic Light
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                <RadioGroupItem value="auto-medium" id="auto-medium" />
-                <Label htmlFor="auto-medium" className="font-normal cursor-pointer flex-1">
-                  🌤️ Automatic Medium
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                <RadioGroupItem value="auto-dark" id="auto-dark" />
-                <Label htmlFor="auto-dark" className="font-normal cursor-pointer flex-1">
-                  🌑 Automatic Dark
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                <RadioGroupItem value="manual" id="manual" />
-                <Label htmlFor="manual" className="font-normal cursor-pointer flex-1">
-                  🎛️ Manual Mode (full control)
-                </Label>
-              </div>
-            </div>
-          </RadioGroup>
-        </CardContent>
-      </Card>
-
-      {/* Timer */}
-      <TimerDisplay 
-        time={elapsedTime}
-        mode="count-up"
-        label="TIME ELAPSED"
-      />
-
-      {/* Bean Temperature */}
-      <Card className="border-2 border-primary/20">
-        <CardContent className="p-6">
-          <h3 className="text-sm font-semibold text-center mb-4 text-muted-foreground">
-            BEAN TEMPERATURE
-          </h3>
-          <div className="text-center space-y-2">
-            <div className="text-5xl font-bold text-orange-600 dark:text-orange-400 font-mono">
-              {lastTempData?.beanTemp.toFixed(0) || '---'}°C
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Current bean temperature
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Temperature Input */}
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="bean-temp" className="text-sm font-medium">
-                Bean Temp (°C) *
-              </Label>
-              <Input
-                id="bean-temp"
-                type="number"
-                placeholder="e.g., 205"
-                value={beanTemp}
-                onChange={(e) => setBeanTemp(e.target.value)}
-                disabled={isPaused}
-                className="text-lg h-12 text-center font-mono"
-                min="0"
-                max="300"
-                step="1"
+      {/* Two-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        
+        {/* LEFT COLUMN: Timer & Controls */}
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {/* Timer */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground text-center uppercase tracking-wide">
+                Roast Timer
+              </h3>
+              <TimerDisplay 
+                seconds={elapsedTime} 
+                mode="count-up" 
+                size="large"
               />
             </div>
             
+            {/* Control buttons */}
             <div className="space-y-2">
-              <Label htmlFor="env-temp" className="text-sm font-medium">
-                Environmental Temp (°C)
-              </Label>
-              <Input
-                id="env-temp"
-                type="number"
-                placeholder="e.g., 24"
-                value={environmentalTemp}
-                onChange={(e) => setEnvironmentalTemp(e.target.value)}
+              <div className="flex gap-2">
+                {!isRunning ? (
+                  <Button 
+                    onClick={() => {
+                      startTimeRef.current = Date.now();
+                      setIsRunning(true);
+                    }} 
+                    size="lg"
+                    className="flex items-center gap-2 flex-1"
+                  >
+                    <Play className="h-5 w-5" />
+                    Start Roast
+                  </Button>
+                ) : (
+                  <>
+                    {!isPaused ? (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="secondary"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Pause className="h-5 w-5" />
+                        Pause
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handlePause} 
+                        variant="default"
+                        size="lg"
+                        className="flex items-center gap-2 flex-1"
+                      >
+                        <Play className="h-5 w-5" />
+                        Resume
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={handleStop} 
+                      variant="destructive"
+                      size="lg"
+                      className="flex items-center gap-2"
+                    >
+                      <Square className="h-5 w-5" />
+                      Stop
+                    </Button>
+                  </>
+                )}
+              </div>
+              
+              {!isRunning && elapsedTime > 0 && (
+                <Button 
+                  onClick={handleReset} 
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset
+                </Button>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Roast Mode Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Roast Mode</Label>
+              <RadioGroup
+                value={roastMode}
+                onValueChange={(value) => setRoastMode(value as HottopModeType)}
                 disabled={isPaused}
-                className="text-lg h-12 text-center font-mono"
-                min="0"
-                max="100"
-                step="1"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
+                    <RadioGroupItem value="auto-light" id="auto-light" />
+                    <Label htmlFor="auto-light" className="font-normal cursor-pointer flex-1">
+                      ☀️ Auto Light
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
+                    <RadioGroupItem value="auto-medium" id="auto-medium" />
+                    <Label htmlFor="auto-medium" className="font-normal cursor-pointer flex-1">
+                      🌤️ Auto Medium
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
+                    <RadioGroupItem value="auto-dark" id="auto-dark" />
+                    <Label htmlFor="auto-dark" className="font-normal cursor-pointer flex-1">
+                      🌑 Auto Dark
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
+                    <RadioGroupItem value="manual" id="manual" />
+                    <Label htmlFor="manual" className="font-normal cursor-pointer flex-1">
+                      🎛️ Manual
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* RIGHT COLUMN: Temperature & Tracking */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            
+            {/* Bean Temperature Display */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                🌡️ Bean Temperature
+              </Label>
+              <div className="flex items-center justify-center">
+                <div className="text-4xl font-bold font-mono text-orange-600 dark:text-orange-400">
+                  {lastTempData?.beanTemp.toFixed(0) || '---'}°C
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Temperature Input */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="bean-temp" className="text-sm font-medium">
+                    Bean Temp (°C) *
+                  </Label>
+                  <Input
+                    id="bean-temp"
+                    type="number"
+                    placeholder="205"
+                    value={beanTemp}
+                    onChange={(e) => setBeanTemp(e.target.value)}
+                    disabled={isPaused || !isRunning}
+                    className="text-2xl font-bold font-mono text-center h-14"
+                    min="0"
+                    max="300"
+                    step="1"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="env-temp" className="text-sm font-medium">
+                    Env Temp (°C)
+                  </Label>
+                  <Input
+                    id="env-temp"
+                    type="number"
+                    placeholder="24"
+                    value={environmentalTemp}
+                    onChange={(e) => setEnvironmentalTemp(e.target.value)}
+                    disabled={isPaused || !isRunning}
+                    className="text-2xl font-bold font-mono text-center h-14"
+                    min="0"
+                    max="100"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleRecordTemp}
+                className="w-full"
+                size="default"
+                disabled={!beanTemp || isPaused || !isRunning}
+              >
+                📝 Record Temperature
+              </Button>
+
+              {temperatureData.length > 0 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {temperatureData.length} reading{temperatureData.length !== 1 ? 's' : ''} recorded
+                </p>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Advanced Metrics */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">📊 Advanced Metrics</h3>
+              <AdvancedMetrics data={advancedMetrics} />
+            </div>
+
+            {/* Manual Controls (only in manual mode) */}
+            {roastMode === 'manual' && (
+              <>
+                <Separator />
+                <div>
+                  <ManualControlSliders
+                    heatPercent={heatPercent}
+                    fanPercent={fanPercent}
+                    onHeatChange={setHeatPercent}
+                    onFanChange={setFanPercent}
+                    onRecordChange={handleRecordManualControl}
+                    disabled={isPaused || !isRunning}
+                    hasUnsavedChanges={hasUnsavedControlChanges()}
+                  />
+                </div>
+              </>
+            )}
+
+            <Separator />
+
+            {/* Crack Events */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">🔊 Crack Events</h3>
+              <CrackEventButtons
+                onFirstCrack={handleFirstCrack}
+                onSecondCrack={handleSecondCrack}
+                firstCrackRecorded={crackEvents.some(e => e.type === 'first')}
+                secondCrackRecorded={crackEvents.some(e => e.type === 'second')}
+                disabled={isPaused || !isRunning}
+                variant="inline"
               />
             </div>
-          </div>
-
-          <Button
-            onClick={handleRecordTemp}
-            className="w-full h-12 text-base font-semibold"
-            disabled={!beanTemp || isPaused}
-            size="lg"
-          >
-            📝 Record Temperature
-          </Button>
-
-          {temperatureData.length > 0 && (
-            <div className="text-center text-sm text-muted-foreground">
-              {temperatureData.length} reading{temperatureData.length !== 1 ? 's' : ''} recorded
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Advanced Metrics */}
-      <AdvancedMetrics data={advancedMetrics} />
-
-      {/* Manual Controls (only in manual mode) */}
-      {roastMode === 'manual' && (
-        <ManualControlSliders
-          heatPercent={heatPercent}
-          fanPercent={fanPercent}
-          onHeatChange={setHeatPercent}
-          onFanChange={setFanPercent}
-          onRecordChange={handleRecordManualControl}
-          disabled={isPaused}
-          hasUnsavedChanges={hasUnsavedControlChanges()}
-        />
-      )}
-
-      {/* Crack Events */}
-      <CrackEventButtons
-        elapsedTime={elapsedTime}
-        onCrackEvent={handleCrackEvent}
-        disabled={isPaused}
-      />
-
-      {/* Batch Capacity */}
-      {batchSize && (
-        <BatchCapacityIndicator
-          batchSize={batchSize}
-          roasterType="hottop-kn8828"
-        />
-      )}
-
-      {/* Tips */}
-      <RoasterTips roasterType="hottop-kn8828" />
-
-      {/* Control Buttons */}
-      <div className="flex gap-4 pt-4">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handlePause}
-          className="flex-1"
-        >
-          {isPaused ? '▶️ Resume' : '⏸️ Pause'}
-        </Button>
-        <Button
-          variant="destructive"
-          size="lg"
-          onClick={handleStop}
-          className="flex-1"
-        >
-          ⏹️ Stop & Save
-        </Button>
+            
+          </CardContent>
+        </Card>
+        
       </div>
+      
+      {/* Tips - Collapsible */}
+      <RoasterTips
+        roasterType="hottop-kn8828"
+        defaultCollapsed={true}
+      />
     </div>
   );
 }

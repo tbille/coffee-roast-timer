@@ -11,6 +11,11 @@ import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, Copy, ThumbsUp, Thermo
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
+import { RoasterFilter } from "@/components/dashboard/RoasterFilter";
+import { ROASTER_SPECS } from "@/utils/roasterRegistry";
+import { getRoasterBadgeClasses } from "@/utils/roasterColors";
+import type { RoasterType } from "@/types/roaster.types";
+
 interface RoastProfile {
   id: string;
   user_id: string;
@@ -27,6 +32,7 @@ interface RoastProfile {
   created_at: string;
   likes_count: number;
   temperature_unit?: string;
+  roaster_type?: RoasterType;
 }
 const Discover = () => {
   const {
@@ -40,6 +46,7 @@ const Discover = () => {
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
   useEffect(() => {
@@ -50,7 +57,7 @@ const Discover = () => {
   }, [user]);
   useEffect(() => {
     filterProfiles();
-  }, [searchQuery, profiles]);
+  }, [searchQuery, profiles, selectedRoaster]);
   const fetchUserPreferences = async () => {
     try {
       const {
@@ -113,12 +120,30 @@ const Discover = () => {
     }
   };
   const filterProfiles = () => {
-    if (!searchQuery.trim()) {
-      setFilteredProfiles(profiles);
-      return;
+    let filtered = profiles;
+    
+    // Apply roaster filter
+    if (selectedRoaster !== "all") {
+      if (selectedRoaster === "unknown") {
+        filtered = filtered.filter(p => !p.roaster_type);
+      } else {
+        filtered = filtered.filter(p => p.roaster_type === selectedRoaster);
+      }
     }
-    const query = searchQuery.toLowerCase();
-    const filtered = profiles.filter(profile => profile.beans_name.toLowerCase().includes(query) || profile.origin?.toLowerCase().includes(query) || profile.farm_name?.toLowerCase().includes(query) || profile.roast_process?.toLowerCase().includes(query) || profile.coffee_roaster?.toLowerCase().includes(query));
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(profile => 
+        profile.beans_name.toLowerCase().includes(query) || 
+        profile.origin?.toLowerCase().includes(query) || 
+        profile.farm_name?.toLowerCase().includes(query) || 
+        profile.roast_process?.toLowerCase().includes(query) || 
+        profile.coffee_roaster?.toLowerCase().includes(query) ||
+        getRoasterDisplayName(profile.roaster_type).toLowerCase().includes(query)
+      );
+    }
+    
     setFilteredProfiles(filtered);
   };
   const formatTime = (seconds: number): string => {
@@ -153,6 +178,12 @@ const Discover = () => {
       }
     });
   };
+
+  const getRoasterDisplayName = (roasterType?: RoasterType): string => {
+    if (!roasterType) return "Unknown";
+    const roaster = ROASTER_SPECS[roasterType];
+    return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
+  };
   if (loading) {
     return <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
         <div className="container mx-auto max-w-6xl w-full">
@@ -184,8 +215,11 @@ const Discover = () => {
               <Input placeholder="Search by bean name, origin, farm, process, or roaster..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
-            {/* Temperature Unit Toggle */}
-            
+            {/* Roaster Filter */}
+            <RoasterFilter 
+              value={selectedRoaster} 
+              onChange={setSelectedRoaster}
+            />
           </CardContent>
         </Card>
 
@@ -209,9 +243,18 @@ const Discover = () => {
             {filteredProfiles.map(profile => <Card key={profile.id} className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => navigate(`/profile/${profile.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                      {profile.beans_name}
-                    </CardTitle>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {profile.beans_name}
+                        </CardTitle>
+                        {profile.roaster_type && (
+                          <Badge className={`text-xs ${getRoasterBadgeClasses(profile.roaster_type)}`}>
+                            {getRoasterDisplayName(profile.roaster_type)}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
                         <ThumbsUp className="h-3 w-3 text-muted-foreground" />
