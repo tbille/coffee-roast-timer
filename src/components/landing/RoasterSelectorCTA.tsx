@@ -82,7 +82,7 @@ export function RoasterSelectorCTA() {
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
           size="lg"
-          className="flex-1 h-14 text-lg font-semibold"
+          className="flex-1 h-16 text-lg font-semibold"
           onClick={handleStartRoasting}
           disabled={!selectedRoaster}
         >
@@ -92,7 +92,7 @@ export function RoasterSelectorCTA() {
         <Button
           size="lg"
           variant="outline"
-          className="flex-1 h-14 text-lg"
+          className="flex-1 h-16 text-lg"
           onClick={handleBrowseProfiles}
         >
           Browse Profiles
