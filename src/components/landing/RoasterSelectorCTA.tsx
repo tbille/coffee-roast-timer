@@ -67,9 +67,9 @@ export function RoasterSelectorCTA() {
           </SelectTrigger>
           <SelectContent>
             {sortedRoasters.map((roaster) => (
-              <SelectItem key={roaster.id} value={roaster.id} className="py-3">
+              <SelectItem key={roaster.id} value={roaster.id} className="py-4 text-base min-h-[56px]">
                 <div className="flex items-center gap-2">
-                  <Coffee className="h-4 w-4 opacity-60" />
+                  <Coffee className="h-5 w-5 opacity-60" />
                   <span className="font-medium">{roaster.displayName}</span>
                 </div>
               </SelectItem>
