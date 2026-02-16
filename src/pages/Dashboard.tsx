@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
+  const [profileCounts, setProfileCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
@@ -53,7 +54,22 @@ const Dashboard = () => {
 
   useEffect(() => {
     filterProfiles();
+    calculateProfileCounts();
   }, [profiles, selectedRoaster]);
+
+  const calculateProfileCounts = () => {
+    const counts: Record<string, number> = { total: profiles.length, unknown: 0 };
+    
+    profiles.forEach((profile) => {
+      if (!profile.roaster_type) {
+        counts.unknown = (counts.unknown || 0) + 1;
+      } else {
+        counts[profile.roaster_type] = (counts[profile.roaster_type] || 0) + 1;
+      }
+    });
+    
+    setProfileCounts(counts);
+  };
 
   const filterProfiles = () => {
     if (selectedRoaster === "all") {
@@ -173,6 +189,7 @@ const Dashboard = () => {
             <RoasterFilter 
               value={selectedRoaster} 
               onChange={setSelectedRoaster}
+              profileCounts={profileCounts}
               className="max-w-md mx-auto"
             />
           </CardContent>

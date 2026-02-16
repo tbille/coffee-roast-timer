@@ -86,6 +86,25 @@ export interface RoastProfile {
    */
   roaster_data: RoasterModeData;
 
+  // NEW: Roast replication guidance fields
+  /**
+   * Structured roaster-specific settings for replication
+   * Contains temperature schedules, profile configs, control schedules, starting conditions
+   */
+  roaster_settings?: RoasterSettings;
+  
+  /**
+   * Time-stamped roast milestones with sensory cues
+   * Helps users know what to expect at each stage
+   */
+  milestones?: RoastMilestone[];
+  
+  /**
+   * Development phase statistics
+   * Key metrics for roast quality and replication
+   */
+  development_stats?: DevelopmentStats;
+
   // Relations
   profiles?: {
     username?: string;
@@ -102,4 +121,79 @@ export interface RoastStatistics {
   weightLossPercent?: number;
   developmentTime?: number;
   developmentRatio?: number;
+}
+
+// NEW: Roaster Settings Types for Replication Guidance
+
+export interface TemperatureAdjustment {
+  time_seconds: number;
+  target_temp_c: number;
+  note?: string;
+}
+
+export interface ProfileConfig {
+  profile_name: string;  // "P1", "P2", "P3", etc. for Behmor
+  base_duration_seconds: number;
+  extensions?: Array<{
+    at_time_remaining_seconds: number;
+    add_seconds: number;
+  }>;
+}
+
+export interface ControlChange {
+  time_seconds: number;
+  heat_level?: 'low' | 'medium' | 'high' | number;  // 0-100 or text
+  fan_level?: 'low' | 'medium' | 'high' | number;
+  drum_speed_rpm?: number;
+  note?: string;
+}
+
+export interface StartingConditions {
+  room_temp_c?: number;
+  bean_temp_c?: number;
+  humidity_percent?: number;
+  altitude_m?: number;
+  notes?: string;
+}
+
+export interface RoasterSettings {
+  // For temperature-based roasters (Gene Cafe, Hottop)
+  temperature_schedule?: TemperatureAdjustment[];
+  
+  // For profile-based roasters (Behmor)
+  profile_config?: ProfileConfig;
+  
+  // For manual control roasters (FreshRoast, KALDI)
+  control_schedule?: ControlChange[];
+  
+  // For all roasters
+  starting_conditions?: StartingConditions;
+  
+  // Freeform instructions for "Other" roasters
+  instructions?: string;
+}
+
+export type MilestoneType = 
+  | 'yellowing' 
+  | 'first_crack' 
+  | 'development_start'
+  | 'second_crack' 
+  | 'drop'
+  | 'custom';
+
+export interface RoastMilestone {
+  time_seconds: number;
+  event_type: MilestoneType;
+  label?: string;  // Custom label for display
+  visual_cue?: string;
+  audio_cue?: string;
+  aroma_cue?: string;
+  action_required?: string;
+}
+
+export interface DevelopmentStats {
+  first_crack_time_seconds?: number;
+  development_time_seconds?: number;  // Time from FC to drop
+  development_ratio_percent?: number; // development / total * 100
+  time_to_first_crack_seconds?: number;  // Total time to reach FC
 }

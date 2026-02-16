@@ -49,6 +49,7 @@ const Discover = () => {
   const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
+  const [profileCounts, setProfileCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     fetchProfiles();
     if (user) {
@@ -57,7 +58,23 @@ const Discover = () => {
   }, [user]);
   useEffect(() => {
     filterProfiles();
+    calculateProfileCounts();
   }, [searchQuery, profiles, selectedRoaster]);
+
+  const calculateProfileCounts = () => {
+    const counts: Record<string, number> = { total: profiles.length, unknown: 0 };
+    
+    profiles.forEach((profile) => {
+      if (!profile.roaster_type) {
+        counts.unknown = (counts.unknown || 0) + 1;
+      } else {
+        counts[profile.roaster_type] = (counts[profile.roaster_type] || 0) + 1;
+      }
+    });
+    
+    setProfileCounts(counts);
+  };
+
   const fetchUserPreferences = async () => {
     try {
       const {
@@ -219,6 +236,7 @@ const Discover = () => {
             <RoasterFilter 
               value={selectedRoaster} 
               onChange={setSelectedRoaster}
+              profileCounts={profileCounts}
             />
           </CardContent>
         </Card>
