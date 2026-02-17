@@ -199,7 +199,10 @@ src/
 # Development server with hot reload
 npm run dev
 
-# Production build
+# Generate sitemap (fetches profiles from Supabase)
+npm run sitemap
+
+# Production build (automatically generates sitemap before building)
 npm run build
 
 # Preview production build
@@ -211,6 +214,21 @@ npx tsc --noEmit
 # Lint code
 npm run lint
 ```
+
+### Sitemap Generation
+
+The project includes automatic sitemap generation that creates a static `sitemap.xml` file with all public routes and profile URLs:
+
+- **Manual generation**: Run `npm run sitemap`
+- **Automatic**: Runs automatically before every build via `prebuild` hook
+- **Location**: Generated at `public/sitemap.xml` and copied to `dist/sitemap.xml`
+- **Content**: Includes all static pages and dynamic profile URLs from Supabase
+
+The script requires the following environment variables (already in `.env`):
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase public key
+
+If Supabase credentials are not available, the script gracefully falls back to generating a sitemap with static routes only.
 
 ### Code Quality
 

@@ -10,7 +10,6 @@ import RoastTimer from "./pages/RoastTimer";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import Sitemap from "./pages/Sitemap";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RoasterProvider } from "@/contexts/RoasterContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -109,7 +108,6 @@ const App = () => (
                 <Route path="/how-to/roasters/hottop-kn-8828" element={<HottopKN8828 />} />
                 <Route path="/how-to/roasters/popcorn-popper" element={<PopcornPopper />} />
                 
-                <Route path="/sitemap.xml" element={<Sitemap />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
