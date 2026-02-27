@@ -11,7 +11,8 @@ const DevelopmentRatios = () => {
         <title>Understanding Coffee Roast Development Ratios</title>
         <meta name="description" content="Master development ratios to improve coffee roast quality. Learn the science behind balanced roasts and how timing after first crack affects flavor." />
         <meta name="keywords" content="development ratio, coffee roasting science, first crack, development time, roast quality, balanced roast" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/development-ratios" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

@@ -11,7 +11,8 @@ const GeneCafeCBR101 = () => {
         <title>How to Use Gene Cafe CBR-101 with Roast Timer</title>
         <meta name="description" content="Complete guide for tracking coffee roasts on the Gene Cafe CBR-101. Learn dual temperature tracking, transparent drum monitoring, and replication techniques." />
         <meta name="keywords" content="Gene Cafe CBR-101, coffee roasting, dual temperature tracking, roast timer, temperature adjustment schedule" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/gene-cafe-cbr-101" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

@@ -10,7 +10,8 @@ const GettingStarted = () => {
         <title>Getting Started with Roast Timer - Coffee Roasting Guide</title>
         <meta name="description" content="Learn how to set up Roast Timer, select your coffee roaster, and start tracking your first roast. Simple step-by-step guide for beginners." />
         <meta name="keywords" content="coffee roast timer setup, start roasting coffee, roast tracking tutorial, coffee roasting for beginners" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/getting-started" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

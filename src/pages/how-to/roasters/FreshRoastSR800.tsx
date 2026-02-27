@@ -11,7 +11,8 @@ const FreshRoastSR800 = () => {
         <title>How to Use FreshRoast SR800 with Roast Timer</title>
         <meta name="description" content="Complete guide for tracking FreshRoast SR800 roasts. Learn heat and fan control, small batch roasting, and fast roast techniques." />
         <meta name="keywords" content="FreshRoast SR800, coffee roasting, heat fan control, small batch roasting, fast roasting, roast timer" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/freshroast-sr800" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

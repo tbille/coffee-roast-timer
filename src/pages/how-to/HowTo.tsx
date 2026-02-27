@@ -10,7 +10,8 @@ const HowTo = () => {
         <title>How to Use Roast Timer - Complete Coffee Roasting Guide</title>
         <meta name="description" content="Learn how to use Roast Timer to track, save, and replicate coffee roasts. Step-by-step guides for Gene Cafe, Behmor, FreshRoast, KALDI, Hottop, and more." />
         <meta name="keywords" content="coffee roast timer, how to roast coffee, coffee roasting guide, roast tracking, roast profiles" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useProfileComparison } from '@/hooks/useProfileComparison';
 import { ProfileCard } from './ProfileCard';
 import { ComparisonChart } from './ComparisonChart';
@@ -84,7 +85,11 @@ export const ComparisonPage = () => {
   const stats2 = comparisonProfile2?.statistics || null;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <>
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -170,5 +175,6 @@ export const ComparisonPage = () => {
         onSelect={handleSelectProfiles}
       />
     </div>
+    </>
   );
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +161,11 @@ const Dashboard = () => {
         </div>
       </div>;
   }
-  return <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+  return <>
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
+    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
         <div className="mb-6">
@@ -328,6 +333,7 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
-    </div>;
+    </div>
+    </>;
 };
 export default Dashboard;

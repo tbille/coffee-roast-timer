@@ -23,7 +23,8 @@ const LandingPage = () => {
           content="Track your coffee roasts with precision. Support for 6 popular roasters. Browse community profiles." 
         />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://coffeeroasttimer.com" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com" />
       </Helmet>
 
       <div className="flex flex-col">

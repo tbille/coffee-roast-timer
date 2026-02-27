@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -197,7 +198,15 @@ const Discover = () => {
         </div>
       </div>;
   }
-  return <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+  return <>
+    <Helmet>
+      <title>Discover Roast Profiles - Community Coffee Roasts</title>
+      <meta name="description" content="Browse and discover coffee roast profiles shared by the community. Find inspiration for your next roast with detailed temperature curves and bean information." />
+      <meta name="keywords" content="coffee roast profiles, community roasts, coffee roasting inspiration, roast discovery, shared roast profiles" />
+      <meta name="robots" content="index, follow" />
+      <link rel="canonical" href="https://roast-timer.com/discover" />
+    </Helmet>
+    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
         <div className="mb-6">
@@ -299,6 +308,7 @@ const Discover = () => {
               </Card>)}
           </div>}
       </div>
-    </div>;
+    </div>
+    </>;
 };
 export default Discover;

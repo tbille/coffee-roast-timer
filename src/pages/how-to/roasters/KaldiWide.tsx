@@ -11,7 +11,8 @@ const KaldiWide = () => {
         <title>How to Use KALDI Wide with Roast Timer</title>
         <meta name="description" content="Complete guide for tracking KALDI Wide roasts. Learn voice input, hands-free recording, manual flame control, and environmental tracking." />
         <meta name="keywords" content="KALDI Wide, manual coffee roasting, voice input, hands-free roasting, manual flame control, roast timer" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/kaldi-wide" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

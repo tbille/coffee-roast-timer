@@ -10,7 +10,8 @@ const CuppingNotes = () => {
         <title>How to Add Cupping Notes to Coffee Roast Profiles</title>
         <meta name="description" content="Learn how to document taste evaluations and cupping notes for your coffee roasts. Improve your roasting by connecting technique to cup quality." />
         <meta name="keywords" content="coffee cupping notes, tasting notes, coffee evaluation, SCA cupping, flavor notes, coffee scoring" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/cupping-notes" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

@@ -11,7 +11,8 @@ const Behmor2000AB = () => {
         <title>How to Use Behmor 2000AB Plus with Roast Timer</title>
         <meta name="description" content="Complete guide for tracking Behmor 2000AB Plus roasts. Learn profile selection, time extension tracking, and large batch roasting techniques." />
         <meta name="keywords" content="Behmor 2000AB, coffee roasting, profile based roasting, time extensions, roast timer, P1 P2 P3 P4 P5 profiles" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/behmor-2000ab" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

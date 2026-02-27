@@ -1,10 +1,19 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Coffee, ExternalLink } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <>
+      <Helmet>
+        <title>About Coffee Roast Timer - Our Coffee Roasting Story</title>
+        <meta name="description" content="Learn about Coffee Roast Timer, a passion project built by a home coffee roasting enthusiast to track and improve coffee roasts with the Gene CBR-101 and more." />
+        <meta name="keywords" content="about coffee roast timer, home coffee roasting, Gene CBR-101, coffee roasting enthusiast" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/about" />
+      </Helmet>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-4">About</h1>
         <p className="text-xl text-muted-foreground">
@@ -58,6 +67,7 @@ const About = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

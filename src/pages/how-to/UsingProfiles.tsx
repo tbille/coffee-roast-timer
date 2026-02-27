@@ -10,7 +10,8 @@ const UsingProfiles = () => {
         <title>How to Use Roast Profiles to Replicate Coffee Roasts</title>
         <meta name="description" content="Learn how to use roast profiles to replicate your best coffee roasts. Understand timelines, temperature curves, sensory checkpoints, and development ratios." />
         <meta name="keywords" content="coffee roast profiles, replicate roast, roast replication, coffee roasting guide, temperature curves, development ratio" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/using-profiles" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

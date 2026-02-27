@@ -11,7 +11,8 @@ const HottopKN8828 = () => {
         <title>How to Use Hottop KN-8828B-2K+ with Roast Timer</title>
         <meta name="description" content="Complete guide for tracking Hottop KN-8828B-2K+ roasts. Learn advanced controls, RoR tracking, automatic modes, and precision roasting techniques." />
         <meta name="keywords" content="Hottop KN-8828, advanced coffee roasting, RoR tracking, rate of rise, automatic roasting modes, roast timer" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/hottop-kn-8828" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

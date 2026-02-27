@@ -12,7 +12,8 @@ const PopcornPopper = () => {
         <title>How to Roast Coffee with a Popcorn Popper (Safely)</title>
         <meta name="description" content="Complete safety guide for roasting coffee with an air popcorn popper. Learn batch size limits, visual cue tracking, and beginner-friendly roasting techniques." />
         <meta name="keywords" content="popcorn popper coffee roasting, budget coffee roasting, beginner roasting, air popper roasting, home coffee roasting safety" />
-        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://roast-timer.com/how-to/roasters/popcorn-popper" />
       </Helmet>
 
       <div className="min-h-screen bg-background">
