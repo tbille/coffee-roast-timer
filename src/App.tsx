@@ -17,6 +17,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
+import { DocsScrollTop } from "@/components/navigation/DocsScrollTop";
 
 // How To pages
 import HowTo from "./pages/how-to/HowTo";
@@ -24,6 +25,10 @@ import GettingStarted from "./pages/how-to/GettingStarted";
 import UsingProfiles from "./pages/how-to/UsingProfiles";
 import CuppingNotes from "./pages/how-to/CuppingNotes";
 import DevelopmentRatios from "./pages/how-to/DevelopmentRatios";
+import FirstCrackTiming from "./pages/how-to/FirstCrackTiming";
+import RoastDefects from "./pages/how-to/RoastDefects";
+import BehmorTroubleshooting from "./pages/how-to/BehmorTroubleshooting";
+import PopcornPopperSafety from "./pages/how-to/PopcornPopperSafety";
 import GeneCafeCBR101 from "./pages/how-to/roasters/GeneCafeCBR101";
 import Behmor2000AB from "./pages/how-to/roasters/Behmor2000AB";
 import FreshRoastSR800 from "./pages/how-to/roasters/FreshRoastSR800";
@@ -65,6 +70,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <AnalyticsTracker />
+              <DocsScrollTop />
               <Header />
               <div className="flex-1">
               <Routes>
@@ -112,6 +118,10 @@ const App = () => (
                 <Route path="/how-to/using-profiles" element={<UsingProfiles />} />
                 <Route path="/how-to/cupping-notes" element={<CuppingNotes />} />
                 <Route path="/how-to/development-ratios" element={<DevelopmentRatios />} />
+                <Route path="/how-to/first-crack-timing" element={<FirstCrackTiming />} />
+                <Route path="/how-to/roast-defects" element={<RoastDefects />} />
+                <Route path="/how-to/behmor-2000ab-troubleshooting" element={<BehmorTroubleshooting />} />
+                <Route path="/how-to/popcorn-popper-safety" element={<PopcornPopperSafety />} />
                 <Route path="/how-to/roasters/gene-cafe-cbr-101" element={<GeneCafeCBR101 />} />
                 <Route path="/how-to/roasters/behmor-2000ab" element={<Behmor2000AB />} />
                 <Route path="/how-to/roasters/freshroast-sr800" element={<FreshRoastSR800 />} />

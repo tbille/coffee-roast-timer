@@ -50,6 +50,10 @@ const staticRoutes = [
   { loc: '/how-to/using-profiles', changefreq: 'monthly', priority: 0.7 },
   { loc: '/how-to/cupping-notes', changefreq: 'monthly', priority: 0.7 },
   { loc: '/how-to/development-ratios', changefreq: 'monthly', priority: 0.7 },
+  { loc: '/how-to/first-crack-timing', changefreq: 'monthly', priority: 0.7 },
+  { loc: '/how-to/roast-defects', changefreq: 'monthly', priority: 0.7 },
+  { loc: '/how-to/behmor-2000ab-troubleshooting', changefreq: 'monthly', priority: 0.7 },
+  { loc: '/how-to/popcorn-popper-safety', changefreq: 'monthly', priority: 0.7 },
   
   // Roaster-Specific Guides
   { loc: '/how-to/roasters/gene-cafe-cbr-101', changefreq: 'monthly', priority: 0.6 },

@@ -46,6 +46,26 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://roast-timer.com/how-to/first-crack-timing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://roast-timer.com/how-to/roast-defects</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://roast-timer.com/how-to/behmor-2000ab-troubleshooting</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://roast-timer.com/how-to/popcorn-popper-safety</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://roast-timer.com/how-to/roasters/gene-cafe-cbr-101</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

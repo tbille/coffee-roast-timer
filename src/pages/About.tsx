@@ -7,10 +7,14 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About Coffee Roast Timer - Our Coffee Roasting Story</title>
-        <meta name="description" content="Learn about Coffee Roast Timer, a passion project built by a home coffee roasting enthusiast to track and improve coffee roasts with the Gene CBR-101 and more." />
+        <title>About Coffee Roast Timer - Why I Built This Roasting App</title>
+        <meta name="description" content="Learn why Coffee Roast Timer was built, how it helps home roasters track better batches, and the journey from Gene CBR-101 experiments to a full roast logging tool." />
         <meta name="keywords" content="about coffee roast timer, home coffee roasting, Gene CBR-101, coffee roasting enthusiast" />
         <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="About Coffee Roast Timer - Why I Built This Roasting App" />
+        <meta property="og:description" content="The story behind Coffee Roast Timer and the home roasting workflow it was built to improve." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://roast-timer.com/about" />
         <link rel="canonical" href="https://roast-timer.com/about" />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-4xl">

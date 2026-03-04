@@ -41,7 +41,7 @@ const Dashboard = () => {
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
-  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
+  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all" | "unknown">("all");
   const [profileCounts, setProfileCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     if (!loading && !user) {

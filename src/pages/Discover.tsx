@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,18 +44,19 @@ const Discover = () => {
     description: "Community coffee roast profiles with roast curves, bean origin data, and tasting notes."
   };
 
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     toast
   } = useToast();
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all">("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all" | "unknown">(
+    (searchParams.get("roaster") as RoasterType | "all" | "unknown") || "all"
+  );
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
   const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
   const [profileCounts, setProfileCounts] = useState<Record<string, number>>({});
@@ -69,6 +70,20 @@ const Discover = () => {
     filterProfiles();
     calculateProfileCounts();
   }, [searchQuery, profiles, selectedRoaster]);
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+
+    if (searchQuery.trim()) {
+      next.set("q", searchQuery.trim());
+    }
+
+    if (selectedRoaster !== "all") {
+      next.set("roaster", selectedRoaster);
+    }
+
+    setSearchParams(next, { replace: true });
+  }, [searchQuery, selectedRoaster, setSearchParams]);
 
   const calculateProfileCounts = () => {
     const counts: Record<string, number> = { total: profiles.length, unknown: 0 };
@@ -206,12 +221,18 @@ const Discover = () => {
         </div>
       </div>;
   }
+  const hasLowValueState = searchQuery.trim().length > 0 || selectedRoaster !== "all";
+
   return <>
     <Helmet>
-      <title>Discover Roast Profiles - Community Coffee Roasts</title>
-      <meta name="description" content="Browse and discover coffee roast profiles shared by the community. Find inspiration for your next roast with detailed temperature curves and bean information." />
+      <title>Discover Coffee Roast Profiles by Roaster, Origin, and Process</title>
+      <meta name="description" content="Browse community coffee roast profiles by roaster type, bean origin, and process. Find proven roast timelines, first-crack timing, and inspiration for your next batch." />
       <meta name="keywords" content="coffee roast profiles, community roasts, coffee roasting inspiration, roast discovery, shared roast profiles" />
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content={hasLowValueState ? "noindex, follow" : "index, follow"} />
+      <meta property="og:title" content="Discover Coffee Roast Profiles by Roaster, Origin, and Process" />
+      <meta property="og:description" content="Find community roast profiles with useful timing and roast details you can replicate." />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://roast-timer.com/discover" />
       <link rel="canonical" href="https://roast-timer.com/discover" />
       <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
     </Helmet>
@@ -220,12 +241,28 @@ const Discover = () => {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Discover Roast Profiles</h1>
+          <p className="text-sm text-muted-foreground text-center mt-2 max-w-3xl mx-auto">
+            Explore real roast profiles from the community by bean origin, roaster model, and process method.
+            Use this page to find reference timelines before your next batch.
+          </p>
           <div className="flex justify-center mt-2">
             <Badge variant="secondary" className="text-xs">
               {filteredProfiles.length} profile{filteredProfiles.length !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
+
+        <Card className="shadow-coffee mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Related Guides</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2">
+            <Link to="/how-to/first-crack-timing" className="text-primary hover:underline">First crack timing</Link>
+            <Link to="/how-to/roast-defects" className="text-primary hover:underline">Roast defect diagnosis</Link>
+            <Link to="/how-to/development-ratios" className="text-primary hover:underline">Development ratios</Link>
+            <Link to="/how-to/using-profiles" className="text-primary hover:underline">Using profiles as reference</Link>
+          </CardContent>
+        </Card>
 
         {/* Search and Controls */}
         <Card className="shadow-coffee mb-6">

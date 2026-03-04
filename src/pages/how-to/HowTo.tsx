@@ -32,6 +32,10 @@ const HowTo = () => {
       "https://roast-timer.com/how-to/using-profiles",
       "https://roast-timer.com/how-to/cupping-notes",
       "https://roast-timer.com/how-to/development-ratios",
+      "https://roast-timer.com/how-to/first-crack-timing",
+      "https://roast-timer.com/how-to/roast-defects",
+      "https://roast-timer.com/how-to/behmor-2000ab-troubleshooting",
+      "https://roast-timer.com/how-to/popcorn-popper-safety",
       "https://roast-timer.com/how-to/roasters/gene-cafe-cbr-101",
       "https://roast-timer.com/how-to/roasters/behmor-2000ab",
       "https://roast-timer.com/how-to/roasters/freshroast-sr800",
@@ -48,10 +52,14 @@ const HowTo = () => {
   return (
     <>
       <Helmet>
-        <title>How to Use Roast Timer - Complete Coffee Roasting Guide</title>
-        <meta name="description" content="Learn how to use Roast Timer to track, save, and replicate coffee roasts. Step-by-step guides for Gene Cafe, Behmor, FreshRoast, KALDI, Hottop, and more." />
+        <title>Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup</title>
+        <meta name="description" content="Step-by-step coffee roasting guides for Gene Cafe, Behmor, FreshRoast, KALDI, Hottop, and popcorn poppers. Learn first crack timing, defect fixes, and profile replication." />
         <meta name="keywords" content="coffee roast timer, how to roast coffee, coffee roasting guide, roast tracking, roast profiles" />
         <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup" />
+        <meta property="og:description" content="Learn practical home roasting workflows, troubleshooting, and roaster-specific setup guides." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://roast-timer.com/how-to" />
         <link rel="canonical" href="https://roast-timer.com/how-to" />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
@@ -171,6 +179,85 @@ const HowTo = () => {
                     className="text-primary hover:underline"
                   >
                     Read guide →
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Thermometer className="h-5 w-5" />
+                    First Crack Timing
+                  </CardTitle>
+                  <CardDescription>
+                    Learn to diagnose early or late first crack and roast with consistency
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link
+                    to="/how-to/first-crack-timing"
+                    className="text-primary hover:underline"
+                  >
+                    Read guide →
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Coffee className="h-5 w-5" />
+                    Roast Defects
+                  </CardTitle>
+                  <CardDescription>
+                    Fix baked, scorched, and underdeveloped roasts with clear adjustments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link
+                    to="/how-to/roast-defects"
+                    className="text-primary hover:underline"
+                  >
+                    Read guide →
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Troubleshooting and Safety</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Behmor 2000AB Troubleshooting</CardTitle>
+                  <CardDescription>
+                    Resolve late first crack, stalled roasts, and extension timing issues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link
+                    to="/how-to/behmor-2000ab-troubleshooting"
+                    className="text-primary hover:underline"
+                  >
+                    View troubleshooting guide →
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Popcorn Popper Safety</CardTitle>
+                  <CardDescription>
+                    Batch size limits, ventilation checklist, and safer starter profile
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link
+                    to="/how-to/popcorn-popper-safety"
+                    className="text-primary hover:underline"
+                  >
+                    View safety guide →
                   </Link>
                 </CardContent>
               </Card>

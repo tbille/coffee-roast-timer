@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -433,7 +433,8 @@ const RoastProfileDetails = () => {
   const getRoasterDescription = (roasterType?: RoasterType): string | undefined => {
     if (!roasterType) return undefined;
     const roaster = ROASTER_SPECS[roasterType];
-    return roaster?.description;
+    if (!roaster) return undefined;
+    return `${roaster.manufacturer} ${roaster.name}`;
   };
 
   const generatePageTitle = (): string => {
@@ -489,6 +490,29 @@ const RoastProfileDetails = () => {
     return description;
   };
 
+  const relatedGuides = (() => {
+    const defaultGuides = [
+      { label: "First crack timing", path: "/how-to/first-crack-timing" },
+      { label: "Development ratios", path: "/how-to/development-ratios" },
+      { label: "Roast defect diagnosis", path: "/how-to/roast-defects" }
+    ];
+
+    switch (profile?.roaster_type) {
+      case "behmor-2000ab":
+        return [
+          { label: "Behmor troubleshooting", path: "/how-to/behmor-2000ab-troubleshooting" },
+          ...defaultGuides
+        ];
+      case "popcorn-popper":
+        return [
+          { label: "Popcorn popper safety", path: "/how-to/popcorn-popper-safety" },
+          ...defaultGuides
+        ];
+      default:
+        return defaultGuides;
+    }
+  })();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4">
@@ -503,18 +527,25 @@ const RoastProfileDetails = () => {
 
   if (!profile) {
     return (
-      <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
-        <div className="container mx-auto max-w-6xl w-full">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center space-y-4">
-              <div className="text-lg text-muted-foreground">Profile not found</div>
-              <Button onClick={() => navigate('/')}>
-                Return to Home
-              </Button>
+      <>
+        <Helmet>
+          <title>Roast Profile Not Found</title>
+          <meta name="robots" content="noindex, follow" />
+          <link rel="canonical" href={canonicalUrl} />
+        </Helmet>
+        <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
+          <div className="container mx-auto max-w-6xl w-full">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center space-y-4">
+                <div className="text-lg text-muted-foreground">Profile not found</div>
+                <Button onClick={() => navigate('/')}>
+                  Return to Home
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -1076,6 +1107,25 @@ const RoastProfileDetails = () => {
               onEdit={() => setShowCuppingForm(true)}
               isOwner={isOwner}
             />
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Related Guides and Roasts</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2">
+                <Link
+                  to={profile.roaster_type ? `/discover?roaster=${profile.roaster_type}` : "/discover"}
+                  className="text-primary hover:underline"
+                >
+                  Similar community roasts
+                </Link>
+                {relatedGuides.map((guide) => (
+                  <Link key={guide.path} to={guide.path} className="text-primary hover:underline">
+                    {guide.label}
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
         </div>
       </div>
 

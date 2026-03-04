@@ -6,8 +6,8 @@ import { getRoasterPrimaryColor } from "@/utils/roasterColors";
 import type { RoasterType } from "@/types/roaster.types";
 
 interface RoasterFilterProps {
-  value: RoasterType | "all";
-  onChange: (value: RoasterType | "all") => void;
+  value: RoasterType | "all" | "unknown";
+  onChange: (value: RoasterType | "all" | "unknown") => void;
   profileCounts?: Record<string, number>;
   className?: string;
 }
@@ -57,7 +57,7 @@ export const RoasterFilter = ({ value, onChange, profileCounts, className = "" }
         <Label htmlFor="roaster-filter" className="sr-only">Filter profiles by coffee roaster equipment</Label>
         <Select 
           value={value} 
-          onValueChange={(val) => onChange(val as RoasterType | "all")}
+          onValueChange={(val) => onChange(val as RoasterType | "all" | "unknown")}
         >
           <SelectTrigger 
             id="roaster-filter" 
