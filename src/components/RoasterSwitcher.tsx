@@ -38,6 +38,17 @@ export function RoasterSwitcher() {
   const availableRoasters: RoasterType[] = [
     ...new Set([...userRoasters, ...implementedRoasters])
   ].filter(r => implementedRoasters.includes(r));
+
+  const getOptionLabel = (roasterType: RoasterType) => {
+    const spec = getRoasterSpec(roasterType);
+    const preference = preferences?.find(p => p.roaster_type === roasterType);
+
+    if (preference?.is_primary) {
+      return `${spec.name} (Primary)`;
+    }
+
+    return spec.name;
+  };
   
   return (
     <Select value={currentRoaster} onValueChange={(value) => switchRoaster(value as RoasterType)}>
@@ -51,26 +62,9 @@ export function RoasterSwitcher() {
       </SelectTrigger>
       <SelectContent>
         {availableRoasters.map(roasterType => {
-          const spec = getRoasterSpec(roasterType);
-          const preference = preferences?.find(p => p.roaster_type === roasterType);
-          
           return (
             <SelectItem key={roasterType} value={roasterType}>
-              <div className="flex flex-col items-start py-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{spec.name}</span>
-                  {preference?.is_primary && (
-                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                      Primary
-                    </span>
-                  )}
-                </div>
-                {preference && (
-                  <span className="text-xs text-muted-foreground">
-                    {preference.usage_count} roast{preference.usage_count !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
+              {getOptionLabel(roasterType)}
             </SelectItem>
           );
         })}

@@ -205,9 +205,6 @@ npm run sitemap
 # Production build (automatically generates sitemap before building)
 npm run build
 
-# Build includes prerendering for public marketing routes
-# (via react-snap postbuild)
-
 # Preview production build
 npm run preview
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import RoastMonitor from "@/components/RoastMonitor";
 import { useRoaster } from "@/contexts/RoasterContext";
@@ -7,6 +7,7 @@ import type { RoasterType } from "@/types/roaster.types";
 
 const RoastTimer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { switchRoaster } = useRoaster();
   
   // Handle roaster selection from landing page
@@ -14,8 +15,9 @@ const RoastTimer = () => {
     const roasterType = location.state?.roasterType as RoasterType;
     if (roasterType) {
       switchRoaster(roasterType);
+      navigate(location.pathname, { replace: true });
     }
-  }, [location.state, switchRoaster]);
+  }, [location.pathname, location.state, navigate, switchRoaster]);
 
   return (
     <>
