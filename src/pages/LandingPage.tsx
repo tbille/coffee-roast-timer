@@ -5,6 +5,27 @@ import { RoasterShowcase } from '@/components/landing/RoasterShowcase';
 import { FeedbackSection } from '@/components/landing/FeedbackSection';
 
 const LandingPage = () => {
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Coffee Roast Timer",
+    url: "https://roast-timer.com",
+    description: "Track and improve home coffee roasting with timers, roast profiles, and community discoveries.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://roast-timer.com/discover?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Coffee Roast Timer",
+    url: "https://roast-timer.com",
+    logo: "https://roast-timer.com/favicon.ico"
+  };
+
   return (
     <>
       <Helmet>
@@ -25,6 +46,8 @@ const LandingPage = () => {
         <meta property="og:type" content="website" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://roast-timer.com" />
+        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(organizationSchema)}</script>
       </Helmet>
 
       <div className="flex flex-col">

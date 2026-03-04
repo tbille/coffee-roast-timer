@@ -36,6 +36,14 @@ interface RoastProfile {
   roaster_type?: RoasterType;
 }
 const Discover = () => {
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Discover Roast Profiles",
+    url: "https://roast-timer.com/discover",
+    description: "Community coffee roast profiles with roast curves, bean origin data, and tasting notes."
+  };
+
   const {
     user
   } = useAuth();
@@ -205,6 +213,7 @@ const Discover = () => {
       <meta name="keywords" content="coffee roast profiles, community roasts, coffee roasting inspiration, roast discovery, shared roast profiles" />
       <meta name="robots" content="index, follow" />
       <link rel="canonical" href="https://roast-timer.com/discover" />
+      <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
     </Helmet>
     <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">

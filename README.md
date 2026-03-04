@@ -205,6 +205,9 @@ npm run sitemap
 # Production build (automatically generates sitemap before building)
 npm run build
 
+# Build includes prerendering for public marketing routes
+# (via react-snap postbuild)
+
 # Preview production build
 npm run preview
 
@@ -261,6 +264,12 @@ Required for production:
 ```
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Optional SEO and analytics variables:
+```
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_GSC_SITE_VERIFICATION=google-site-verification-token
 ```
 
 ## Custom Domain

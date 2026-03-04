@@ -4,6 +4,47 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Coffee, Timer, BookOpen, Thermometer } from "lucide-react";
 
 const HowTo = () => {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://roast-timer.com"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "How To",
+        item: "https://roast-timer.com/how-to"
+      }
+    ]
+  };
+
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Coffee Roasting Guides",
+    itemListElement: [
+      "https://roast-timer.com/how-to/getting-started",
+      "https://roast-timer.com/how-to/using-profiles",
+      "https://roast-timer.com/how-to/cupping-notes",
+      "https://roast-timer.com/how-to/development-ratios",
+      "https://roast-timer.com/how-to/roasters/gene-cafe-cbr-101",
+      "https://roast-timer.com/how-to/roasters/behmor-2000ab",
+      "https://roast-timer.com/how-to/roasters/freshroast-sr800",
+      "https://roast-timer.com/how-to/roasters/kaldi-wide",
+      "https://roast-timer.com/how-to/roasters/hottop-kn-8828",
+      "https://roast-timer.com/how-to/roasters/popcorn-popper"
+    ].map((url, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url
+    }))
+  };
+
   return (
     <>
       <Helmet>
@@ -12,6 +53,8 @@ const HowTo = () => {
         <meta name="keywords" content="coffee roast timer, how to roast coffee, coffee roasting guide, roast tracking, roast profiles" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://roast-timer.com/how-to" />
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
       </Helmet>
 
       <div className="min-h-screen bg-background">

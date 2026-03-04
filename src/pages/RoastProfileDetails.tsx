@@ -72,6 +72,9 @@ interface RoastProfile {
 
 const RoastProfileDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const canonicalUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${window.location.pathname}`
+    : `https://roast-timer.com/profile/${id ?? ""}`;
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -581,7 +584,7 @@ const RoastProfileDetails = () => {
         <meta property="og:title" content={generatePageTitle()} />
         <meta property="og:description" content={generatePageDescription()} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={window.location.href} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="Roast Timer - Coffee Roasting Profiles" />
         <meta property="og:locale" content="en_US" />
         
@@ -606,7 +609,7 @@ const RoastProfileDetails = () => {
         <meta name="twitter:description" content={generatePageDescription()} />
         
         {/* Canonical URL */}
-        <link rel="canonical" href={window.location.href} />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* JSON-LD Structured Data */}
         {profile && (

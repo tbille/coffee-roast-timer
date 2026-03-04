@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
@@ -15,6 +16,7 @@ import { RoasterProvider } from "@/contexts/RoasterContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 
 // How To pages
 import HowTo from "./pages/how-to/HowTo";
@@ -46,6 +48,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <HelmetProvider>
+    {import.meta.env.VITE_GSC_SITE_VERIFICATION ? (
+      <Helmet>
+        <meta
+          name="google-site-verification"
+          content={import.meta.env.VITE_GSC_SITE_VERIFICATION}
+        />
+      </Helmet>
+    ) : null}
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RoasterProvider>
@@ -54,6 +64,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <AnalyticsTracker />
               <Header />
               <div className="flex-1">
               <Routes>
