@@ -252,18 +252,6 @@ const Discover = () => {
           </div>
         </div>
 
-        <Card className="shadow-coffee mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">Related Guides</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2">
-            <Link to="/how-to/first-crack-timing" className="text-primary hover:underline">First crack timing</Link>
-            <Link to="/how-to/roast-defects" className="text-primary hover:underline">Roast defect diagnosis</Link>
-            <Link to="/how-to/development-ratios" className="text-primary hover:underline">Development ratios</Link>
-            <Link to="/how-to/using-profiles" className="text-primary hover:underline">Using profiles as reference</Link>
-          </CardContent>
-        </Card>
-
         {/* Search and Controls */}
         <Card className="shadow-coffee mb-6">
           <CardContent className="p-4 space-y-4">
@@ -353,6 +341,18 @@ const Discover = () => {
                 </CardContent>
               </Card>)}
           </div>}
+
+        <Card className="shadow-coffee mt-8">
+          <CardHeader>
+            <CardTitle className="text-base">Related Guides</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2">
+            <Link to="/how-to/first-crack-timing" className="text-primary hover:underline">First crack timing</Link>
+            <Link to="/how-to/roast-defects" className="text-primary hover:underline">Roast defect diagnosis</Link>
+            <Link to="/how-to/development-ratios" className="text-primary hover:underline">Development ratios</Link>
+            <Link to="/how-to/using-profiles" className="text-primary hover:underline">Using profiles as reference</Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
     </>;
