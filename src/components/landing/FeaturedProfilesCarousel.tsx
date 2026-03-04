@@ -121,6 +121,7 @@ export function FeaturedProfilesCarousel() {
             size="icon"
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 hidden md:flex"
             onClick={handlePrevious}
+            aria-label="Previous featured profiles"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -129,6 +130,7 @@ export function FeaturedProfilesCarousel() {
             size="icon"
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 hidden md:flex"
             onClick={handleNext}
+            aria-label="Next featured profiles"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

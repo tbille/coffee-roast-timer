@@ -97,6 +97,7 @@ export const ComparisonPage = () => {
             variant="ghost"
             size="icon"
             onClick={() => navigate('/dashboard')}
+            aria-label="Back to dashboard"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

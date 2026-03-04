@@ -55,14 +55,20 @@ export function RoasterSelectorCTA() {
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Roaster Selector */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-muted-foreground block text-center">
+        <label
+          id="roaster-selector-label"
+          className="text-sm font-medium text-muted-foreground block text-center"
+        >
           Select Your Roaster to Start
         </label>
         <Select
           value={selectedRoaster}
           onValueChange={(value) => setSelectedRoaster(value as RoasterType)}
         >
-          <SelectTrigger className="w-full h-14 text-base">
+          <SelectTrigger
+            className="w-full h-14 text-base"
+            aria-labelledby="roaster-selector-label"
+          >
             <SelectValue placeholder="Choose your coffee roaster..." />
           </SelectTrigger>
           <SelectContent>

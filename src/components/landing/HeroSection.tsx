@@ -64,6 +64,7 @@ export function HeroSection() {
         <RoasterSelectorCTA />
 
         {/* Feature Highlights */}
+        <h2 className="sr-only">Feature Highlights</h2>
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <div className="flex flex-col items-center text-center space-y-2">
             <div className="p-3 rounded-full bg-primary/10">

@@ -92,6 +92,7 @@ const Header = () => {
               size="sm"
               onClick={signOut}
               className="flex items-center gap-2"
+              aria-label="Sign out"
             >
               <LogOut className="h-3 w-3" />
             </Button>
@@ -144,7 +145,7 @@ const Header = () => {
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" aria-label="Open navigation menu">
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>

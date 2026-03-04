@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, ArrowRight, MapPin, Scale, ThumbsUp } from 'lucide-react';
-import { getRoasterBadgeClasses } from '@/utils/roasterColors';
 import { ROASTER_SPECS } from '@/utils/roasterRegistry';
 import type { RoasterType } from '@/types/roaster.types';
 
@@ -121,7 +120,7 @@ export function LatestRoasts() {
                           {profile.beans_name}
                         </CardTitle>
                         {profile.roaster_type && (
-                          <Badge className={`text-xs ${getRoasterBadgeClasses(profile.roaster_type)}`}>
+                          <Badge className="text-xs border-primary/30 bg-primary/10 text-foreground">
                             {getRoasterDisplayName(profile.roaster_type)}
                           </Badge>
                         )}
