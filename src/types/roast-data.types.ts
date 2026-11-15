@@ -18,7 +18,7 @@ export interface BaseRoastData {
  * Records when cracks occur during the roast
  */
 export interface CrackEvent {
-  time: number;                     // Seconds elapsed (or remaining for countdown modes)
+  time: number;                     // Seconds elapsed from start (excluding pauses)
   type: 'first' | 'second';         // Crack type
   targetTemp?: number;              // Target temp at time of crack (Gene mode)
   currentTemp?: number;             // Actual temp at time of crack
@@ -56,13 +56,13 @@ export interface ProfileBasedRoastData extends BaseRoastData {
 export type BehmortProfile = 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'Manual';
 
 export interface Extension {
-  time: number;                     // Seconds remaining when extension added
+  time: number;                     // Seconds elapsed when extension added
   duration: number;                 // Duration added (typically 30 seconds)
   timestamp: number;                // Unix timestamp when added
 }
 
 export interface OptionalTempDataPoint {
-  time: number;                     // Seconds remaining (countdown mode)
+  time: number;                     // Seconds elapsed from start
   temp: number;                     // Temperature in Celsius
   timestamp: number;                // Unix timestamp of recording
 }

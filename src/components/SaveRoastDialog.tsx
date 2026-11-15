@@ -31,6 +31,10 @@ interface SaveRoastDialogProps {
   onSaveSuccess?: () => void;
   roasterType: RoasterType;
   temperatureUnit: TemperatureUnit;
+  /** Roasting time excluding pauses; falls back to endTime - startTime */
+  durationSeconds?: number;
+  /** Prefills the initial weight field (grams) */
+  defaultInitialWeight?: number;
 }
 
 const SaveRoastDialog = ({ 
@@ -39,7 +43,9 @@ const SaveRoastDialog = ({
   roastData, 
   onSaveSuccess,
   roasterType,
-  temperatureUnit 
+  temperatureUnit,
+  durationSeconds: providedDuration,
+  defaultInitialWeight
 }: SaveRoastDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -49,7 +55,7 @@ const SaveRoastDialog = ({
     beansName: "",
     origin: "",
     farmName: "",
-    initialWeight: "",
+    initialWeight: defaultInitialWeight ? String(defaultInitialWeight) : "",
     finalWeight: "",
     roastProcess: "",
     coffeeRoaster: "",
@@ -57,9 +63,9 @@ const SaveRoastDialog = ({
   });
 
   // Calculate duration from roast data
-  const durationSeconds = roastData.endTime 
+  const durationSeconds = providedDuration ?? (roastData.endTime
     ? Math.floor((roastData.endTime - roastData.startTime) / 1000)
-    : 0;
+    : 0);
 
   // Auto-save after successful authentication
   useEffect(() => {

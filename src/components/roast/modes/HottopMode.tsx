@@ -1,410 +1,200 @@
-import { useState, useEffect, useRef } from "react";
+/**
+ * HottopMode Component
+ * Bean/environment temperature tracking with RoR for the Hottop KN-8828B-2K+,
+ * plus heat/fan logging in manual mode.
+ */
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Play, Pause, Square, RotateCcw } from 'lucide-react';
-import { TimerDisplay } from "@/components/roast/shared/TimerDisplay";
-import { CrackEventButtons } from "@/components/roast/shared/CrackEventButtons";
-import { BatchCapacityBadge } from "@/components/roast/shared/BatchCapacityBadge";
-import { RoasterTips } from "@/components/roast/shared/RoasterTips";
-import { ManualControlSliders, type ManualControl } from "@/components/roast/hottop/ManualControlSliders";
-import { AdvancedMetrics, calculateRoR, type AdvancedMetricsData } from "@/components/roast/hottop/AdvancedMetrics";
+import { RoasterHeader } from "../shared/RoasterHeader";
+import { RoastControls } from "../shared/RoastControls";
+import { CrackEventButtons } from "../shared/CrackEventButtons";
+import { RoasterTips } from "../shared/RoasterTips";
+import { ManualControlSliders } from "../hottop/ManualControlSliders";
+import { AdvancedMetrics, calculateRoR, type AdvancedMetricsData } from "../hottop/AdvancedMetrics";
+import { useRoastSession } from "@/hooks/useRoastSession";
+import { getRoasterSpec } from "@/utils/roasterRegistry";
 import type {
-  HottopRoastData,
-  HottopMode as HottopModeType,
-  HottopTempDataPoint,
+  CrackEvent,
   HottopManualControl,
-  CrackEvent
+  HottopMode as HottopModeType,
+  HottopRoastData,
+  HottopTempDataPoint,
 } from "@/types/roast-data.types";
+import type { RoastModeProps } from "./types";
 
-interface HottopModeProps {
-  onSave: (data: HottopRoastData) => void;
-  initialBatchSize?: number;
+const ROASTER = 'hottop-kn8828';
+
+const ROAST_MODES: { value: HottopModeType; label: string }[] = [
+  { value: 'auto-light', label: '☀️ Auto Light' },
+  { value: 'auto-medium', label: '🌤️ Auto Medium' },
+  { value: 'auto-dark', label: '🌑 Auto Dark' },
+  { value: 'manual', label: '🎛️ Manual' },
+];
+
+interface HottopSettings {
+  batchSize: number;
+  roastMode: HottopModeType;
+  heatPercent: number;
+  fanPercent: number;
 }
 
-export function HottopMode({
-  onSave,
-  initialBatchSize = 250
-}: HottopModeProps) {
-  // Timer state
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const startTimeRef = useRef<number>(0);
-  const pausedTimeRef = useRef<number>(0);
+interface HottopLog {
+  temperatureData: HottopTempDataPoint[];
+  crackEvents: CrackEvent[];
+  manualControls: HottopManualControl[];
+}
 
-  // Roast mode
-  const [roastMode, setRoastMode] = useState<HottopModeType>('manual');
-  
-  // Roast data
-  const [batchSize, setBatchSize] = useState(initialBatchSize);
-  const [beanTemp, setBeanTemp] = useState<string>('');
-  const [environmentalTemp, setEnvironmentalTemp] = useState<string>('');
-  const [temperatureData, setTemperatureData] = useState<HottopTempDataPoint[]>([]);
-  const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
-  
-  // Manual controls (only for manual mode)
-  const [heatPercent, setHeatPercent] = useState(50);
-  const [fanPercent, setFanPercent] = useState(50);
-  const [manualControls, setManualControls] = useState<HottopManualControl[]>([]);
-  const [hasRecordedInitialControl, setHasRecordedInitialControl] = useState(false);
-
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isRunning && !isPaused) {
-      interval = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - startTimeRef.current - pausedTimeRef.current) / 1000);
-        setElapsedTime(elapsed);
-      }, 100);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, isPaused]);
-
-  // Record initial manual control settings
-  useEffect(() => {
-    if (roastMode === 'manual' && elapsedTime > 0 && !hasRecordedInitialControl) {
-      const initialControl: HottopManualControl = {
-        time: 0,
-        heatPercent,
-        fanPercent,
-        timestamp: Date.now()
-      };
-      setManualControls([initialControl]);
-      setHasRecordedInitialControl(true);
-    }
-  }, [roastMode, elapsedTime, hasRecordedInitialControl, heatPercent, fanPercent]);
+export function HottopMode(props: RoastModeProps) {
+  const session = useRoastSession<HottopSettings, HottopLog>(
+    'roast_session:hottop-kn8828',
+    { batchSize: getRoasterSpec(ROASTER).recommendedBatchSize, roastMode: 'manual', heatPercent: 50, fanPercent: 50 },
+    { temperatureData: [], crackEvents: [], manualControls: [] },
+    {
+      // Record the starting heat/fan settings at 0:00 in manual mode
+      seedLogOnStart: ({ roastMode, heatPercent, fanPercent }) => ({
+        manualControls: roastMode === 'manual' ? [{ time: 0, heatPercent, fanPercent, timestamp: Date.now() }] : [],
+      }),
+    },
+  );
+  const { settings, updateSettings, log, canRecord } = session;
+  const { roastMode, heatPercent, fanPercent } = settings;
+  const [beanTemp, setBeanTemp] = useState('');
+  const [environmentalTemp, setEnvironmentalTemp] = useState('');
 
   const handleRecordTemp = () => {
     const temp = parseFloat(beanTemp);
-    if (isNaN(temp) || temp < 0 || temp > 300) {
-      return;
-    }
-
+    if (Number.isNaN(temp) || temp < 0 || temp > 300) return;
     const envTemp = parseFloat(environmentalTemp);
-    const previousData = temperatureData[temperatureData.length - 1];
-    
-    // Calculate RoR if we have previous data
-    let ror: number | undefined;
-    if (previousData) {
-      const timeInterval = elapsedTime - previousData.time;
-      ror = calculateRoR(temp, previousData.beanTemp, timeInterval);
-    }
 
-    const dataPoint: HottopTempDataPoint = {
-      time: elapsedTime,
-      beanTemp: temp,
-      environmentalTemp: !isNaN(envTemp) ? envTemp : undefined,
-      rateOfRise: ror,
-      timestamp: Date.now()
-    };
-
-    setTemperatureData(prev => [...prev, dataPoint]);
-    setBeanTemp('');
+    const recorded = session.record((l, time) => {
+      const previous = l.temperatureData[l.temperatureData.length - 1];
+      const point: HottopTempDataPoint = {
+        time,
+        beanTemp: temp,
+        environmentalTemp: Number.isNaN(envTemp) ? undefined : envTemp,
+        rateOfRise: previous ? calculateRoR(temp, previous.beanTemp, time - previous.time) : undefined,
+        timestamp: Date.now(),
+      };
+      return { ...l, temperatureData: [...l.temperatureData, point] };
+    });
+    if (recorded) setBeanTemp('');
   };
 
   const handleRecordManualControl = () => {
-    const control: HottopManualControl = {
-      time: elapsedTime,
-      heatPercent,
-      fanPercent,
-      timestamp: Date.now()
-    };
-    
-    setManualControls(prev => [...prev, control]);
+    session.record((l, time) => ({
+      ...l,
+      manualControls: [...l.manualControls, { time, heatPercent, fanPercent, timestamp: Date.now() }],
+    }));
   };
 
-  const handlePause = () => {
-    if (isPaused) {
-      // Resume
-      pausedTimeRef.current += Date.now() - (startTimeRef.current + elapsedTime * 1000);
-      setIsPaused(false);
-    } else {
-      // Pause
-      setIsPaused(true);
-    }
-  };
+  const lastControl = log.manualControls[log.manualControls.length - 1];
+  const hasUnrecordedControlChange =
+    !lastControl || lastControl.heatPercent !== heatPercent || lastControl.fanPercent !== fanPercent;
 
-  const handleStop = () => {
-    setIsRunning(false);
-    setIsPaused(false);
-
-    const roastData: HottopRoastData = {
-      mode: 'hottop-advanced',
-      roastMode,
-      startTime: startTimeRef.current,
-      endTime: Date.now(),
-      temperatureData,
-      manualControls: roastMode === 'manual' ? manualControls : undefined,
-      crackEvents
-    };
-
-    onSave(roastData);
-  };
-
-  const handleFirstCrack = () => {
-    if (crackEvents.some(e => e.type === 'first')) return;
-    
-    const event: CrackEvent = {
-      time: elapsedTime,
-      type: 'first',
-      timestamp: Date.now()
-    };
-    setCrackEvents(prev => [...prev, event]);
-  };
-
-  const handleSecondCrack = () => {
-    if (crackEvents.some(e => e.type === 'second')) return;
-    if (!crackEvents.some(e => e.type === 'first')) return;
-    
-    const event: CrackEvent = {
-      time: elapsedTime,
-      type: 'second',
-      timestamp: Date.now()
-    };
-    setCrackEvents(prev => [...prev, event]);
-  };
-
-  // Check if manual controls have unsaved changes
-  const hasUnsavedControlChanges = () => {
-    if (manualControls.length === 0) return true;
-    const lastControl = manualControls[manualControls.length - 1];
-    return lastControl.heatPercent !== heatPercent || lastControl.fanPercent !== fanPercent;
-  };
-
-  // Calculate advanced metrics for display
-  const lastTempData = temperatureData[temperatureData.length - 1];
-  const previousTempData = temperatureData[temperatureData.length - 2];
-  
+  const lastTempData = log.temperatureData[log.temperatureData.length - 1];
+  const previousTempData = log.temperatureData[log.temperatureData.length - 2];
   const advancedMetrics: AdvancedMetricsData = {
     rateOfRise: lastTempData?.rateOfRise,
-    tempDelta: lastTempData && previousTempData 
-      ? lastTempData.beanTemp - previousTempData.beanTemp 
-      : undefined,
+    tempDelta: lastTempData && previousTempData ? lastTempData.beanTemp - previousTempData.beanTemp : undefined,
     environmentalTemp: lastTempData?.environmentalTemp,
     beanTemp: lastTempData?.beanTemp,
-    timeElapsed: elapsedTime
+    timeElapsed: session.elapsedSeconds,
   };
 
-  // Add reset handler
-  const handleReset = () => {
-    setElapsedTime(0);
-    setIsRunning(false);
-    setIsPaused(false);
-    setBeanTemp('');
-    setEnvironmentalTemp('');
-    setTemperatureData([]);
-    setCrackEvents([]);
-    setManualControls([]);
-    setHasRecordedInitialControl(false);
-    startTimeRef.current = 0;
-    pausedTimeRef.current = 0;
-  };
+  const buildData = (): HottopRoastData => ({
+    mode: 'hottop-advanced',
+    roastMode,
+    startTime: session.startTime ?? Date.now(),
+    endTime: session.endTime ?? Date.now(),
+    temperatureData: log.temperatureData,
+    manualControls: roastMode === 'manual' ? log.manualControls : undefined,
+    crackEvents: log.crackEvents,
+  });
+
+  const readings = log.temperatureData.length;
 
   return (
     <div className="space-y-4">
-      {/* Roaster Header */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xl">☕</span>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">Hottop KN-8828B-2K+</h2>
-                <p className="text-sm text-muted-foreground">Advanced Temperature Tracking</p>
-              </div>
-            </div>
-            <BatchCapacityBadge 
-              roasterType="hottop-kn8828"
-              currentWeight={batchSize}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <RoasterHeader
+        roasterType={ROASTER}
+        subtitle="Advanced Temperature Tracking"
+        batchSize={settings.batchSize}
+        onBatchSizeChange={batchSize => updateSettings({ batchSize })}
+        batchLocked={session.status !== 'idle'}
+      />
 
-      {/* Two-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        
-        {/* LEFT COLUMN: Timer & Controls */}
         <Card>
           <CardContent className="p-6 space-y-6">
-            {/* Timer */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground text-center uppercase tracking-wide">
-                Roast Timer
-              </h3>
-              <TimerDisplay 
-                seconds={elapsedTime} 
-                mode="count-up" 
-                size="large"
-              />
-            </div>
-            
-            {/* Control buttons */}
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                {!isRunning ? (
-                  <Button 
-                    onClick={() => {
-                      startTimeRef.current = Date.now();
-                      setIsRunning(true);
-                    }} 
-                    size="lg"
-                    className="flex items-center gap-2 flex-1"
-                  >
-                    <Play className="h-5 w-5" />
-                    Start Roast
-                  </Button>
-                ) : (
-                  <>
-                    {!isPaused ? (
-                      <Button 
-                        onClick={handlePause} 
-                        variant="secondary"
-                        size="lg"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Pause className="h-5 w-5" />
-                        Pause
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={handlePause} 
-                        variant="default"
-                        size="lg"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Play className="h-5 w-5" />
-                        Resume
-                      </Button>
-                    )}
-                    <Button 
-                      onClick={handleStop} 
-                      variant="destructive"
-                      size="lg"
-                      className="flex items-center gap-2"
-                    >
-                      <Square className="h-5 w-5" />
-                      Stop
-                    </Button>
-                  </>
-                )}
-              </div>
-              
-              {!isRunning && elapsedTime > 0 && (
-                <Button 
-                  onClick={handleReset} 
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
-              )}
-            </div>
+            <RoastControls session={session} modeProps={props} buildData={buildData} />
 
             <Separator />
 
-            {/* Roast Mode Selection */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Roast Mode</Label>
+              <Label className="text-sm font-medium" id="hottop-roast-mode">Roast Mode</Label>
               <RadioGroup
                 value={roastMode}
-                onValueChange={(value) => setRoastMode(value as HottopModeType)}
-                disabled={isPaused}
+                onValueChange={value => updateSettings({ roastMode: value as HottopModeType })}
+                disabled={session.isPaused || session.status === 'stopped'}
+                aria-labelledby="hottop-roast-mode"
+                className="space-y-2"
               >
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                    <RadioGroupItem value="auto-light" id="auto-light" />
-                    <Label htmlFor="auto-light" className="font-normal cursor-pointer flex-1">
-                      ☀️ Auto Light
+                {ROAST_MODES.map(({ value, label }) => (
+                  <div key={value} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
+                    <RadioGroupItem value={value} id={`hottop-${value}`} />
+                    <Label htmlFor={`hottop-${value}`} className="font-normal cursor-pointer flex-1">
+                      {label}
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                    <RadioGroupItem value="auto-medium" id="auto-medium" />
-                    <Label htmlFor="auto-medium" className="font-normal cursor-pointer flex-1">
-                      🌤️ Auto Medium
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                    <RadioGroupItem value="auto-dark" id="auto-dark" />
-                    <Label htmlFor="auto-dark" className="font-normal cursor-pointer flex-1">
-                      🌑 Auto Dark
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted">
-                    <RadioGroupItem value="manual" id="manual" />
-                    <Label htmlFor="manual" className="font-normal cursor-pointer flex-1">
-                      🎛️ Manual
-                    </Label>
-                  </div>
-                </div>
+                ))}
               </RadioGroup>
             </div>
           </CardContent>
         </Card>
-        
-        {/* RIGHT COLUMN: Temperature & Tracking */}
+
         <Card>
           <CardContent className="p-6 space-y-4">
-            
-            {/* Bean Temperature Display */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">
-                🌡️ Bean Temperature
-              </Label>
-              <div className="flex items-center justify-center">
-                <div className="text-4xl font-bold font-mono text-orange-600 dark:text-orange-400">
-                  {lastTempData?.beanTemp.toFixed(0) || '---'}°C
-                </div>
+              <Label className="text-sm font-medium">🌡️ Bean Temperature</Label>
+              <div className="text-4xl font-bold font-mono text-center text-orange-600 dark:text-orange-400">
+                {lastTempData ? lastTempData.beanTemp.toFixed(0) : '---'}°C
               </div>
             </div>
 
             <Separator />
 
-            {/* Temperature Input */}
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="bean-temp" className="text-sm font-medium">
-                    Bean Temp (°C) *
-                  </Label>
+                  <Label htmlFor="hottop-bean-temp" className="text-sm font-medium">Bean Temp (°C) *</Label>
                   <Input
-                    id="bean-temp"
+                    id="hottop-bean-temp"
                     type="number"
                     placeholder="205"
                     value={beanTemp}
-                    onChange={(e) => setBeanTemp(e.target.value)}
-                    disabled={isPaused || !isRunning}
+                    onChange={e => setBeanTemp(e.target.value)}
+                    disabled={!canRecord}
                     className="text-2xl font-bold font-mono text-center h-14"
                     min="0"
                     max="300"
                     step="1"
                   />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="env-temp" className="text-sm font-medium">
-                    Env Temp (°C)
-                  </Label>
+                  <Label htmlFor="hottop-env-temp" className="text-sm font-medium">Env Temp (°C)</Label>
                   <Input
-                    id="env-temp"
+                    id="hottop-env-temp"
                     type="number"
                     placeholder="24"
                     value={environmentalTemp}
-                    onChange={(e) => setEnvironmentalTemp(e.target.value)}
-                    disabled={isPaused || !isRunning}
+                    onChange={e => setEnvironmentalTemp(e.target.value)}
+                    disabled={!canRecord}
                     className="text-2xl font-bold font-mono text-center h-14"
                     min="0"
                     max="100"
@@ -413,72 +203,57 @@ export function HottopMode({
                 </div>
               </div>
 
-              <Button
-                onClick={handleRecordTemp}
-                className="w-full"
-                size="default"
-                disabled={!beanTemp || isPaused || !isRunning}
-              >
+              <Button onClick={handleRecordTemp} className="w-full" disabled={!beanTemp || !canRecord}>
                 📝 Record Temperature
               </Button>
 
-              {temperatureData.length > 0 && (
+              {readings > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
-                  {temperatureData.length} reading{temperatureData.length !== 1 ? 's' : ''} recorded
+                  {readings} reading{readings !== 1 ? 's' : ''} recorded
                 </p>
               )}
             </div>
 
             <Separator />
 
-            {/* Advanced Metrics */}
             <div>
               <h3 className="text-sm font-medium mb-3">📊 Advanced Metrics</h3>
               <AdvancedMetrics data={advancedMetrics} />
             </div>
 
-            {/* Manual Controls (only in manual mode) */}
             {roastMode === 'manual' && (
               <>
                 <Separator />
-                <div>
-                  <ManualControlSliders
-                    heatPercent={heatPercent}
-                    fanPercent={fanPercent}
-                    onHeatChange={setHeatPercent}
-                    onFanChange={setFanPercent}
-                    onRecordChange={handleRecordManualControl}
-                    disabled={isPaused || !isRunning}
-                    hasUnsavedChanges={hasUnsavedControlChanges()}
-                  />
-                </div>
+                <ManualControlSliders
+                  heatPercent={heatPercent}
+                  fanPercent={fanPercent}
+                  onHeatChange={value => updateSettings({ heatPercent: value })}
+                  onFanChange={value => updateSettings({ fanPercent: value })}
+                  onRecordChange={handleRecordManualControl}
+                  disabled={!canRecord}
+                  hasUnsavedChanges={hasUnrecordedControlChange}
+                />
               </>
             )}
 
             <Separator />
 
-            {/* Crack Events */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">🔊 Crack Events</h3>
-              <CrackEventButtons
-                onFirstCrack={handleFirstCrack}
-                onSecondCrack={handleSecondCrack}
-                firstCrackRecorded={crackEvents.some(e => e.type === 'first')}
-                secondCrackRecorded={crackEvents.some(e => e.type === 'second')}
-                disabled={isPaused || !isRunning}
-                variant="inline"
-              />
-            </div>
-            
+            <CrackEventButtons
+              firstCrack={session.firstCrack}
+              secondCrack={session.secondCrack}
+              onRecord={type => session.recordCrack(type)}
+              elapsedSeconds={session.elapsedSeconds}
+              disabled={!canRecord}
+            />
           </CardContent>
         </Card>
-        
       </div>
-      
-      {/* Tips - Collapsible */}
+
       <RoasterTips
-        roasterType="hottop-kn8828"
-        defaultCollapsed={true}
+        roasterType={ROASTER}
+        elapsedSeconds={session.elapsedSeconds}
+        firstCrackRecorded={!!session.firstCrack}
+        defaultCollapsed
       />
     </div>
   );

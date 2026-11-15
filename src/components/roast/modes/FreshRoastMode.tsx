@@ -1,272 +1,92 @@
-import { useState, useEffect, useRef } from "react";
+/**
+ * FreshRoastMode Component
+ * Heat/fan setting tracking for the FreshRoast SR800.
+ */
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Play, Pause, Square, RotateCcw, Flame, Wind } from "lucide-react";
-import { TimerDisplay } from "@/components/roast/shared/TimerDisplay";
-import { CrackEventButtons } from "@/components/roast/shared/CrackEventButtons";
-import { BatchCapacityBadge } from "@/components/roast/shared/BatchCapacityBadge";
-import { RoasterTips } from "@/components/roast/shared/RoasterTips";
-import { HeatFanControls } from "@/components/roast/freshroast/HeatFanControls";
-import { SettingChangeHistory } from "@/components/roast/shared/SettingChangeHistory";
-import type { 
-  HeatLevel, 
-  FanSpeed, 
-  SettingChange, 
+import { Flame, Wind } from "lucide-react";
+import { RoasterHeader } from "../shared/RoasterHeader";
+import { RoastControls } from "../shared/RoastControls";
+import { CrackEventButtons } from "../shared/CrackEventButtons";
+import { RoasterTips } from "../shared/RoasterTips";
+import { SettingChangeHistory } from "../shared/SettingChangeHistory";
+import { HeatFanControls } from "../freshroast/HeatFanControls";
+import { useRoastSession } from "@/hooks/useRoastSession";
+import { getRoasterSpec } from "@/utils/roasterRegistry";
+import type {
   CrackEvent,
-  HeatFanRoastData 
+  FanSpeed,
+  HeatFanRoastData,
+  HeatLevel,
+  SettingChange,
 } from "@/types/roast-data.types";
+import type { RoastModeProps } from "./types";
 
-interface FreshRoastModeProps {
-  onSave: (data: HeatFanRoastData) => void;
-  initialBatchSize?: number;
+const ROASTER = 'freshroast-sr800';
+
+interface FreshRoastSettings {
+  batchSize: number;
+  heatLevel: HeatLevel;
+  fanSpeed: FanSpeed;
 }
 
-export function FreshRoastMode({
-  onSave,
-  initialBatchSize = 120
-}: FreshRoastModeProps) {
-  // Timer state
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const startTimeRef = useRef<number>(0);
-  const pausedTimeRef = useRef<number>(0);
+interface FreshRoastLog {
+  settingChanges: SettingChange[];
+  crackEvents: CrackEvent[];
+}
 
-  // Roast settings
-  const [heatLevel, setHeatLevel] = useState<HeatLevel>('Medium');
-  const [fanSpeed, setFanSpeed] = useState<FanSpeed>('Medium');
-  const [settingChanges, setSettingChanges] = useState<SettingChange[]>([]);
-  const [crackEvents, setCrackEvents] = useState<CrackEvent[]>([]);
-  const [batchSize, setBatchSize] = useState(initialBatchSize);
-  const [hasRecordedInitial, setHasRecordedInitial] = useState(false);
+export function FreshRoastMode(props: RoastModeProps) {
+  const session = useRoastSession<FreshRoastSettings, FreshRoastLog>(
+    'roast_session:freshroast-sr800',
+    { batchSize: getRoasterSpec(ROASTER).recommendedBatchSize, heatLevel: 'Medium', fanSpeed: 'Medium' },
+    { settingChanges: [], crackEvents: [] },
+    {
+      // Record the starting heat/fan settings at 0:00
+      seedLogOnStart: ({ heatLevel, fanSpeed }) => ({
+        settingChanges: [{ time: 0, heatLevel, fanSpeed, timestamp: Date.now() }],
+      }),
+    },
+  );
+  const { settings, updateSettings, log, canRecord } = session;
+  const { heatLevel, fanSpeed } = settings;
 
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+  const lastChange = log.settingChanges[log.settingChanges.length - 1];
+  const hasUnrecordedChange = !lastChange || lastChange.heatLevel !== heatLevel || lastChange.fanSpeed !== fanSpeed;
 
-    if (isRunning && !isPaused) {
-      interval = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - startTimeRef.current - pausedTimeRef.current) / 1000);
-        setElapsedTime(elapsed);
-      }, 100);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, isPaused]);
-
-  // Record initial settings when roast starts
-  useEffect(() => {
-    if (elapsedTime > 0 && !hasRecordedInitial) {
-      const initialChange: SettingChange = {
-        time: 0,
-        heatLevel,
-        fanSpeed,
-        timestamp: Date.now()
-      };
-      setSettingChanges([initialChange]);
-      setHasRecordedInitial(true);
-    }
-  }, [elapsedTime, hasRecordedInitial, heatLevel, fanSpeed]);
-
-  const handlePause = () => {
-    if (isPaused) {
-      // Resume
-      pausedTimeRef.current += Date.now() - (startTimeRef.current + elapsedTime * 1000);
-      setIsPaused(false);
-    } else {
-      // Pause
-      setIsPaused(true);
-    }
+  const recordChange = () => {
+    session.record((l, time) => ({
+      ...l,
+      settingChanges: [...l.settingChanges, { time, heatLevel, fanSpeed, timestamp: Date.now() }],
+    }));
   };
 
-  const handleStop = () => {
-    setIsRunning(false);
-    setIsPaused(false);
-
-    const roastData: HeatFanRoastData = {
-      mode: 'heat-fan-control',
-      startTime: startTimeRef.current,
-      endTime: Date.now(),
-      settingChanges,
-      crackEvents
-    };
-
-    onSave(roastData);
-  };
-
-  const handleRecordChange = () => {
-    const change: SettingChange = {
-      time: elapsedTime,
-      heatLevel,
-      fanSpeed,
-      timestamp: Date.now()
-    };
-    
-    setSettingChanges(prev => [...prev, change]);
-  };
-
-  const handleHeatChange = (newHeat: HeatLevel | FanSpeed) => {
-    setHeatLevel(newHeat as HeatLevel);
-  };
-
-  const handleFanChange = (newFan: HeatLevel | FanSpeed) => {
-    setFanSpeed(newFan as FanSpeed);
-  };
-
-  const handleFirstCrack = () => {
-    if (crackEvents.some(e => e.type === 'first')) return;
-    
-    const event: CrackEvent = {
-      time: elapsedTime,
-      type: 'first',
-      timestamp: Date.now()
-    };
-    setCrackEvents(prev => [...prev, event]);
-  };
-
-  const handleSecondCrack = () => {
-    if (crackEvents.some(e => e.type === 'second')) return;
-    if (!crackEvents.some(e => e.type === 'first')) return;
-    
-    const event: CrackEvent = {
-      time: elapsedTime,
-      type: 'second',
-      timestamp: Date.now()
-    };
-    setCrackEvents(prev => [...prev, event]);
-  };
-
-  // Check if current settings differ from last recorded
-  const hasUnsavedChanges = () => {
-    if (settingChanges.length === 0) return true;
-    const lastChange = settingChanges[settingChanges.length - 1];
-    return lastChange.heatLevel !== heatLevel || lastChange.fanSpeed !== fanSpeed;
-  };
-
-  // Add reset handler
-  const handleReset = () => {
-    setElapsedTime(0);
-    setIsRunning(false);
-    setIsPaused(false);
-    setSettingChanges([]);
-    setCrackEvents([]);
-    setHasRecordedInitial(false);
-    startTimeRef.current = 0;
-    pausedTimeRef.current = 0;
-  };
+  const buildData = (): HeatFanRoastData => ({
+    mode: 'heat-fan-control',
+    startTime: session.startTime ?? Date.now(),
+    endTime: session.endTime ?? Date.now(),
+    settingChanges: log.settingChanges,
+    crackEvents: log.crackEvents,
+  });
 
   return (
     <div className="space-y-4">
-      {/* Roaster Header */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xl">☕</span>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">FreshRoast SR800</h2>
-                <p className="text-sm text-muted-foreground">Heat/Fan Control Tracking</p>
-              </div>
-            </div>
-            <BatchCapacityBadge 
-              roasterType="freshroast-sr800"
-              currentWeight={batchSize}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <RoasterHeader
+        roasterType={ROASTER}
+        subtitle="Heat/Fan Control Tracking"
+        batchSize={settings.batchSize}
+        onBatchSizeChange={batchSize => updateSettings({ batchSize })}
+        batchLocked={session.status !== 'idle'}
+      />
 
-      {/* Two-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        
-        {/* LEFT COLUMN: Timer & Controls */}
         <Card>
           <CardContent className="p-6 space-y-6">
-            {/* Timer */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground text-center uppercase tracking-wide">
-                Roast Timer
-              </h3>
-              <TimerDisplay 
-                seconds={elapsedTime} 
-                mode="count-up" 
-                size="large"
-              />
-            </div>
-            
-            {/* Control buttons */}
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                {!isRunning ? (
-                  <Button 
-                    onClick={() => {
-                      startTimeRef.current = Date.now();
-                      setIsRunning(true);
-                    }} 
-                    size="lg"
-                    className="flex items-center gap-2 flex-1"
-                  >
-                    <Play className="h-5 w-5" />
-                    Start Roast
-                  </Button>
-                ) : (
-                  <>
-                    {!isPaused ? (
-                      <Button 
-                        onClick={handlePause} 
-                        variant="secondary"
-                        size="lg"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Pause className="h-5 w-5" />
-                        Pause
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={handlePause} 
-                        variant="default"
-                        size="lg"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Play className="h-5 w-5" />
-                        Resume
-                      </Button>
-                    )}
-                    <Button 
-                      onClick={handleStop} 
-                      variant="destructive"
-                      size="lg"
-                      className="flex items-center gap-2"
-                    >
-                      <Square className="h-5 w-5" />
-                      Stop
-                    </Button>
-                  </>
-                )}
-              </div>
-              
-              {!isRunning && elapsedTime > 0 && (
-                <Button 
-                  onClick={handleReset} 
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
-              )}
-            </div>
+            <RoastControls session={session} modeProps={props} buildData={buildData} />
 
             <Separator />
 
-            {/* Current Settings Display */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-center text-muted-foreground uppercase tracking-wide">
                 Current Settings
@@ -274,103 +94,83 @@ export function FreshRoastMode({
               <div className="flex justify-center items-center gap-8">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <Flame className="h-5 w-5 text-orange-500" />
+                    <Flame className="h-5 w-5 text-orange-500" aria-hidden="true" />
                     <span className="text-xs font-medium text-muted-foreground">HEAT</span>
                   </div>
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {heatLevel}
-                  </div>
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{heatLevel}</div>
                 </div>
                 <div className="h-12 w-px bg-border" />
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <Wind className="h-5 w-5 text-cyan-500" />
+                    <Wind className="h-5 w-5 text-cyan-500" aria-hidden="true" />
                     <span className="text-xs font-medium text-muted-foreground">FAN</span>
                   </div>
-                  <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
-                    {fanSpeed}
-                  </div>
+                  <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{fanSpeed}</div>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-        
-        {/* RIGHT COLUMN: Heat/Fan Controls & Tracking */}
+
         <Card>
           <CardContent className="p-6 space-y-4">
-            
-            {/* Heat Control */}
-            <div>
-              <HeatFanControls
-                type="heat"
-                value={heatLevel}
-                onChange={handleHeatChange}
-                label="HEAT LEVEL"
-                icon={<Flame className="h-4 w-4" />}
-              />
-            </div>
+            <HeatFanControls
+              type="heat"
+              value={heatLevel}
+              onChange={v => updateSettings({ heatLevel: v as HeatLevel })}
+              label="HEAT LEVEL"
+              icon={<Flame className="h-4 w-4" />}
+            />
 
             <Separator />
 
-            {/* Fan Control */}
-            <div>
-              <HeatFanControls
-                type="fan"
-                value={fanSpeed}
-                onChange={handleFanChange}
-                label="FAN SPEED"
-                icon={<Wind className="h-4 w-4" />}
-              />
-            </div>
+            <HeatFanControls
+              type="fan"
+              value={fanSpeed}
+              onChange={v => updateSettings({ fanSpeed: v as FanSpeed })}
+              label="FAN SPEED"
+              icon={<Wind className="h-4 w-4" />}
+            />
 
             <Separator />
 
-            {/* Record Change Button */}
             <Button
-              onClick={handleRecordChange}
+              onClick={recordChange}
               className="w-full"
-              disabled={!hasUnsavedChanges() || isPaused || !isRunning}
-              variant={hasUnsavedChanges() ? "default" : "secondary"}
+              disabled={!hasUnrecordedChange || !canRecord}
+              variant={hasUnrecordedChange ? "default" : "secondary"}
             >
               📝 Record Heat/Fan Change
             </Button>
 
-            {/* Setting Change History */}
-            {settingChanges.length > 0 && (
+            {log.settingChanges.length > 0 && (
               <>
                 <Separator />
                 <div>
                   <h3 className="text-sm font-medium mb-3">📋 Change History</h3>
-                  <SettingChangeHistory changes={settingChanges} maxDisplay={6} />
+                  <SettingChangeHistory changes={log.settingChanges} maxDisplay={6} />
                 </div>
               </>
             )}
 
             <Separator />
 
-            {/* Crack Events */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">🔊 Crack Events</h3>
-              <CrackEventButtons
-                onFirstCrack={handleFirstCrack}
-                onSecondCrack={handleSecondCrack}
-                firstCrackRecorded={crackEvents.some(e => e.type === 'first')}
-                secondCrackRecorded={crackEvents.some(e => e.type === 'second')}
-                disabled={isPaused || !isRunning}
-                variant="inline"
-              />
-            </div>
-            
+            <CrackEventButtons
+              firstCrack={session.firstCrack}
+              secondCrack={session.secondCrack}
+              onRecord={type => session.recordCrack(type)}
+              elapsedSeconds={session.elapsedSeconds}
+              disabled={!canRecord}
+            />
           </CardContent>
         </Card>
-        
       </div>
-      
-      {/* Tips - Collapsible */}
+
       <RoasterTips
-        roasterType="freshroast-sr800"
-        defaultCollapsed={true}
+        roasterType={ROASTER}
+        elapsedSeconds={session.elapsedSeconds}
+        firstCrackRecorded={!!session.firstCrack}
+        defaultCollapsed
       />
     </div>
   );

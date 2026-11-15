@@ -35,6 +35,9 @@ export const AutoRecordTimer = ({
   const [secondsUntilNext, setSecondsUntilNext] = useState(interval);
   const intervalRef = useRef<NodeJS.Timeout>();
   const lastTriggerRef = useRef<number>(Date.now());
+  // Keep the latest callback without restarting the countdown on every parent render
+  const onTriggerRef = useRef(onTrigger);
+  onTriggerRef.current = onTrigger;
 
   useEffect(() => {
     if (isEnabled && !isPaused) {
@@ -44,7 +47,7 @@ export const AutoRecordTimer = ({
         
         if (remaining <= 0) {
           // Trigger recording
-          onTrigger();
+          onTriggerRef.current();
           lastTriggerRef.current = Date.now();
           setSecondsUntilNext(interval);
           
@@ -65,7 +68,7 @@ export const AutoRecordTimer = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isEnabled, isPaused, interval, onTrigger]);
+  }, [isEnabled, isPaused, interval]);
 
   // Reset timer when interval changes
   useEffect(() => {
