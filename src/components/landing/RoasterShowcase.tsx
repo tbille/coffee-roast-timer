@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,8 +104,8 @@ export function RoasterShowcase() {
           <p className="text-muted-foreground mb-4">
             Don't see your roaster? We support custom configurations too!
           </p>
-          <Button variant="link" onClick={() => navigate('/how-to/getting-started')}>
-            Learn more about custom roaster setups →
+          <Button variant="link" asChild>
+            <Link to="/how-to/getting-started">Learn more about custom roaster setups →</Link>
           </Button>
         </div>
       </div>

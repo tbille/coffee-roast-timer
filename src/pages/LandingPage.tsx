@@ -5,29 +5,10 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { LatestRoasts } from '@/components/landing/LatestRoasts';
 import { RoasterShowcase } from '@/components/landing/RoasterShowcase';
 import { FeedbackSection } from '@/components/landing/FeedbackSection';
+import { HomeFaq } from '@/components/landing/HomeFaq';
+import { homeFaqJsonLd } from '@/content/staticShell';
 
 const LandingPage = () => {
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Coffee Roast Timer",
-    url: "https://roast-timer.com",
-    description: "Track and improve home coffee roasting with timers, roast profiles, and community discoveries.",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://roast-timer.com/discover?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  };
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Coffee Roast Timer",
-    url: "https://roast-timer.com",
-    logo: "https://roast-timer.com/favicon.ico"
-  };
-
   return (
     <>
       <Helmet>
@@ -51,8 +32,8 @@ const LandingPage = () => {
         <meta name="twitter:image" content="https://roast-timer.com/og-image.png" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://roast-timer.com" />
-        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
-        <script type="application/ld+json">{JSON.stringify(organizationSchema)}</script>
+        {/* WebSite / Organization / WebApplication JSON-LD is static in index.html (src/content/staticShell.ts). */}
+        <script type="application/ld+json">{JSON.stringify(homeFaqJsonLd())}</script>
       </Helmet>
 
       <div className="flex flex-col">
@@ -115,6 +96,8 @@ const LandingPage = () => {
             </Card>
           </div>
         </section>
+
+        <HomeFaq />
 
         {/* Feedback Section */}
         <FeedbackSection />
