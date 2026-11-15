@@ -63,7 +63,7 @@ export function CommunityStats() {
   };
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
+    <section className="py-16 px-4 bg-linear-to-br from-primary/5 via-primary/10 to-primary/5">
       <div className="container max-w-4xl mx-auto text-center space-y-8">
         {/* Heading */}
         <div>

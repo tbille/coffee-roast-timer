@@ -165,7 +165,7 @@ const Discover = () => {
 
   const chipClass = (active: boolean) =>
     cn(
-      "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
       active ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-muted",
     );
 

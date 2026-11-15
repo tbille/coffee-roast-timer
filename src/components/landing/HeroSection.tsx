@@ -50,7 +50,7 @@ export function HeroSection() {
   return (
     <section className="relative py-12 md:py-20 px-4 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-orange-50/30 to-brown-50/50 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-brown-950/20 -z-10" />
+      <div className="absolute inset-0 bg-linear-to-br from-amber-50/50 via-orange-50/30 to-brown-50/50 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-brown-950/20 -z-10" />
 
       <div className="container max-w-6xl mx-auto">
         <div className="grid items-center gap-12 lg:grid-cols-2">

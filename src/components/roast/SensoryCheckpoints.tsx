@@ -61,7 +61,7 @@ export const SensoryCheckpoints = forwardRef<HTMLDivElement, SensoryCheckpointsP
             {/* Visual Cue */}
             {milestone.visual_cue && (
               <div className="flex gap-2 text-sm">
-                <Eye className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <Eye className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <span className="font-medium">Look: </span>
                   <span className="text-muted-foreground">{milestone.visual_cue}</span>
@@ -72,7 +72,7 @@ export const SensoryCheckpoints = forwardRef<HTMLDivElement, SensoryCheckpointsP
             {/* Audio Cue */}
             {milestone.audio_cue && (
               <div className="flex gap-2 text-sm">
-                <Ear className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <Ear className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <span className="font-medium">Sound: </span>
                   <span className="text-muted-foreground">{milestone.audio_cue}</span>
@@ -83,7 +83,7 @@ export const SensoryCheckpoints = forwardRef<HTMLDivElement, SensoryCheckpointsP
             {/* Aroma Cue */}
             {milestone.aroma_cue && (
               <div className="flex gap-2 text-sm">
-                <Nose className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <Nose className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <span className="font-medium">Smell: </span>
                   <span className="text-muted-foreground">{milestone.aroma_cue}</span>
@@ -94,7 +94,7 @@ export const SensoryCheckpoints = forwardRef<HTMLDivElement, SensoryCheckpointsP
             {/* Action Required */}
             {milestone.action_required && (
               <div className="flex gap-2 text-sm mt-2 p-2 bg-primary/5 rounded border border-primary/20">
-                <AlertCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-primary">ACTION: </span>
                   <span className="font-medium">{milestone.action_required}</span>

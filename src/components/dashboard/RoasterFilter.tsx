@@ -52,7 +52,7 @@ export const RoasterFilter = ({ value, onChange, profileCounts, className = "" }
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Coffee className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+      <Coffee className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <Label htmlFor="roaster-filter" className="sr-only">Filter profiles by coffee roaster equipment</Label>
         <Select 
@@ -97,7 +97,7 @@ export const RoasterFilter = ({ value, onChange, profileCounts, className = "" }
                     >
                       <span className="flex items-center gap-2">
                         <span 
-                          className="w-2 h-2 rounded-full flex-shrink-0" 
+                          className="w-2 h-2 rounded-full shrink-0" 
                           style={{ backgroundColor: getRoasterPrimaryColor(roaster.id) }}
                           aria-hidden="true"
                         />
@@ -122,7 +122,7 @@ export const RoasterFilter = ({ value, onChange, profileCounts, className = "" }
                   >
                     <span className="flex items-center gap-2">
                       <span 
-                        className="w-2 h-2 rounded-full flex-shrink-0" 
+                        className="w-2 h-2 rounded-full shrink-0" 
                         style={{ backgroundColor: getRoasterPrimaryColor(roaster.id) }}
                         aria-hidden="true"
                       />

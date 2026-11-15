@@ -101,7 +101,7 @@ export const VisualCueTracker = ({
                 <div className={cn(
                   "w-4 h-4 rounded-full mr-2 border-2",
                   option.color,
-                  "border-white shadow-sm"
+                  "border-white shadow-xs"
                 )} />
                 {option.label}
               </Button>
@@ -150,7 +150,7 @@ export const VisualCueTracker = ({
                     className="flex items-start gap-3 p-2 rounded-lg bg-muted/50 text-sm"
                   >
                     <div className={cn(
-                      "w-6 h-6 rounded-full border-2 border-border flex-shrink-0 mt-0.5",
+                      "w-6 h-6 rounded-full border-2 border-border shrink-0 mt-0.5",
                       colorOption?.color
                     )} />
                     <div className="flex-1 min-w-0">

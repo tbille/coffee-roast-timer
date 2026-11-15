@@ -12,7 +12,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary to-coffee-dark text-primary-foreground">
+      <div className="relative bg-linear-to-br from-primary to-coffee-dark text-primary-foreground">
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-3xl mx-auto">
             <div className="flex justify-center mb-6">
@@ -87,7 +87,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
       </div>
 
       {/* Discovery Section */}
-      <div className="bg-gradient-to-r from-coffee-light/10 to-accent/10 py-16">
+      <div className="bg-linear-to-r from-coffee-light/10 to-accent/10 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
@@ -105,7 +105,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
             <div className="flex items-center gap-4">
-              <Users className="h-8 w-8 text-primary flex-shrink-0" />
+              <Users className="h-8 w-8 text-primary shrink-0" />
               <div>
                 <h3 className="font-semibold text-lg mb-2">Community Profiles</h3>
                 <p className="text-muted-foreground">
@@ -115,7 +115,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
             </div>
             
             <div className="flex items-center gap-4">
-              <Search className="h-8 w-8 text-primary flex-shrink-0" />
+              <Search className="h-8 w-8 text-primary shrink-0" />
               <div>
                 <h3 className="font-semibold text-lg mb-2">Search & Filter</h3>
                 <p className="text-muted-foreground">

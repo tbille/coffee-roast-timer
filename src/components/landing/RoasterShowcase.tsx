@@ -67,7 +67,7 @@ export function RoasterShowcase() {
 
                   {/* Roaster Info */}
                   <div>
-                    <h3 className="font-bold text-lg mb-1 line-clamp-2 min-h-[3.5rem]">
+                    <h3 className="font-bold text-lg mb-1 line-clamp-2 min-h-14">
                       {roaster.displayName}
                     </h3>
                     {roaster.manufacturer && (

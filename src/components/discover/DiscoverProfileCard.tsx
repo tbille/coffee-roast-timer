@@ -61,7 +61,7 @@ export function DiscoverProfileCard({ card }: { card: DiscoverCardData }) {
     <li className="h-full">
       <Link
         to={`/profile/${card.id}`}
-        className="group flex h-full flex-col gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-coffee transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5"
+        className="group flex h-full flex-col gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-coffee transition-shadow hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
