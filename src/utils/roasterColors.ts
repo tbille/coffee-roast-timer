@@ -39,62 +39,6 @@ export const ROASTER_COLORS: Record<RoasterType, RoasterColorScheme> = {
     badgeClasses: 'bg-orange-500 hover:bg-orange-600 text-white border-orange-600',
   },
   
-  'hottop-kn-8828b-2k': {
-    primary: '#DC2626', // Red - professional, high-end
-    secondary: '#EF4444',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-red-600 hover:bg-red-700 text-white border-red-700',
-  },
-  
-  'quest-m3s': {
-    primary: '#10B981', // Green - fresh, innovative
-    secondary: '#34D399',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-green-500 hover:bg-green-600 text-white border-green-600',
-  },
-  
-  'artisan-3-e': {
-    primary: '#8B5CF6', // Purple - artisan, creative
-    secondary: '#A78BFA',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-purple-500 hover:bg-purple-600 text-white border-purple-600',
-  },
-  
-  'aillio-bullet-r1-v2': {
-    primary: '#EF4444', // Bright red - fast, powerful
-    secondary: '#F87171',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-red-500 hover:bg-red-600 text-white border-red-600',
-  },
-  
-  'kaffelogic-nano-7e': {
-    primary: '#06B6D4', // Cyan - tech-forward, precise
-    secondary: '#22D3EE',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-cyan-500 hover:bg-cyan-600 text-white border-cyan-600',
-  },
-  
-  'sandbox-smart-r1': {
-    primary: '#F59E0B', // Amber - warm, smart
-    secondary: '#FBBF24',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-amber-500 hover:bg-amber-600 text-white border-amber-600',
-  },
-  
-  'kaldi-home-roaster': {
-    primary: '#059669', // Emerald - natural, accessible
-    secondary: '#10B981',
-    textOnPrimary: '#FFFFFF',
-    badgeVariant: 'default',
-    badgeClasses: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700',
-  },
-  
   'freshroast-sr800': {
     primary: '#10B981', // Green - fresh, beginner-friendly
     secondary: '#34D399',

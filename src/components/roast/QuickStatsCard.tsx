@@ -60,7 +60,7 @@ export function QuickStatsCard({
     : "ideal";
 
   return (
-    <Card className={cn("shadow-coffee", className)}>
+    <Card className={className}>
       <CardHeader>
         <CardTitle as="h2">Quick Stats</CardTitle>
       </CardHeader>

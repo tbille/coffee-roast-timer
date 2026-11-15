@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUpdateCuppingNotes } from '@/hooks/useCuppingNotes';
 import { RoastProfile } from '@/types/roast.types';
@@ -38,7 +38,6 @@ interface CuppingNotesFormProps {
 
 export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFormProps) {
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const updateMutation = useUpdateCuppingNotes(profile.id);
 
   const {
@@ -79,20 +78,13 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
         roasted_bean_photo_url: data.roasted_bean_photo_url || null,
       });
 
-      toast({
-        title: 'Tasting notes saved',
-        description: 'Your cupping notes have been saved successfully.',
-      });
+      toast.success('Tasting notes saved', { description: 'Your cupping notes have been saved successfully.' });
 
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving cupping notes:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to save cupping notes. Please try again.';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast.error(errorMessage);
     }
   };
 

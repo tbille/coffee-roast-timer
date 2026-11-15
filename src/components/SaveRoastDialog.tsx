@@ -17,7 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 import { type TemperatureUnit } from "@/utils/temperatureConversion";
 import { Save } from "lucide-react";
 import type { RoastData } from "@/types/roast-data.types";
@@ -48,7 +49,6 @@ const SaveRoastDialog = ({
   defaultInitialWeight
 }: SaveRoastDialogProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [loading, setSaving] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [formData, setFormData] = useState({
@@ -90,11 +90,7 @@ const SaveRoastDialog = ({
     }
 
     if (!formData.beansName.trim()) {
-      toast({
-        title: "Beans Name Required",
-        description: "Please enter the beans name to save your roast profile.",
-        variant: "destructive"
-      });
+      toast.error("Bean name required", { description: "Please enter the beans name to save your roast profile." });
       return;
     }
 
@@ -117,18 +113,15 @@ const SaveRoastDialog = ({
           environmental_notes: formData.environmentalNotes.trim() || null,
           // NEW: Multi-roaster support fields
           roaster_type: roasterType,
-          roaster_data: roastData as any,
+          roaster_data: roastData as unknown as Json,
           // Legacy fields for backward compatibility
-          temperature_data: (roastData as any).temperatureData || [],
-          crack_events: roastData.crackEvents || []
+          temperature_data: ((roastData as { temperatureData?: unknown }).temperatureData || []) as Json,
+          crack_events: (roastData.crackEvents || []) as unknown as Json
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Roast Profile Saved",
-        description: "Your roast has been saved successfully!"
-      });
+      toast.success("Roast saved", { description: "Your roast has been saved successfully!" });
 
       // Reset form
       setFormData({
@@ -151,11 +144,7 @@ const SaveRoastDialog = ({
       }
     } catch (error) {
       console.error('Error saving roast profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save roast profile. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to save roast profile. Please try again.");
     } finally {
       setSaving(false);
     }

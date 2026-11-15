@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Settings, Trash2, User, Lock, Thermometer } from "lucide-react";
@@ -30,13 +30,20 @@ import { Switch } from "@/components/ui/switch";
 import { type TemperatureUnit } from "@/utils/temperatureConversion";
 
 interface UserSettingsDialogProps {
-  trigger: React.ReactNode;
+  /** Element that opens the dialog. Omit when controlling it with `open` / `onOpenChange`. */
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
+const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogProps) => {
   const { user, signOut } = useAuth();
-  const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = (next: boolean) => {
+    if (open === undefined) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [username, setUsername] = useState("");
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
@@ -99,25 +106,14 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
 
       setOriginalUsername(username);
       setOriginalTempUnit(defaultTempUnit);
-      toast({
-        title: "Username updated",
-        description: "Your username has been updated successfully."
-      });
-    } catch (error: any) {
+      toast.success("Username updated", { description: "Your username has been updated successfully." });
+    } catch (error) {
       console.error('Error updating username:', error);
       
-      if (error.code === '23505') { // Unique constraint violation
-        toast({
-          title: "Username taken",
-          description: "This username is already taken. Please choose another one.",
-          variant: "destructive"
-        });
+      if ((error as { code?: string })?.code === "23505") { // Unique constraint violation
+        toast.error("Username taken", { description: "This username is already taken. Please choose another one." });
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to update username. Please try again.",
-          variant: "destructive"
-        });
+        toast.error("Failed to update username. Please try again.");
       }
     } finally {
       setIsUpdatingUsername(false);
@@ -129,29 +125,17 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
 
     // Validate passwords
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all password fields.",
-        variant: "destructive"
-      });
+      toast.error("Missing fields", { description: "Please fill in all password fields." });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation password must match.",
-        variant: "destructive"
-      });
+      toast.error("Passwords don't match", { description: "New password and confirmation password must match." });
       return;
     }
 
     if (newPassword.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive"
-      });
+      toast.error("Password too short", { description: "Password must be at least 6 characters long." });
       return;
     }
 
@@ -168,17 +152,10 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
       setNewPassword("");
       setConfirmPassword("");
 
-      toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully."
-      });
-    } catch (error: any) {
+      toast.success("Password updated", { description: "Your password has been updated successfully." });
+    } catch (error) {
       console.error('Error updating password:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update password. Please try again.",
-        variant: "destructive"
-      });
+      toast.error((error instanceof Error && error.message) || "Failed to update password. Please try again.");
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -212,20 +189,13 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
 
       // Note: Account deletion via Supabase Auth requires server-side implementation
       // For now, we'll sign the user out and show a message
-      toast({
-        title: "Account data cleared",
-        description: "Your roast profiles have been deleted. Please contact support to fully delete your account.",
-      });
+      toast.success("Account data cleared", { description: "Your roast profiles have been deleted. Please contact support to fully delete your account." });
       
       // Sign out the user
       await signOut();
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete account. Please try again or contact support.",
-        variant: "destructive"
-      });
+      toast.error("Failed to delete account. Please try again or contact support.");
     } finally {
       setIsDeletingAccount(false);
     }
@@ -233,14 +203,16 @@ const UserSettingsDialog = ({ trigger }: UserSettingsDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Account Settings
+            Account settings
           </DialogTitle>
           <DialogDescription>
             Manage your account settings.

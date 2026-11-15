@@ -1,10 +1,9 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { lazy, Suspense, type ReactNode } from "react";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
@@ -15,12 +14,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { DocsScrollTop } from "@/components/navigation/DocsScrollTop";
+import { BottomTabBar } from "@/components/layout/BottomTabBar";
+import { RoastingProvider, useRoasting } from "@/contexts/RoastingContext";
+import { ThemeProvider } from "next-themes";
+import { cn } from "@/lib/utils";
 
 // Lazy-load non-critical routes to improve first load
 const RoastTimer = lazy(() => import("./pages/RoastTimer"));
 const Auth = lazy(() => import("./pages/Auth"));
 const About = lazy(() => import("./pages/About"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const MyRoasts = lazy(() => import("./pages/MyRoasts"));
 const Discover = lazy(() => import("./pages/Discover"));
 const RoastProfileDetails = lazy(() => import("./pages/RoastProfileDetails"));
 const HowTo = lazy(() => import("./pages/how-to/HowTo"));
@@ -56,7 +59,22 @@ const withPageLoader = (element: ReactNode) => (
 
 const queryClient = new QueryClient();
 
+/** Main landmark; leaves room for the mobile tab bar unless a roast is running full-viewport. */
+const Main = ({ children }: { children: ReactNode }) => {
+  const { roasting } = useRoasting();
+  return (
+    <main
+      id="main"
+      tabIndex={-1}
+      className={cn("flex-1 focus:outline-hidden", !roasting && "pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0")}
+    >
+      {children}
+    </main>
+  );
+};
+
 const App = () => (
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
   <HelmetProvider>
     {import.meta.env.VITE_GSC_SITE_VERIFICATION ? (
       <Helmet>
@@ -70,14 +88,14 @@ const App = () => (
       <AuthProvider>
         <RoasterProvider>
           <TooltipProvider>
+          <RoastingProvider>
           <div className="min-h-screen flex flex-col">
             <Toaster />
-            <Sonner />
             <BrowserRouter>
               <AnalyticsTracker />
               <DocsScrollTop />
               <Header />
-              <main id="main" className="flex-1">
+              <Main>
               <Routes>
                 {/* Landing Page */}
                 <Route path="/" element={<LandingPage />} />
@@ -87,11 +105,9 @@ const App = () => (
                 
                 {/* Auth & User Pages */}
                 <Route path="/auth" element={withPageLoader(<Auth />)} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    {withPageLoader(<Dashboard />)}
-                  </ProtectedRoute>
-                } />
+                {/* My roasts works signed-out (local drafts), so it is not protected */}
+                <Route path="/roasts" element={withPageLoader(<MyRoasts />)} />
+                <Route path="/dashboard" element={<Navigate to="/roasts" replace />} />
                 
                 {/* Discovery & Profiles */}
                 <Route path="/discover" element={withPageLoader(<Discover />)} />
@@ -126,15 +142,18 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-            <Footer />
-          </BrowserRouter>
-        </div>
+              </Main>
+              <Footer />
+              <BottomTabBar />
+            </BrowserRouter>
+          </div>
+          </RoastingProvider>
         </TooltipProvider>
         </RoasterProvider>
       </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
+  </ThemeProvider>
 );
 
 export default App;

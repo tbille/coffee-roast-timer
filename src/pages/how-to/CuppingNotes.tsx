@@ -34,7 +34,7 @@ const CuppingNotes = () => (
     <Steps>
       <Step title="Open the roast">
         <p>
-          Go to your <Link to="/dashboard">dashboard</Link> and open the roast you're tasting.
+          Go to <Link to="/roasts">My roasts</Link> and open the roast you're tasting.
         </p>
       </Step>
       <Step title="Press Add cupping">

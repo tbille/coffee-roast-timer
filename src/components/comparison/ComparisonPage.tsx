@@ -69,7 +69,7 @@ export const ComparisonPage = () => {
             Failed to load profiles for comparison: {error instanceof Error ? error.message : 'Unknown error'}
           </AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/dashboard')} className="mt-4">
+        <Button onClick={() => navigate('/roasts')} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </Button>
@@ -87,6 +87,7 @@ export const ComparisonPage = () => {
   return (
     <>
       <Helmet>
+        <title>Compare roasts · Roast Timer</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -96,8 +97,8 @@ export const ComparisonPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/dashboard')}
-            aria-label="Back to dashboard"
+            onClick={() => navigate('/roasts')}
+            aria-label="Back to my roasts"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

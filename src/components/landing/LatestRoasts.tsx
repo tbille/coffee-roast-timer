@@ -19,8 +19,8 @@ interface RoastProfile {
   initial_weight?: number;
   final_weight?: number;
   duration_seconds: number;
-  temperature_data: any;
-  crack_events: any;
+  temperature_data: unknown;
+  crack_events: unknown;
   created_at: string;
   likes_count: number;
   roaster_type?: RoasterType;
@@ -113,7 +113,7 @@ export function LatestRoasts() {
             {roasts.map((profile) => (
               <Card
                 key={profile.id}
-                className="w-[280px] sm:w-[320px] shrink-0 shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                className="w-[280px] sm:w-[320px] shrink-0 hover:border-primary/40 transition-all duration-200 cursor-pointer group"
                 onClick={() => navigate(`/profile/${profile.id}`)}
               >
                 <CardHeader className="pb-3">

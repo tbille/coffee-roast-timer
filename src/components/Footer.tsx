@@ -1,53 +1,50 @@
 import { Link } from "react-router";
 import { FEEDBACK_URL } from "@/components/landing/FeedbackSection";
-import { getDoc } from "@/content/docs";
-import { SUPPORTED_ROASTERS } from "@/content/siteContent";
+import { useRoasting } from "@/contexts/RoastingContext";
 
-type FooterLink = { label: string; to: string } | { label: string; href: string };
+type FooterLink = { label: string; to: string } | { label: string; href: string; external?: boolean };
 
 const LINK_GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Roast",
     links: [
-      { label: "Start roasting", to: "/roast" },
-      { label: "Discover profiles", to: "/discover" },
+      { label: "Start a roast", to: "/roast" },
+      { label: "My roasts", to: "/roasts" },
+      { label: "Discover", to: "/discover" },
     ],
   },
   {
-    title: "Guides",
+    title: "Learn",
     links: [
-      ...["getting-started", "first-crack-timing", "roast-defects", "development-ratios"].map((slug) => {
-        const doc = getDoc(slug)!;
-        return { label: doc.navTitle ?? doc.title, to: doc.path };
-      }),
+      { label: "Getting started", to: "/how-to/getting-started" },
+      { label: "First crack timing", to: "/how-to/first-crack-timing" },
       { label: "All guides", to: "/how-to" },
     ],
   },
   {
-    title: "Roasters",
-    links: SUPPORTED_ROASTERS.map((r) => ({ label: r.title, to: r.path })),
-  },
-  {
-    title: "About",
+    title: "Roast Timer",
     links: [
       { label: "About", to: "/about" },
-      { label: "Share feedback", href: FEEDBACK_URL },
+      { label: "Send feedback", href: FEEDBACK_URL, external: true },
       { label: "Sitemap", href: "/sitemap.xml" },
     ],
   },
 ];
 
-const LINK_CLASS = "text-sm text-muted-foreground hover:text-foreground hover:underline";
+const LINK_CLASS = "text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground hover:underline";
 
 const Footer = () => {
+  const { roasting } = useRoasting();
+  if (roasting) return null;
+
   return (
-    <footer className="border-t mt-auto py-10 px-4">
-      <div className="container mx-auto max-w-6xl">
-        <nav aria-label="Footer" className="grid grid-cols-2 gap-8 md:grid-cols-4">
+    <footer className="mt-auto border-t px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-6xl">
+        <nav aria-label="Footer" className="grid grid-cols-2 gap-6 sm:grid-cols-3">
           {LINK_GROUPS.map((group) => (
             <div key={group.title}>
-              <h2 className="text-sm font-semibold mb-3">{group.title}</h2>
-              <ul className="space-y-2">
+              <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{group.title}</h2>
+              <ul className="space-y-1.5">
                 {group.links.map((link) => (
                   <li key={link.label}>
                     {"to" in link ? (
@@ -55,7 +52,11 @@ const Footer = () => {
                         {link.label}
                       </Link>
                     ) : (
-                      <a href={link.href} className={LINK_CLASS}>
+                      <a
+                        href={link.href}
+                        className={LINK_CLASS}
+                        {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      >
                         {link.label}
                       </a>
                     )}
@@ -66,14 +67,9 @@ const Footer = () => {
           ))}
         </nav>
 
-        <p className="mt-10 text-sm text-muted-foreground text-center">
-          made with love by{" "}
-          <a
-            href="https://bille.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline font-medium"
-          >
+        <p className="mt-8 text-xs text-muted-foreground">
+          Made by{" "}
+          <a href="https://bille.dev" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:underline">
             toto
           </a>
         </p>

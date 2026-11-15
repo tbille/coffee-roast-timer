@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useAuth } from '@/hooks/useAuth';
 
 interface AuthPromptProps {
@@ -22,17 +22,12 @@ export const AuthPrompt = ({ onAuthSuccess }: AuthPromptProps) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in both email and password.",
-        variant: "destructive",
-      });
+      toast.error("Missing fields", { description: "Please fill in both email and password." });
       return;
     }
 
@@ -57,35 +52,21 @@ export const AuthPrompt = ({ onAuthSuccess }: AuthPromptProps) => {
           errorMessage = 'Please check your email and click the confirmation link before signing in.';
         }
         
-        toast({
-          title: activeTab === 'signup' ? "Sign up failed" : "Sign in failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        toast.error(activeTab === 'signup' ? "Sign up failed" : "Sign in failed", { description: errorMessage });
       } else {
         if (activeTab === 'signup') {
-          toast({
-            title: "Account created!",
-            description: "Please check your email to confirm your account, then sign in to save.",
-          });
+          toast.success("Account created", { description: "Please check your email to confirm your account, then sign in to save." });
           // Switch to sign in tab after successful signup
           setActiveTab('signin');
           setPassword(''); // Clear password for security
         } else {
-          toast({
-            title: "Welcome back!",
-            description: "Signing you in...",
-          });
+          toast.message("Welcome back", { description: "Signing you in..." });
           // Call success callback - the parent will handle auto-save
           onAuthSuccess();
         }
       }
-    } catch (error: any) {
-      toast({
-        title: "An error occurred",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      toast.error("An error occurred", { description: (error instanceof Error && error.message) || "Something went wrong. Please try again." });
     } finally {
       setLoading(false);
     }

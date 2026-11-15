@@ -44,7 +44,7 @@ export function RoastCurveChart({ points, facts, unit, onUnitChange, contextNote
   }, [points]);
 
   return (
-    <Card className="shadow-coffee">
+    <Card>
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 space-y-0 pb-2">
         <div className="space-y-1">
           <CardTitle as="h2" className="text-lg">Temperature curve</CardTitle>

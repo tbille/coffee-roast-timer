@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useAuth } from '@/hooks/useAuth';
 
 const Auth = () => {
@@ -14,7 +14,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -28,11 +27,7 @@ const Auth = () => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in both email and password.",
-        variant: "destructive",
-      });
+      toast.error("Missing fields", { description: "Please fill in both email and password." });
       return;
     }
 
@@ -55,30 +50,16 @@ const Auth = () => {
           errorMessage = 'Please check your email and click the confirmation link before signing in.';
         }
         
-        toast({
-          title: isSignUp ? "Sign up failed" : "Sign in failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        toast.error(isSignUp ? "Sign up failed" : "Sign in failed", { description: errorMessage });
       } else {
         if (isSignUp) {
-          toast({
-            title: "Account created!",
-            description: "Please check your email to confirm your account.",
-          });
+          toast.success("Account created", { description: "Please check your email to confirm your account." });
         } else {
-          toast({
-            title: "Welcome back!",
-            description: "You have been signed in successfully.",
-          });
+          toast.message("Welcome back", { description: "You have been signed in successfully." });
         }
       }
-    } catch (error: any) {
-      toast({
-        title: "An error occurred",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      toast.error("An error occurred", { description: (error instanceof Error && error.message) || "Something went wrong. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -87,6 +68,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
+        <title>Sign in · Roast Timer</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -105,7 +87,7 @@ const Auth = () => {
           <p className="text-muted-foreground mt-2">Track your perfect roast</p>
         </div>
 
-        <Card className="shadow-coffee">
+        <Card>
           <CardHeader>
             <CardTitle>{isSignUp ? 'Create Account' : 'Sign In'}</CardTitle>
             <CardDescription>

@@ -23,7 +23,7 @@ const GENERAL_GUIDANCE: Partial<Record<StepKind, string>> = {
 
 export function RoastSteps({ steps, footer }: { steps: RoastStep[]; footer?: ReactNode }) {
   return (
-    <Card className="shadow-coffee">
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle as="h2" className="text-lg">Roast steps</CardTitle>
         <p className="text-sm text-muted-foreground">What happened during this roast, in order.</p>

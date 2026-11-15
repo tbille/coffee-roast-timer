@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DiscoverProfileCard, type DiscoverCardData } from "@/components/discover/DiscoverProfileCard";
+import { RoastCard, type RoastCardData } from "@/components/roast-card/RoastCard";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { deriveRoastFacts, deriveRoastPhases, type ProfileViewInput } from "@/utils/roastProfileView";
@@ -28,7 +28,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 const UNKNOWN_ROASTER = "unknown";
 
-interface DiscoverRow extends DiscoverCardData {
+interface DiscoverRow extends RoastCardData {
   searchText: string;
 }
 
@@ -289,7 +289,7 @@ const Discover = () => {
             </div>
           ) : (
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((card) => <DiscoverProfileCard key={card.id} card={card} />)}
+              {results.map((card) => <RoastCard key={card.id} card={card} />)}
             </ul>
           )}
 

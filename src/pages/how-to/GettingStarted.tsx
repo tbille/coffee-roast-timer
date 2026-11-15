@@ -77,7 +77,7 @@ const GettingStarted = () => (
       </Step>
       <Step title="Find your roast">
         <p>
-          You land on <Ui>My Roast Profiles</Ui> (your <Link to="/dashboard">dashboard</Link>). Open the roast to see its
+          You land on <Link to="/roasts">My roasts</Link>. Open the roast to see its
           summary, temperature curve and the steps you logged.
         </p>
       </Step>

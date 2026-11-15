@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoaster } from '@/contexts/RoasterContext';
 import { useRoasterPreferences } from '@/hooks/useRoasterPreferences';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useMigration } from '@/hooks/useMigration';
 import SaveRoastDialog from './SaveRoastDialog';
 import { RoasterSwitcher } from './RoasterSwitcher';
@@ -30,7 +30,6 @@ const FALLBACK_ROASTER: RoasterType = 'gene-cbr-101';
 
 export default function RoastMonitor() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { currentRoaster } = useRoaster();
   const { incrementUsage } = useRoasterPreferences(user?.id);
@@ -51,11 +50,8 @@ export default function RoastMonitor() {
     saveRequest?.clear();
     setSaveRequest(null);
     if (user) incrementUsage(roasterType);
-    toast({
-      title: 'Roast Saved!',
-      description: 'Your roast profile has been saved successfully.',
-    });
-    navigate('/dashboard');
+    toast.success("Roast saved", { description: 'Your roast profile has been saved successfully.' });
+    navigate('/roasts');
   };
 
   return (

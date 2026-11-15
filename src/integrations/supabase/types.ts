@@ -77,17 +77,30 @@ export type Database = {
       roast_profiles: {
         Row: {
           beans_name: string
+          brew_method: string | null
           coffee_roaster: string | null
           crack_events: Json
           created_at: string
+          cupping_date: string | null
+          cupping_score: number | null
+          development_stats: Json | null
           duration_seconds: number
+          environmental_notes: string | null
           farm_name: string | null
           final_weight: number | null
+          flavor_notes: string | null
+          flavor_tags: string[] | null
           id: string
           initial_weight: number | null
+          milestones: Json | null
           notes: string | null
           origin: string | null
+          rest_days: number | null
           roast_process: string | null
+          roasted_bean_photo_url: string | null
+          roaster_data: Json | null
+          roaster_settings: Json | null
+          roaster_type: string | null
           temperature_data: Json
           temperature_unit: string
           updated_at: string
@@ -95,17 +108,30 @@ export type Database = {
         }
         Insert: {
           beans_name: string
+          brew_method?: string | null
           coffee_roaster?: string | null
           crack_events?: Json
           created_at?: string
+          cupping_date?: string | null
+          cupping_score?: number | null
+          development_stats?: Json | null
           duration_seconds: number
+          environmental_notes?: string | null
           farm_name?: string | null
           final_weight?: number | null
+          flavor_notes?: string | null
+          flavor_tags?: string[] | null
           id?: string
           initial_weight?: number | null
+          milestones?: Json | null
           notes?: string | null
           origin?: string | null
+          rest_days?: number | null
           roast_process?: string | null
+          roasted_bean_photo_url?: string | null
+          roaster_data?: Json | null
+          roaster_settings?: Json | null
+          roaster_type?: string | null
           temperature_data?: Json
           temperature_unit?: string
           updated_at?: string
@@ -113,23 +139,74 @@ export type Database = {
         }
         Update: {
           beans_name?: string
+          brew_method?: string | null
           coffee_roaster?: string | null
           crack_events?: Json
           created_at?: string
+          cupping_date?: string | null
+          cupping_score?: number | null
+          development_stats?: Json | null
           duration_seconds?: number
+          environmental_notes?: string | null
           farm_name?: string | null
           final_weight?: number | null
+          flavor_notes?: string | null
+          flavor_tags?: string[] | null
           id?: string
           initial_weight?: number | null
+          milestones?: Json | null
           notes?: string | null
           origin?: string | null
+          rest_days?: number | null
           roast_process?: string | null
+          roasted_bean_photo_url?: string | null
+          roaster_data?: Json | null
+          roaster_settings?: Json | null
+          roaster_type?: string | null
           temperature_data?: Json
           temperature_unit?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      user_roaster_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          last_used_at: string | null
+          roaster_type: string
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_used_at?: string | null
+          roaster_type: string
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_used_at?: string | null
+          roaster_type?: string
+          usage_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roaster_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

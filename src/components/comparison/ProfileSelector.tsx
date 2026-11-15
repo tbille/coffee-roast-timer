@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Search, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -56,7 +56,6 @@ export const ProfileSelector = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
   const isDesktop = !isMobile;
 
@@ -144,11 +143,7 @@ export const ProfileSelector = ({
     } catch (error) {
       console.error('Error fetching profiles:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast({
-        title: 'Error',
-        description: `Failed to load profiles: ${errorMessage}`,
-        variant: 'destructive',
-      });
+      toast.error(`Failed to load profiles: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -159,10 +154,7 @@ export const ProfileSelector = ({
       onSelect(selectedIds.filter((id) => id !== profileId));
     } else {
       if (selectedIds.length >= 2) {
-        toast({
-          title: 'Maximum Reached',
-          description: 'You can compare up to 2 profiles at a time.',
-        });
+        toast.message("Maximum reached", { description: 'You can compare up to 2 profiles at a time.' });
         return;
       }
       onSelect([...selectedIds, profileId]);
@@ -171,10 +163,7 @@ export const ProfileSelector = ({
 
   const handleCompare = () => {
     if (selectedIds.length === 0) {
-      toast({
-        title: 'No Selection',
-        description: 'Please select at least one profile to compare.',
-      });
+      toast.message("No selection", { description: 'Please select at least one profile to compare.' });
       return;
     }
     onOpenChange(false);

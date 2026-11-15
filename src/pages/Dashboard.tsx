@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Helmet } from "react-helmet-async";
+import { PageTitle } from "@/components/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Clock, Coffee, MapPin, Scale, Trash2, Settings, GitCompare } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UserSettingsDialog from "@/components/UserSettingsDialog";
@@ -24,8 +24,8 @@ interface RoastProfile {
   initial_weight?: number;
   final_weight?: number;
   duration_seconds: number;
-  temperature_data: any;
-  crack_events: any;
+  temperature_data: unknown;
+  crack_events: unknown;
   created_at: string;
   roaster_type?: RoasterType;
 }
@@ -35,9 +35,6 @@ const Dashboard = () => {
     loading
   } = useAuth();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
   const [profiles, setProfiles] = useState<RoastProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
@@ -96,14 +93,10 @@ const Dashboard = () => {
           ascending: false
         });
       if (error) throw error;
-      setProfiles(data || []);
+      setProfiles((data ?? []) as RoastProfile[]);
     } catch (error) {
       console.error('Error fetching profiles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load your roast profiles.",
-        variant: "destructive"
-      });
+      toast.error("Failed to load your roast profiles.");
     } finally {
       setLoadingProfiles(false);
     }
@@ -115,17 +108,10 @@ const Dashboard = () => {
       } = await supabase.from('roast_profiles').delete().eq('id', profileId);
       if (error) throw error;
       setProfiles(prev => prev.filter(p => p.id !== profileId));
-      toast({
-        title: "Profile Deleted",
-        description: "Your roast profile has been deleted successfully."
-      });
+      toast.success("Roast deleted", { description: "Your roast profile has been deleted successfully." });
     } catch (error) {
       console.error('Error deleting profile:', error);
-      toast({
-        title: "Delete Failed",
-        description: "Failed to delete the roast profile. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Delete failed", { description: "Failed to delete the roast profile. Please try again." });
     }
   };
   const formatTime = (seconds: number): string => {
@@ -162,9 +148,7 @@ const Dashboard = () => {
       </div>;
   }
   return <>
-    <Helmet>
-      <meta name="robots" content="noindex, nofollow" />
-    </Helmet>
+    <PageTitle title="My roasts" noIndex />
     <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
       <div className="container mx-auto max-w-6xl w-full">
         {/* Header */}
@@ -189,7 +173,7 @@ const Dashboard = () => {
         </div>
 
         {/* Filter Section */}
-        <Card className="shadow-coffee mb-6">
+        <Card className=" mb-6">
           <CardContent className="p-4">
             <RoasterFilter 
               value={selectedRoaster} 
@@ -201,7 +185,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Profiles Grid */}
-        {filteredProfiles.length === 0 ? <Card className="shadow-coffee">
+        {filteredProfiles.length === 0 ? <Card>
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -225,7 +209,7 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfiles.map(profile => <Card key={profile.id} className="shadow-coffee cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/profile/${profile.id}`)}>
+            {filteredProfiles.map(profile => <Card key={profile.id} className=" cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate(`/profile/${profile.id}`)}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -303,7 +287,7 @@ const Dashboard = () => {
 
         {/* Settings Section */}
         <div className="mt-12 pt-8 border-t">
-          <Card className="shadow-coffee">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />

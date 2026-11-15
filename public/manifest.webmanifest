@@ -1,0 +1,14 @@
+{
+  "name": "Roast Timer",
+  "short_name": "Roast Timer",
+  "description": "A roast timer and log for home coffee roasters.",
+  "start_url": "/roast",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#faf8f5",
+  "icons": [
+    { "src": "/icon-512.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" },
+    { "src": "/favicon.ico", "sizes": "73x74", "type": "image/png" }
+  ]
+}

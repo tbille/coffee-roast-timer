@@ -23,7 +23,7 @@ import { RoastNotes } from "@/components/profile/RoastNotes";
 import { RoastSetup } from "@/components/profile/RoastSetup";
 import { EditDetailsDialog, type EditableDetails } from "@/components/profile/EditDetailsDialog";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
@@ -52,7 +52,6 @@ const RoastProfileDetails = () => {
     : `https://roast-timer.com/profile/${id ?? ""}`;
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const [profile, setProfile] = useState<ProfileRow | null>(null);
@@ -88,7 +87,7 @@ const RoastProfileDetails = () => {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roast-profile-likes", id] }),
-    onError: () => toast({ title: "Error", description: "Failed to update like status.", variant: "destructive" }),
+    onError: () => toast.error("Failed to update like status."),
   });
 
   const handleLikeClick = () => {
@@ -148,7 +147,7 @@ const RoastProfileDetails = () => {
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast({ title: "Error", description: "Failed to load roast profile.", variant: "destructive" });
+      toast.error("Failed to load roast profile.");
       navigate("/");
     } finally {
       setLoading(false);
@@ -162,11 +161,11 @@ const RoastProfileDetails = () => {
     const { error } = await supabase.from("roast_profiles").update(patch).eq("id", profile.id);
     if (error) {
       console.error("Error updating profile:", error);
-      toast({ title: "Error", description: "Your changes could not be saved.", variant: "destructive" });
+      toast.error("Your changes could not be saved.");
       return false;
     }
     setProfile({ ...profile, ...patch } as ProfileRow);
-    toast({ title: successTitle });
+    toast.success(successTitle);
     return true;
   };
 
@@ -198,9 +197,9 @@ const RoastProfileDetails = () => {
     }
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Link copied", description: "Paste it anywhere to share this roast." });
+      toast.success("Link copied", { description: "Paste it anywhere to share this roast." });
     } catch {
-      toast({ title: "Share this profile", description: shareUrl, duration: 10000 });
+      toast.message("Share this profile", { description: shareUrl, duration: 10000 });
     }
   };
 

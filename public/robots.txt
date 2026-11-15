@@ -2,6 +2,7 @@
 User-agent: *
 Allow: /
 Disallow: /dashboard
+Disallow: /roasts
 Disallow: /compare
 Disallow: /auth
 
@@ -23,6 +24,7 @@ User-agent: Amazonbot
 User-agent: DuckAssistBot
 Allow: /
 Disallow: /dashboard
+Disallow: /roasts
 Disallow: /compare
 Disallow: /auth
 

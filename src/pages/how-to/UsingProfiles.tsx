@@ -36,7 +36,7 @@ const UsingProfiles = () => (
     <Steps>
       <Step title="Open the roast you want to repeat">
         <p>
-          Find it on your <Link to="/dashboard">dashboard</Link>, or on <Link to="/discover">Discover</Link> if you're
+          Find it in <Link to="/roasts">My roasts</Link>, or on <Link to="/discover">Discover</Link> if you're
           starting from someone else's roast. Filter by roaster to keep it relevant to your machine.
         </p>
       </Step>

@@ -36,7 +36,7 @@ export function RoastSetup(props: RoastSetupProps) {
   ].filter(Boolean) as string[];
 
   return (
-    <Card className="shadow-coffee">
+    <Card>
       <CardHeader className="pb-1">
         <CardTitle as="h2" className="text-lg">Beans &amp; setup</CardTitle>
       </CardHeader>

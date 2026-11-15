@@ -52,7 +52,7 @@ export function RoastNotes({ data, isOwner, onSaveNotes, onEditCupping }: RoastN
   ].filter(Boolean) as string[];
 
   return (
-    <Card className="shadow-coffee">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
         <CardTitle as="h2" className="text-lg">Tasting notes</CardTitle>
         {isOwner && (

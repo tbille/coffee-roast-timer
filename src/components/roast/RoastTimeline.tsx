@@ -85,7 +85,7 @@ export function RoastTimeline({ duration_seconds, milestones = [], className, on
   const useCompactMode = areMilestonesTooClose(sortedMilestones, duration_seconds);
 
   return (
-    <Card className={cn("shadow-coffee", className)}>
+    <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">

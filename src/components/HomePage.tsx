@@ -27,7 +27,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
               size="lg" 
               variant="secondary"
               onClick={onStartRoast}
-              className="text-lg px-8 py-6 shadow-warm hover:scale-105 transition-transform"
+              className="text-lg px-8 py-6 hover:scale-105 transition-transform"
             >
               <Timer className="mr-2 h-5 w-5" />
               Start New Roast
@@ -48,7 +48,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <Card className="shadow-coffee border-border/50">
+          <Card className=" border-border/50">
             <CardHeader className="text-center">
               <Timer className="h-12 w-12 text-primary mx-auto mb-4" />
               <CardTitle className="text-xl">Precise Timing</CardTitle>
@@ -60,7 +60,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-coffee border-border/50">
+          <Card className=" border-border/50">
             <CardHeader className="text-center">
               <TrendingUp className="h-12 w-12 text-temperature-hot mx-auto mb-4" />
               <CardTitle className="text-xl">Temperature Control</CardTitle>
@@ -72,7 +72,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-coffee border-border/50">
+          <Card className=" border-border/50">
             <CardHeader className="text-center">
               <Coffee className="h-12 w-12 text-coffee-medium mx-auto mb-4" />
               <CardTitle className="text-xl">Roast Profiles</CardTitle>
@@ -129,7 +129,7 @@ const HomePage = ({ onStartRoast }: HomePageProps) => {
             <Button 
               asChild
               size="lg"
-              className="text-lg px-8 py-6 shadow-warm hover:scale-105 transition-transform"
+              className="text-lg px-8 py-6 hover:scale-105 transition-transform"
             >
               <Link to="/discover">
                 <Globe className="mr-2 h-5 w-5" />

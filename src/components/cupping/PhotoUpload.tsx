@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { ACCEPTED_IMAGE_TYPES, MAX_PHOTO_SIZE_MB } from '@/types/cupping.types';
 
 interface PhotoUploadProps {
@@ -17,27 +17,18 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadPhoto, deletePhoto, uploading, progress } = usePhotoUpload();
-  const { toast } = useToast();
 
   const handleFileSelect = async (file: File) => {
     // Validate file type - accept all image/* types
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Invalid file type',
-        description: `Please upload an image file. Received: ${file.type}`,
-        variant: 'destructive',
-      });
+      toast.error('Invalid file type', { description: `Please upload an image file. Received: ${file.type}` });
       return;
     }
 
     // Validate file size
     const maxSizeBytes = MAX_PHOTO_SIZE_MB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      toast({
-        title: 'File too large',
-        description: `Please upload an image smaller than ${MAX_PHOTO_SIZE_MB}MB.`,
-        variant: 'destructive',
-      });
+      toast.error('File too large', { description: `Please upload an image smaller than ${MAX_PHOTO_SIZE_MB}MB.` });
       return;
     }
 
@@ -51,18 +42,11 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
       const url = await uploadPhoto(file);
       onPhotoUploaded(url);
       
-      toast({
-        title: 'Photo uploaded',
-        description: 'Your roasted bean photo has been uploaded successfully.',
-      });
+      toast.success('Photo uploaded', { description: 'Your roasted bean photo has been uploaded successfully.' });
     } catch (error) {
       console.error('Photo upload error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload photo. Please try again.';
-      toast({
-        title: 'Upload failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast.error('Upload failed', { description: errorMessage });
     }
   };
 
@@ -73,17 +57,10 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
       await deletePhoto(currentPhotoUrl);
       onPhotoRemoved();
       
-      toast({
-        title: 'Photo removed',
-        description: 'Your photo has been removed.',
-      });
+      toast.success('Photo removed', { description: 'Your photo has been removed.' });
     } catch (error) {
       console.error('Photo delete error:', error);
-      toast({
-        title: 'Delete failed',
-        description: 'Failed to remove photo. Please try again.',
-        variant: 'destructive',
-      });
+      toast.error('Delete failed', { description: 'Failed to remove photo. Please try again.' });
     }
   };
 

@@ -37,7 +37,7 @@ export const SensoryCheckpoints = forwardRef<HTMLDivElement, SensoryCheckpointsP
     }
 
     return (
-      <Card className={cn("shadow-coffee", className)} ref={ref} id="sensory-checkpoints">
+      <Card className={className} ref={ref} id="sensory-checkpoints">
         <CardHeader>
           <CardTitle>👂 Sensory Checkpoints - What You Should Notice</CardTitle>
         </CardHeader>
