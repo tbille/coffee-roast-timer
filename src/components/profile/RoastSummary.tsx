@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatClock, type RoastFacts, type RoastPhase } from "@/utils/roastProfileView";
 
-const PHASE_COLOR: Record<RoastPhase["key"], string> = {
+export const PHASE_COLOR: Record<RoastPhase["key"], string> = {
   drying: "bg-[hsl(var(--phase-drying))]",
   maillard: "bg-[hsl(var(--phase-maillard))]",
   beforeCrack: "bg-[hsl(var(--phase-precrack))]",

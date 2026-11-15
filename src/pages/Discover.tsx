@@ -1,360 +1,311 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
+import { Coffee, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Coffee, MapPin, Scale, Search, ThumbsUp, Thermometer } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { convertTemperature, formatTemperature, type TemperatureUnit } from "@/utils/temperatureConversion";
-import { RoasterFilter } from "@/components/dashboard/RoasterFilter";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DiscoverProfileCard, type DiscoverCardData } from "@/components/discover/DiscoverProfileCard";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
+import { deriveRoastFacts, deriveRoastPhases, type ProfileViewInput } from "@/utils/roastProfileView";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
-import { getRoasterBadgeClasses } from "@/utils/roasterColors";
+import { getRoasterPrimaryColor } from "@/utils/roasterColors";
+import { tidyLabel } from "@/utils/textDisplay";
 import type { RoasterType } from "@/types/roaster.types";
 
-interface RoastProfile {
-  id: string;
-  user_id: string;
-  beans_name: string;
-  origin?: string;
-  farm_name?: string;
-  roast_process?: string;
-  coffee_roaster?: string;
-  initial_weight?: number;
-  final_weight?: number;
-  duration_seconds: number;
-  temperature_data: any;
-  crack_events: any;
-  created_at: string;
-  likes_count: number;
-  temperature_unit?: string;
-  roaster_type?: RoasterType;
+type SortKey = "newest" | "liked" | "shortest" | "longest";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "newest", label: "Newest" },
+  { value: "liked", label: "Most liked" },
+  { value: "shortest", label: "Shortest roast" },
+  { value: "longest", label: "Longest roast" },
+];
+
+const UNKNOWN_ROASTER = "unknown";
+
+interface DiscoverRow extends DiscoverCardData {
+  searchText: string;
 }
+
+/** Only the columns the cards need: no temperature curves, likes counted in the same request. */
+const PROFILE_COLUMNS =
+  "id, beans_name, origin, farm_name, roast_process, coffee_roaster, roaster_type, duration_seconds, initial_weight, final_weight, crack_events, milestones, roaster_data, created_at, likes:roast_profile_likes(count)";
+
+async function fetchDiscoverRows(): Promise<DiscoverRow[]> {
+  const { data, error } = await supabase
+    .from("roast_profiles")
+    .select(PROFILE_COLUMNS)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const profile = row as unknown as ProfileViewInput & {
+      id: string;
+      beans_name: string;
+      origin?: string | null;
+      farm_name?: string | null;
+      roast_process?: string | null;
+      coffee_roaster?: string | null;
+      created_at: string;
+      likes?: { count: number }[];
+    };
+    const facts = deriveRoastFacts(profile);
+    const roasterType = profile.roaster_type && ROASTER_SPECS[profile.roaster_type as RoasterType]
+      ? (profile.roaster_type as RoasterType)
+      : undefined;
+    const origin = tidyLabel(profile.origin);
+    const farm = tidyLabel(profile.farm_name);
+    const details = [origin, tidyLabel(profile.roast_process), farm && farm.toLowerCase() !== origin.toLowerCase() ? farm : ""]
+      .filter(Boolean);
+    const roasterLabel = roasterType ? ROASTER_SPECS[roasterType].displayName : "Roaster not specified";
+
+    return {
+      id: profile.id,
+      title: tidyLabel(profile.beans_name) || "Untitled roast",
+      details,
+      roasterType,
+      roasterLabel,
+      createdAt: profile.created_at,
+      likes: profile.likes?.[0]?.count ?? 0,
+      facts,
+      phases: deriveRoastPhases(profile, facts),
+      searchText: [profile.beans_name, profile.origin, profile.farm_name, profile.roast_process, profile.coffee_roaster, roasterLabel]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase(),
+    };
+  });
+}
+
+const SORTERS: Record<SortKey, (a: DiscoverRow, b: DiscoverRow) => number> = {
+  newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
+  liked: (a, b) => b.likes - a.likes || b.createdAt.localeCompare(a.createdAt),
+  shortest: (a, b) => a.facts.totalSeconds - b.facts.totalSeconds,
+  longest: (a, b) => b.facts.totalSeconds - a.facts.totalSeconds,
+};
+
+function CardSkeleton() {
+  return (
+    <li className="space-y-4 rounded-lg border bg-card p-4 sm:p-5" aria-hidden>
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-8" />
+        ))}
+      </div>
+      <Skeleton className="h-1.5 w-full" />
+      <Skeleton className="h-3 w-1/3" />
+    </li>
+  );
+}
+
 const Discover = () => {
   const collectionSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Discover Roast Profiles",
     url: "https://roast-timer.com/discover",
-    description: "Community coffee roast profiles with roast curves, bean origin data, and tasting notes."
+    description: "Community coffee roast profiles with first crack timing, development ratio, and weight loss.",
   };
 
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const {
-    toast
-  } = useToast();
-  const [profiles, setProfiles] = useState<RoastProfile[]>([]);
-  const [filteredProfiles, setFilteredProfiles] = useState<RoastProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
-  const [selectedRoaster, setSelectedRoaster] = useState<RoasterType | "all" | "unknown">(
-    (searchParams.get("roaster") as RoasterType | "all" | "unknown") || "all"
-  );
-  const [viewUnit, setViewUnit] = useState<TemperatureUnit>('C');
-  const [userDefaultUnit, setUserDefaultUnit] = useState<TemperatureUnit>('C');
-  const [profileCounts, setProfileCounts] = useState<Record<string, number>>({});
-  useEffect(() => {
-    fetchProfiles();
-    if (user) {
-      fetchUserPreferences();
-    }
-  }, [user]);
-  useEffect(() => {
-    filterProfiles();
-    calculateProfileCounts();
-  }, [searchQuery, profiles, selectedRoaster]);
+  const query = searchParams.get("q") ?? "";
+  const roaster = searchParams.get("roaster") ?? "all";
+  const sortParam = searchParams.get("sort") as SortKey | null;
+  const sort: SortKey = sortParam && sortParam in SORTERS ? sortParam : "newest";
 
-  useEffect(() => {
-    const next = new URLSearchParams();
-
-    if (searchQuery.trim()) {
-      next.set("q", searchQuery.trim());
-    }
-
-    if (selectedRoaster !== "all") {
-      next.set("roaster", selectedRoaster);
-    }
-
+  const updateParam = (key: string, value: string, defaultValue: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (!value.trim() || value === defaultValue) next.delete(key);
+    else next.set(key, value);
     setSearchParams(next, { replace: true });
-  }, [searchQuery, selectedRoaster, setSearchParams]);
-
-  const calculateProfileCounts = () => {
-    const counts: Record<string, number> = { total: profiles.length, unknown: 0 };
-    
-    profiles.forEach((profile) => {
-      if (!profile.roaster_type) {
-        counts.unknown = (counts.unknown || 0) + 1;
-      } else {
-        counts[profile.roaster_type] = (counts[profile.roaster_type] || 0) + 1;
-      }
-    });
-    
-    setProfileCounts(counts);
+  };
+  const clearFilters = () => {
+    const next = new URLSearchParams();
+    if (sort !== "newest") next.set("sort", sort);
+    setSearchParams(next, { replace: true });
   };
 
-  const fetchUserPreferences = async () => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('profiles').select('default_temperature_unit').eq('id', user?.id).single();
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 is "not found"
-        console.error('Error fetching user preferences:', error);
-        return;
-      }
-      const defaultUnit = data?.default_temperature_unit || 'C';
-      setUserDefaultUnit(defaultUnit as TemperatureUnit);
-      setViewUnit(defaultUnit as TemperatureUnit);
-    } catch (error) {
-      console.error('Error fetching user preferences:', error);
-    }
-  };
-  const fetchProfiles = async () => {
-    try {
-      // First fetch all roast profiles
-      const {
-        data: roastData,
-        error: roastError
-      } = await supabase.from('roast_profiles').select('*');
-      if (roastError) throw roastError;
+  const { data: rows = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ["discover-profiles"],
+    queryFn: fetchDiscoverRows,
+  });
 
-      // Then fetch likes count for each profile
-      const profilesWithLikes = await Promise.all((roastData || []).map(async profile => {
-        const {
-          data: likesData,
-          error: likesError
-        } = await supabase.from('roast_profile_likes').select('id').eq('roast_profile_id', profile.id);
+  // Roaster chips: only machines that actually have profiles, most used first.
+  const roasterChips = useMemo(() => {
+    const counts = new Map<string, number>();
+    rows.forEach((r) => counts.set(r.roasterType ?? UNKNOWN_ROASTER, (counts.get(r.roasterType ?? UNKNOWN_ROASTER) ?? 0) + 1));
+    return [...counts.entries()]
+      .map(([id, count]) => ({
+        id,
+        count,
+        label: id === UNKNOWN_ROASTER ? "Not specified" : ROASTER_SPECS[id as RoasterType].displayName,
+      }))
+      .sort((a, b) => (a.id === UNKNOWN_ROASTER ? 1 : b.id === UNKNOWN_ROASTER ? -1 : b.count - a.count));
+  }, [rows]);
 
-        // Don't throw error if likes query fails, just set count to 0
-        const likes_count = likesError ? 0 : likesData?.length || 0;
-        return {
-          ...profile,
-          likes_count
-        };
-      }));
+  const results = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return rows
+      .filter((r) => roaster === "all" || (r.roasterType ?? UNKNOWN_ROASTER) === roaster)
+      .filter((r) => terms.every((t) => r.searchText.includes(t)))
+      .sort(SORTERS[sort]);
+  }, [rows, query, roaster, sort]);
 
-      // Sort by likes first (descending), then by date (newest first)
-      const sortedProfiles = profilesWithLikes.sort((a, b) => {
-        if (a.likes_count !== b.likes_count) {
-          return b.likes_count - a.likes_count; // More likes first
-        }
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // Newer first
-      });
-      setProfiles(sortedProfiles);
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load roast profiles.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  const filterProfiles = () => {
-    let filtered = profiles;
-    
-    // Apply roaster filter
-    if (selectedRoaster !== "all") {
-      if (selectedRoaster === "unknown") {
-        filtered = filtered.filter(p => !p.roaster_type);
-      } else {
-        filtered = filtered.filter(p => p.roaster_type === selectedRoaster);
-      }
-    }
-    
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(profile => 
-        profile.beans_name.toLowerCase().includes(query) || 
-        profile.origin?.toLowerCase().includes(query) || 
-        profile.farm_name?.toLowerCase().includes(query) || 
-        profile.roast_process?.toLowerCase().includes(query) || 
-        profile.coffee_roaster?.toLowerCase().includes(query) ||
-        getRoasterDisplayName(profile.roaster_type).toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredProfiles(filtered);
-  };
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-  const getWeightLoss = (initial?: number, final?: number): string => {
-    if (!initial || !final) return "N/A";
-    const loss = initial - final;
-    const percentage = loss / initial * 100;
-    return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
-  };
-  const getRoasterDisplayName = (roasterType?: RoasterType): string => {
-    if (!roasterType) return "Unknown";
-    const roaster = ROASTER_SPECS[roasterType];
-    return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
-  };
-  if (loading) {
-    return <div className="min-h-screen bg-background p-2 sm:p-4 overflow-x-hidden">
-        <div className="container mx-auto max-w-6xl w-full">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="text-lg text-foreground">Loading profiles...</div>
-            </div>
-          </div>
-        </div>
-      </div>;
-  }
-  const hasLowValueState = searchQuery.trim().length > 0 || selectedRoaster !== "all";
+  const hasFilters = query.trim().length > 0 || roaster !== "all";
+  const isNonCanonical = hasFilters || sort !== "newest";
 
-  return <>
-    <Helmet>
-      <title>Discover Coffee Roast Profiles by Roaster, Origin, and Process</title>
-      <meta name="description" content="Browse community coffee roast profiles by roaster type, bean origin, and process. Find proven roast timelines, first-crack timing, and inspiration for your next batch." />
-      <meta name="keywords" content="coffee roast profiles, community roasts, coffee roasting inspiration, roast discovery, shared roast profiles" />
-      <meta name="robots" content={hasLowValueState ? "noindex, follow" : "index, follow"} />
-      <meta property="og:title" content="Discover Coffee Roast Profiles by Roaster, Origin, and Process" />
-      <meta property="og:description" content="Find community roast profiles with useful timing and roast details you can replicate." />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://roast-timer.com/discover" />
-      <link rel="canonical" href="https://roast-timer.com/discover" />
-      <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
-    </Helmet>
-    <div className="bg-background p-2 sm:p-4 overflow-x-hidden">
-      <div className="container mx-auto max-w-6xl w-full">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Discover Roast Profiles</h1>
-          <p className="text-sm text-muted-foreground text-center mt-2 max-w-3xl mx-auto">
-            Explore real roast profiles from the community by bean origin, roaster model, and process method.
-            Use this page to find reference timelines before your next batch.
-          </p>
-          <div className="flex justify-center mt-2">
-            <Badge variant="secondary" className="text-xs">
-              {filteredProfiles.length} profile{filteredProfiles.length !== 1 ? 's' : ''}
-            </Badge>
-          </div>
-        </div>
+  const chipClass = (active: boolean) =>
+    cn(
+      "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      active ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-muted",
+    );
 
-        {/* Search and Controls */}
-        <Card className="shadow-coffee mb-6">
-          <CardContent className="p-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by bean name, origin, farm, process, or roaster..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-            </div>
-            
-            {/* Roaster Filter */}
-            <RoasterFilter 
-              value={selectedRoaster} 
-              onChange={setSelectedRoaster}
-              profileCounts={profileCounts}
-            />
-          </CardContent>
-        </Card>
+  return (
+    <>
+      <Helmet>
+        <title>Discover Coffee Roast Profiles by Roaster, Origin, and Process</title>
+        <meta name="description" content="Browse community coffee roast profiles by roaster type, bean origin, and process. Compare first crack timing, development ratio, and weight loss before your next batch." />
+        <meta name="keywords" content="coffee roast profiles, community roasts, coffee roasting inspiration, roast discovery, shared roast profiles" />
+        <meta name="robots" content={isNonCanonical ? "noindex, follow" : "index, follow"} />
+        <meta property="og:title" content="Discover Coffee Roast Profiles by Roaster, Origin, and Process" />
+        <meta property="og:description" content="Find community roast profiles with useful timing and roast details you can replicate." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://roast-timer.com/discover" />
+        <link rel="canonical" href="https://roast-timer.com/discover" />
+        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
+      </Helmet>
 
-        {/* Profiles Grid */}
-        {filteredProfiles.length === 0 ? <Card className="shadow-coffee">
-            <CardContent className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <Coffee className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {searchQuery ? "No profiles found" : "No roast profiles yet"}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchQuery ? "Try adjusting your search terms to find more profiles." : "Be the first to share a roast profile!"}
-                </p>
-                {searchQuery && <Button variant="outline" onClick={() => setSearchQuery("")}>
-                    Clear Search
-                  </Button>}
+      <div className="bg-background px-4 py-6 sm:py-8">
+        <div className="container mx-auto w-full max-w-6xl">
+          <header className="mb-6 max-w-3xl">
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Discover roast profiles</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Real roasts shared by the community. Compare first crack, development and weight loss on your machine, then
+              open a profile to follow its steps.
+            </p>
+          </header>
+
+          {/* Controls */}
+          <div className="mb-6 space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
+                <Label htmlFor="discover-search" className="sr-only">Search roast profiles</Label>
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                <Input
+                  id="discover-search"
+                  type="search"
+                  placeholder="Search bean, origin, farm or process"
+                  value={query}
+                  onChange={(e) => updateParam("q", e.target.value, "")}
+                  className="pl-9"
+                />
               </div>
-            </CardContent>
-          </Card> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredProfiles.map(profile => <Card key={profile.id} className="shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => navigate(`/profile/${profile.id}`)}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                          {profile.beans_name}
-                        </CardTitle>
-                        {profile.roaster_type && (
-                          <Badge className={`text-xs ${getRoasterBadgeClasses(profile.roaster_type)}`}>
-                            {getRoasterDisplayName(profile.roaster_type)}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <ThumbsUp className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
-                      </div>
-                      
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{profile.origin || "Unknown origin"}</span>
-                  </div>
-                  
-                  {profile.farm_name && <div className="text-sm text-muted-foreground">
-                      <strong>Farm:</strong> {profile.farm_name}
-                    </div>}
-                  
-                  {profile.roast_process && <div className="text-sm text-muted-foreground">
-                      <strong>Process:</strong> {profile.roast_process}
-                    </div>}
-                  
-                  {profile.coffee_roaster && <div className="text-sm text-muted-foreground">
-                      <strong>Roaster:</strong> {profile.coffee_roaster}
-                    </div>}
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{formatTime(profile.duration_seconds)}</span>
-                    </div>
-                    {profile.initial_weight && profile.final_weight && <div className="flex items-center gap-1">
-                        <Scale className="h-4 w-4" />
-                        <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
-                      </div>}
-                  </div>
-                </CardContent>
-              </Card>)}
-          </div>}
+              <div className="flex items-center gap-2 sm:w-52">
+                <Label htmlFor="discover-sort" className="shrink-0 text-sm text-muted-foreground">Sort</Label>
+                <Select value={sort} onValueChange={(v) => updateParam("sort", v, "newest")}>
+                  <SelectTrigger id="discover-sort" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-        <Card className="shadow-coffee mt-8">
-          <CardHeader>
-            <CardTitle className="text-base">Related Guides</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-2">
-            <Link to="/how-to/first-crack-timing" className="text-primary hover:underline">First crack timing</Link>
-            <Link to="/how-to/roast-defects" className="text-primary hover:underline">Roast defect diagnosis</Link>
-            <Link to="/how-to/development-ratios" className="text-primary hover:underline">Development ratios</Link>
-            <Link to="/how-to/using-profiles" className="text-primary hover:underline">Using profiles as reference</Link>
-          </CardContent>
-        </Card>
+            {roasterChips.length > 0 && (
+              <div role="group" aria-label="Filter by roaster" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+                <button type="button" className={chipClass(roaster === "all")} aria-pressed={roaster === "all"} onClick={() => updateParam("roaster", "all", "all")}>
+                  All roasters
+                  <span className="tabular-nums opacity-70">{rows.length}</span>
+                </button>
+                {roasterChips.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    className={chipClass(roaster === chip.id)}
+                    aria-pressed={roaster === chip.id}
+                    onClick={() => updateParam("roaster", roaster === chip.id ? "all" : chip.id, "all")}
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: chip.id === UNKNOWN_ROASTER ? "hsl(var(--muted-foreground))" : getRoasterPrimaryColor(chip.id as RoasterType) }}
+                      aria-hidden
+                    />
+                    {chip.label}
+                    <span className="tabular-nums opacity-70">{chip.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex min-h-8 items-center justify-between gap-3 text-sm text-muted-foreground">
+              <p aria-live="polite">
+                {isLoading ? "Loading profiles…" : `${results.length} ${results.length === 1 ? "profile" : "profiles"}${hasFilters ? ` of ${rows.length}` : ""}`}
+              </p>
+              {hasFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 gap-1">
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                  Clear filters
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Results */}
+          {isLoading ? (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+              {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+            </ul>
+          ) : isError ? (
+            <div className="rounded-lg border bg-card px-6 py-12 text-center">
+              <h2 className="text-lg font-semibold">Couldn't load roast profiles</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Check your connection and try again.</p>
+              <Button variant="outline" className="mt-4" onClick={() => refetch()}>Try again</Button>
+            </div>
+          ) : results.length === 0 ? (
+            <div className="rounded-lg border bg-card px-6 py-12 text-center">
+              <Coffee className="mx-auto mb-4 h-10 w-10 text-muted-foreground" aria-hidden />
+              <h2 className="text-lg font-semibold">{hasFilters ? "No profiles match" : "No roast profiles yet"}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {hasFilters ? "Try a broader search or another roaster." : "Roast a batch and share it to start the collection."}
+              </p>
+              {hasFilters ? (
+                <Button variant="outline" className="mt-4" onClick={clearFilters}>Clear filters</Button>
+              ) : (
+                <Button asChild className="mt-4"><Link to="/roast">Start a roast</Link></Button>
+              )}
+            </div>
+          ) : (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {results.map((card) => <DiscoverProfileCard key={card.id} card={card} />)}
+            </ul>
+          )}
+
+          <nav aria-labelledby="discover-guides" className="mt-10 border-t pt-6">
+            <h2 id="discover-guides" className="text-sm font-semibold text-foreground">Reading these numbers</h2>
+            <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <li><Link to="/how-to/first-crack-timing" className="text-primary hover:underline">First crack timing</Link></li>
+              <li><Link to="/how-to/development-ratios" className="text-primary hover:underline">Development ratios</Link></li>
+              <li><Link to="/how-to/roast-defects" className="text-primary hover:underline">Roast defect diagnosis</Link></li>
+              <li><Link to="/how-to/using-profiles" className="text-primary hover:underline">Using profiles as reference</Link></li>
+            </ul>
+          </nav>
+        </div>
       </div>
-    </div>
-    </>;
+    </>
+  );
 };
+
 export default Discover;
