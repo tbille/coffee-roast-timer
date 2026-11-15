@@ -245,7 +245,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`, which builds the app a
 The build has three steps:
 1. `prebuild` regenerates `public/sitemap.xml` (it reads public Supabase values from `.env`).
 2. `vite build` writes the app to `dist/`.
-3. `postbuild` (`scripts/spa-fallback.js`) copies `index.html` to every static route in the sitemap,
+3. `postbuild` (`scripts/spa-fallback.js`) copies `index.html` to `<route>.html` for every static route in the sitemap,
    so those URLs return HTTP 200 on GitHub Pages, and to `404.html` for dynamic routes like `/profile/:id`.
 
 The custom domain is set by `public/CNAME` and in the repository's Settings → Pages.
