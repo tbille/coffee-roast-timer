@@ -152,10 +152,10 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     manufacturer: 'FreshRoast',
     imageUrl: '/assets/roasters/freshroast-sr800.png',
     
-    // Physical specs
-    maxBatchSize: 150,
+    // Physical specs (8 oz / 226 g washed; ~170 g for chaffy dry-process coffee)
+    maxBatchSize: 226,
     minBatchSize: 50,
-    recommendedBatchSize: 120,
+    recommendedBatchSize: 170,
     
     // Timing
     typicalDuration: {

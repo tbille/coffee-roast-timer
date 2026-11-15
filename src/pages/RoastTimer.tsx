@@ -1,15 +1,25 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import RoastMonitor from "@/components/RoastMonitor";
 import { useRoaster } from "@/contexts/RoasterContext";
 import type { RoasterType } from "@/types/roaster.types";
+import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 
 const RoastTimer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { switchRoaster } = useRoaster();
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle roaster selection from a shareable link, e.g. /roast?roaster=gene-cbr-101
+  useEffect(() => {
+    const roasterParam = searchParams.get("roaster");
+    if (!roasterParam) return;
+    if (roasterParam in ROASTER_SPECS) switchRoaster(roasterParam as RoasterType);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams, switchRoaster]);
+
   // Handle roaster selection from landing page
   useEffect(() => {
     const roasterType = location.state?.roasterType as RoasterType;
