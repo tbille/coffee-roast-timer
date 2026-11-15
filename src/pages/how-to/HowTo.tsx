@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { ArrowRight, BookOpen, ChevronRight, Compass, Flame, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DocsSidebar } from "@/components/guides/DocsLayout";

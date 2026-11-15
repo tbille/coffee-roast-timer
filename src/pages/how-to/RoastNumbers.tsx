@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { DocsLayout } from "@/components/guides/DocsLayout";
 import { H2, RefTable } from "@/components/guides/prose";
 

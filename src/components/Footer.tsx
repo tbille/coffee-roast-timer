@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { FEEDBACK_URL } from "@/components/landing/FeedbackSection";
 import { getDoc } from "@/content/docs";
 import { SUPPORTED_ROASTERS } from "@/content/siteContent";

@@ -33,7 +33,7 @@ export const AutoRecordTimer = ({
   isPaused
 }: AutoRecordTimerProps) => {
   const [secondsUntilNext, setSecondsUntilNext] = useState(interval);
-  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const lastTriggerRef = useRef<number>(Date.now());
   // Keep the latest callback without restarting the countdown on every parent render
   const onTriggerRef = useRef(onTrigger);

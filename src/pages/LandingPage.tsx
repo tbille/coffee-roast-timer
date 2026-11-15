@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { LatestRoasts } from '@/components/landing/LatestRoasts';
