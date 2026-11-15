@@ -46,6 +46,9 @@ const LandingPage = () => {
           content="Track home coffee roasts with event timing, development ratios, and profile history." 
         />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://roast-timer.com" />
+        <meta property="og:image" content="https://roast-timer.com/og-image.png" />
+        <meta name="twitter:image" content="https://roast-timer.com/og-image.png" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://roast-timer.com" />
         <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
@@ -92,7 +95,7 @@ const LandingPage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Behmor 2000AB Troubleshooting</CardTitle>
+                <CardTitle className="text-lg">Behmor 2000AB Plus Troubleshooting</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/how-to/behmor-2000ab-troubleshooting" className="text-primary hover:underline">

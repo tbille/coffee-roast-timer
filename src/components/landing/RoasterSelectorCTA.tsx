@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -32,10 +32,6 @@ export function RoasterSelectorCTA() {
     }
   };
 
-  const handleBrowseProfiles = () => {
-    navigate('/discover');
-  };
-
   // Only show these 6 supported roasters on the homepage
   const supportedRoasterIds: RoasterType[] = [
     'popcorn-popper',
@@ -52,12 +48,12 @@ export function RoasterSelectorCTA() {
     .filter(Boolean); // Filter out any undefined specs
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full max-w-2xl mx-auto lg:mx-0 space-y-4">
       {/* Roaster Selector */}
       <div className="space-y-3">
         <label
           id="roaster-selector-label"
-          className="text-sm font-medium text-muted-foreground block text-center"
+          className="text-sm font-medium text-muted-foreground block text-center lg:text-left"
         >
           Select Your Roaster to Start
         </label>
@@ -84,33 +80,23 @@ export function RoasterSelectorCTA() {
         </Select>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button
-          size="lg"
-          className="flex-1 h-14 text-base font-semibold"
-          onClick={handleStartRoasting}
-          disabled={!selectedRoaster}
-        >
-          Start Roasting
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          className="flex-1 h-14 text-base"
-          onClick={handleBrowseProfiles}
-        >
-          Browse Profiles
-        </Button>
-      </div>
+      <Button
+        size="lg"
+        className="w-full h-14 text-base font-semibold"
+        onClick={handleStartRoasting}
+        disabled={!selectedRoaster}
+      >
+        Start Roasting
+        <ArrowRight className="ml-2 h-5 w-5" />
+      </Button>
 
-      {/* Helper Text */}
-      {selectedRoaster && (
-        <p className="text-sm text-center text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
-          Ready to roast with {sortedRoasters.find(r => r.id === selectedRoaster)?.displayName}
-        </p>
-      )}
+      <p className="text-sm text-center lg:text-left text-muted-foreground">
+        Free. No account needed to run the timer. Sign in to save and share roasts.
+        {' '}
+        <Link to="/discover" className="text-primary font-medium hover:underline whitespace-nowrap">
+          Browse community profiles →
+        </Link>
+      </p>
     </div>
   );
 }

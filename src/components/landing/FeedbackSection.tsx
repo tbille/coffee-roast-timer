@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { MessageSquare, ArrowRight } from 'lucide-react';
 
+export const FEEDBACK_URL = 'https://forms.gle/RE2Dt1DF9yRLoZ9m9';
+
 export function FeedbackSection() {
-  const feedbackUrl = 'https://forms.gle/RE2Dt1DF9yRLoZ9m9';
 
   return (
     <section className="py-16 px-4 bg-muted/20">
@@ -31,7 +32,7 @@ export function FeedbackSection() {
             asChild
           >
             <a
-              href={feedbackUrl}
+              href={FEEDBACK_URL}
               target="_blank"
               rel="noopener noreferrer"
             >

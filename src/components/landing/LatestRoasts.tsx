@@ -46,10 +46,11 @@ export function LatestRoasts() {
   const getRoasterDisplayName = (roasterType?: RoasterType): string => {
     if (!roasterType) return "Unknown";
     const roaster = ROASTER_SPECS[roasterType];
-    return roaster ? `${roaster.manufacturer} ${roaster.name}` : roasterType;
+    return roaster ? roaster.displayName : roasterType;
   };
 
-  // Fetch latest 4 roasts
+  // Fetch recent roasts and keep the latest 4 with enough data to be useful
+  // on the homepage (a named origin and a real duration).
   const { data: roasts, isLoading } = useQuery({
     queryKey: ['latest-roasts'],
     queryFn: async () => {
@@ -60,15 +61,18 @@ export function LatestRoasts() {
           likes:roast_profile_likes(count)
         `)
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(20);
 
       if (error) throw error;
       
       // Transform the data to include likes_count
-      return (data || []).map(profile => ({
-        ...profile,
-        likes_count: profile.likes?.[0]?.count || 0
-      })) as RoastProfile[];
+      return (data || [])
+        .map(profile => ({
+          ...profile,
+          likes_count: profile.likes?.[0]?.count || 0
+        }))
+        .filter(profile => profile.origin?.trim() && profile.duration_seconds > 0)
+        .slice(0, 4) as RoastProfile[];
     },
   });
 
@@ -126,21 +130,24 @@ export function LatestRoasts() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <ThumbsUp className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{profile.likes_count}</span>
+                    {profile.likes_count > 0 && (
+                      <div
+                        className="flex items-center gap-1"
+                        aria-label={`${profile.likes_count} ${profile.likes_count === 1 ? 'like' : 'likes'}`}
+                      >
+                        <ThumbsUp className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                        <span className="text-xs text-muted-foreground" aria-hidden="true">{profile.likes_count}</span>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    <span>{profile.origin || "Unknown origin"}</span>
+                    <span>{profile.origin}</span>
                   </div>
                   
-                  {profile.farm_name && (
+                  {profile.farm_name && profile.farm_name.trim().toLowerCase() !== profile.origin?.trim().toLowerCase() && (
                     <div className="text-sm text-muted-foreground">
                       <strong>Farm:</strong> {profile.farm_name}
                     </div>
@@ -152,11 +159,6 @@ export function LatestRoasts() {
                     </div>
                   )}
                   
-                  {profile.coffee_roaster && (
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Roaster:</strong> {profile.coffee_roaster}
-                    </div>
-                  )}
                   
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
