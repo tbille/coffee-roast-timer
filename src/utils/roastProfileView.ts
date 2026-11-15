@@ -92,26 +92,11 @@ const asArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[
 
 const roasterData = (p: ProfileViewInput) => (p.roaster_data ?? {}) as Record<string, unknown>;
 
-/**
- * Behmor roasts saved before elapsed-time recording was fixed stored the
- * countdown ("time remaining") instead of elapsed seconds. Every event also has
- * a wall-clock timestamp, so the true elapsed time is recoverable.
- */
-function elapsedFor(p: ProfileViewInput, event: { time: number; timestamp?: unknown }): number {
-  const start = roasterData(p).startTime;
-  if (p.roaster_type === "behmor-2000ab" && isNum(start) && isNum(event.timestamp)) {
-    const elapsed = (event.timestamp - start) / 1000;
-    if (elapsed >= 0 && elapsed <= p.duration_seconds + 5) return Math.round(elapsed);
-  }
-  return event.time;
-}
-
 function crackEvents(p: ProfileViewInput) {
   const legacy = asArray<{ time: number; type: "first" | "second"; currentTemp?: number; timestamp?: number }>(p.crack_events);
   const source = legacy.length > 0 ? legacy : asArray<typeof legacy[number]>(roasterData(p).crackEvents);
   return source
-    .filter((e) => e && isNum(e.time) && (e.type === "first" || e.type === "second"))
-    .map((e) => ({ ...e, time: elapsedFor(p, e) }));
+    .filter((e) => e && isNum(e.time) && (e.type === "first" || e.type === "second"));
 }
 
 function findCrack(p: ProfileViewInput, type: "first" | "second"): CrackFact | undefined {
@@ -250,9 +235,9 @@ function settingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): RoastSte
     const base = isNum(data.baseDuration) ? ` · ${formatClock(data.baseDuration)} base` : "";
     steps.push({ time: 0, kind: "start", title: "Start", values: [`Program ${data.profile}${base}`] });
   }
-  asArray<{ time: number; duration?: number; timestamp?: number }>(data.extensions).forEach((ext) => {
+  asArray<{ time: number; duration?: number }>(data.extensions).forEach((ext) => {
     if (!isNum(ext.time)) return;
-    steps.push({ time: elapsedFor(p, ext), kind: "extension", title: "Extend roast", values: [`+${ext.duration ?? 30}s`] });
+    steps.push({ time: ext.time, kind: "extension", title: "Extend roast", values: [`+${ext.duration ?? 30}s`] });
   });
 
   // Structured settings (newer profiles)
