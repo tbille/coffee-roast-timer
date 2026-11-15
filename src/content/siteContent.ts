@@ -6,7 +6,7 @@
  * must not import React, path aliases, or browser-only code.
  */
 
-import { DOCS, type DocEntry } from "./docs";
+import { DOCS, type DocEntry } from "./docs.ts";
 
 export const SITE_URL = "https://roast-timer.com";
 export const SITE_NAME = "Coffee Roast Timer";
