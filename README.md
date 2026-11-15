@@ -239,42 +239,18 @@ If Supabase credentials are not available, the script gracefully falls back to g
 
 ## Deployment
 
-### Via Lovable
+The site is hosted on **GitHub Pages** at [roast-timer.com](https://roast-timer.com).
+Every push to `main` runs `.github/workflows/deploy.yml`, which builds the app and publishes `dist/`.
 
-1. Open [Lovable Project](https://lovable.dev/projects/ca19079e-8524-4553-af99-ba4f827153e4)
-2. Click Share → Publish
-3. Your app will be deployed automatically
+The build has three steps:
+1. `prebuild` regenerates `public/sitemap.xml` (it reads public Supabase values from `.env`).
+2. `vite build` writes the app to `dist/`.
+3. `postbuild` (`scripts/spa-fallback.js`) copies `index.html` to every static route in the sitemap,
+   so those URLs return HTTP 200 on GitHub Pages, and to `404.html` for dynamic routes like `/profile/:id`.
 
-### Via Custom Hosting
+The custom domain is set by `public/CNAME` and in the repository's Settings → Pages.
 
-```sh
-# Build for production
-npm run build
-
-# Deploy the dist/ folder to your hosting provider
-# (Vercel, Netlify, Cloudflare Pages, etc.)
-```
-
-### Environment Variables
-
-Required for production:
-```
-VITE_SUPABASE_URL=your-supabase-project-url
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-```
-
-Optional SEO and analytics variables:
-```
-VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
-VITE_GSC_SITE_VERIFICATION=google-site-verification-token
-```
-
-## Custom Domain
-
-To connect a custom domain:
-1. Navigate to Project > Settings > Domains
-2. Click Connect Domain
-3. Follow the [custom domain setup guide](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+The Supabase URL and anon key are public by design; they live in `src/integrations/supabase/client.ts` and `.env`.
 
 ## Contributing
 
@@ -310,13 +286,10 @@ For questions, issues, or feedback:
 
 ## Acknowledgments
 
-- Built with [Lovable](https://lovable.dev)
 - Icons by [Lucide](https://lucide.dev)
 - UI components by [shadcn/ui](https://ui.shadcn.com)
 
 ---
-
-**Project URL**: https://lovable.dev/projects/ca19079e-8524-4553-af99-ba4f827153e4
 
 **Version**: 2.0.0  
 **Last Updated**: February 15, 2026
