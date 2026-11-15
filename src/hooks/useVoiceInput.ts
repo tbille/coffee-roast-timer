@@ -98,7 +98,7 @@ export const useVoiceInput = (
 
       recognition.onerror = (event: any) => {
         console.error('Voice recognition error:', event.error);
-        let errorMessage = 'Voice recognition error';
+        let errorMessage: string;
         
         switch (event.error) {
           case 'no-speech':

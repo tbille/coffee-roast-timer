@@ -17,7 +17,7 @@ import {
   SUPPORTED_ROASTERS,
   absoluteUrl,
   type ContentLink,
-} from "./siteContent";
+} from "./siteContent.ts";
 
 const escapeHtml = (value: string) =>
   value

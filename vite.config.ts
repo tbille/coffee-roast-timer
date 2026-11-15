@@ -1,7 +1,7 @@
-import { defineConfig, splitVendorChunkPlugin, type Plugin } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { renderLlmsTxt, renderSiteJsonLd, renderStaticShell } from "./src/content/staticShell";
+import { renderLlmsTxt, renderSiteJsonLd, renderStaticShell } from "./src/content/staticShell.ts";
 
 /**
  * Injects crawler-readable HTML + JSON-LD into index.html and serves /llms.txt,
@@ -37,11 +37,10 @@ export default defineConfig({
   plugins: [
     react(),
     seoShell(),
-    splitVendorChunkPlugin(),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });
