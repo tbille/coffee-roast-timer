@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,7 +113,7 @@ export function LatestRoasts() {
             {roasts.map((profile) => (
               <Card
                 key={profile.id}
-                className="w-[280px] sm:w-[320px] flex-shrink-0 shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                className="w-[280px] sm:w-[320px] shrink-0 shadow-coffee hover:shadow-lg transition-all duration-200 cursor-pointer group"
                 onClick={() => navigate(`/profile/${profile.id}`)}
               >
                 <CardHeader className="pb-3">

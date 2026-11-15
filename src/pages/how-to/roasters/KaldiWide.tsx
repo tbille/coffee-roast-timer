@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { DocsLayout } from "@/components/guides/DocsLayout";
 import { RoasterFacts, RoasterLinks } from "@/components/guides/RoasterFacts";
 import { Callout, H2, H3, Step, Steps, Ui } from "@/components/guides/prose";

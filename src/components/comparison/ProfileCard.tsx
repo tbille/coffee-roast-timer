@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { ComparisonProfile } from '@/types/comparison.types';
 import { format } from 'date-fns';
 import { formatDuration } from '@/utils/roastStatistics';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 interface ProfileCardProps {
   comparisonProfile: ComparisonProfile;

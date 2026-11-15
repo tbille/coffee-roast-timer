@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { getRoasterSpec } from "@/utils/roasterRegistry";
 import type { RoasterType } from "@/types/roaster.types";

@@ -58,7 +58,7 @@ export const SettingChangeHistory = ({
               key={`${change.time}-${index}`}
               className="flex items-center gap-3 p-2 rounded-md bg-accent/50 text-sm"
             >
-              <span className="font-mono font-semibold text-primary min-w-[3rem]">
+              <span className="font-mono font-semibold text-primary min-w-12">
                 {formatTime(change.time)}
               </span>
               <span className="text-muted-foreground">→</span>

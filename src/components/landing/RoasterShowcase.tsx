@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -67,7 +67,7 @@ export function RoasterShowcase() {
 
                   {/* Roaster Info */}
                   <div>
-                    <h3 className="font-bold text-lg mb-1 line-clamp-2 min-h-[3.5rem]">
+                    <h3 className="font-bold text-lg mb-1 line-clamp-2 min-h-14">
                       {roaster.displayName}
                     </h3>
                     {roaster.manufacturer && (

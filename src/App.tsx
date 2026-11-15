@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router";
 import { lazy, Suspense, type ReactNode } from "react";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";

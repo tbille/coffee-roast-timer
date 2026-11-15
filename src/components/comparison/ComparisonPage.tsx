@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router';
 import { Helmet } from 'react-helmet-async';
 import { useProfileComparison } from '@/hooks/useProfileComparison';
 import { ProfileCard } from './ProfileCard';

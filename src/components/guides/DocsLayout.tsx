@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router";
 import { ArrowLeft, ArrowRight, ChevronDown, Clock, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";

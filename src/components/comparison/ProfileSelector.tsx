@@ -257,7 +257,7 @@ export const ProfileSelector = ({
                       </div>
                     </div>
                     {isSelected && (
-                      <div className="ml-2 flex-shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                      <div className="ml-2 shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
                         {selectedIds.indexOf(profile.id) + 1}
                       </div>
                     )}

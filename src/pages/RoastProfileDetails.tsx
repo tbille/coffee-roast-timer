@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Flame, GitCompare, Pencil, Share2, ThumbsUp } from "lucide-react";
@@ -401,7 +401,7 @@ const RoastProfileDetails = () => {
             </nav>
 
             <div className="space-y-2">
-              <h1 className="break-words text-2xl font-bold leading-tight text-foreground sm:text-4xl">{profile.beans_name}</h1>
+              <h1 className="wrap-break-word text-2xl font-bold leading-tight text-foreground sm:text-4xl">{profile.beans_name}</h1>
               {subtitle && <p className="text-base text-foreground/80 sm:text-lg">{subtitle}</p>}
               <p className="text-sm text-muted-foreground">
                 {profile.profiles?.username ? <>Roasted by <span className="font-medium text-foreground">{profile.profiles.username}</span> on </> : "Roasted on "}

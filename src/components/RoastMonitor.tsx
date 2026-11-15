@@ -4,7 +4,7 @@
  */
 
 import { lazy, Suspense, useCallback, useState, type ComponentType } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoaster } from '@/contexts/RoasterContext';
 import { useRoasterPreferences } from '@/hooks/useRoasterPreferences';
