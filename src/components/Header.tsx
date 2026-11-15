@@ -40,7 +40,7 @@ const Header = () => {
     { name: "Home", href: "/", icon: Coffee },
     { name: "Start Roasting", href: "/roast", icon: Coffee },
     { name: "Discover", href: "/discover", icon: Coffee },
-    { name: "How To", href: "/how-to", icon: Coffee },
+    { name: "Guides", href: "/how-to", icon: Coffee },
     { name: "About", href: "/about", icon: Coffee },
   ];
 

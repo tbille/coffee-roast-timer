@@ -32,6 +32,7 @@ const FirstCrackTiming = lazy(() => import("./pages/how-to/FirstCrackTiming"));
 const RoastDefects = lazy(() => import("./pages/how-to/RoastDefects"));
 const BehmorTroubleshooting = lazy(() => import("./pages/how-to/BehmorTroubleshooting"));
 const PopcornPopperSafety = lazy(() => import("./pages/how-to/PopcornPopperSafety"));
+const RoastNumbers = lazy(() => import("./pages/how-to/RoastNumbers"));
 const GeneCafeCBR101 = lazy(() => import("./pages/how-to/roasters/GeneCafeCBR101"));
 const Behmor2000AB = lazy(() => import("./pages/how-to/roasters/Behmor2000AB"));
 const FreshRoastSR800 = lazy(() => import("./pages/how-to/roasters/FreshRoastSR800"));
@@ -76,7 +77,7 @@ const App = () => (
               <AnalyticsTracker />
               <DocsScrollTop />
               <Header />
-              <div className="flex-1">
+              <main id="main" className="flex-1">
               <Routes>
                 {/* Landing Page */}
                 <Route path="/" element={<LandingPage />} />
@@ -114,6 +115,7 @@ const App = () => (
                 <Route path="/how-to/roast-defects" element={withPageLoader(<RoastDefects />)} />
                 <Route path="/how-to/behmor-2000ab-troubleshooting" element={withPageLoader(<BehmorTroubleshooting />)} />
                 <Route path="/how-to/popcorn-popper-safety" element={withPageLoader(<PopcornPopperSafety />)} />
+                <Route path="/how-to/roast-numbers" element={withPageLoader(<RoastNumbers />)} />
                 <Route path="/how-to/roasters/gene-cafe-cbr-101" element={withPageLoader(<GeneCafeCBR101 />)} />
                 <Route path="/how-to/roasters/behmor-2000ab" element={withPageLoader(<Behmor2000AB />)} />
                 <Route path="/how-to/roasters/freshroast-sr800" element={withPageLoader(<FreshRoastSR800 />)} />
@@ -124,7 +126,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </div>
+            </main>
             <Footer />
           </BrowserRouter>
         </div>

@@ -1,144 +1,104 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { DocsLayout } from "@/components/guides/DocsLayout";
+import { Callout, H2, Step, Steps, Ui } from "@/components/guides/prose";
 
-const GettingStarted = () => {
-  return (
-    <>
-      <Helmet>
-        <title>Getting Started with Roast Timer - Coffee Roasting Guide</title>
-        <meta name="description" content="Learn how to set up Roast Timer, select your coffee roaster, and start tracking your first roast. Simple step-by-step guide for beginners." />
-        <meta name="keywords" content="coffee roast timer setup, start roasting coffee, roast tracking tutorial, coffee roasting for beginners" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://roast-timer.com/how-to/getting-started" />
-      </Helmet>
+const GettingStarted = () => (
+  <DocsLayout slug="getting-started">
+    <p>
+      This walkthrough follows one roast from start to finish. You don't need an account to start: you'll only be asked
+      to sign in when you save. Any of the six supported roasters works; the steps are the same and only the controls in
+      the middle of the screen change.
+    </p>
 
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-3xl px-4 py-8">
-          <Link to="/how-to" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="h-4 w-4" />
-            Back to How To
-          </Link>
+    <H2 id="before-you-start">Before you start</H2>
+    <ul>
+      <li>Your roaster, set up and ready to preheat.</li>
+      <li>Green coffee, weighed. Write the weight down: you'll need it to work out weight loss.</li>
+      <li>A kitchen scale for weighing the roasted beans afterwards.</li>
+      <li>A phone, tablet or laptop you can keep next to the roaster.</li>
+    </ul>
 
-          <h1 className="text-4xl font-bold mb-4">Getting Started with Roast Timer</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Set up your account and start tracking coffee roasts in minutes.
-          </p>
+    <H2 id="roast">Time the roast</H2>
+    <Steps>
+      <Step title="Open the timer and pick your roaster">
+        <p>
+          Go to <Link to="/roast">Start roasting</Link>. Under the <Ui>Coffee Roast Monitor</Ui> heading, use the roaster
+          menu to pick your machine. The controls below it change to match: temperature logging for the Gene Cafe, a
+          profile menu for the Behmor, heat and fan for the FreshRoast, and so on.
+        </p>
+        <p>
+          If your roaster isn't listed, pick <strong>Gene CBR-101</strong>. It's a general temperature-logging setup that
+          works for any machine.
+        </p>
+      </Step>
+      <Step title="Press Start Roast when the beans go in">
+        <p>
+          Press <Ui>Start Roast</Ui> at the moment the beans hit the heat. The clock starts. On a Behmor, the timer counts down
+          alongside the machine instead.
+        </p>
+      </Step>
+      <Step title="Log what you change">
+        <p>
+          Every time you turn a dial or read a thermometer, record it in the panel for your roaster. These entries become
+          the step-by-step record you'll follow next time. You can skip this on your very first roast and just watch.
+        </p>
+      </Step>
+      <Step title="Mark first crack">
+        <p>
+          Listen for a crackle like popcorn. When you hear several cracks close together (not a single stray pop), press{" "}
+          <Ui>First Crack</Ui>. From now on the timer shows your development time and development ratio live.
+        </p>
+        <p>
+          <Ui>Second Crack</Ui> unlocks after first crack. Most light and medium roasts end before it.
+        </p>
+      </Step>
+      <Step title="Press Stop when you drop the beans">
+        <p>
+          When the beans reach the color you want, empty them to cool and press <Ui>Stop</Ui>. The save form opens.
+        </p>
+      </Step>
+    </Steps>
 
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>1. Create Your Account</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Click "Sign In" in the top right corner and create a free account.</p>
-                <p>You can sign in with email or use magic link authentication for passwordless access.</p>
-                <p>No credit card required. All core features are free.</p>
-              </CardContent>
-            </Card>
+    <H2 id="save">Save it as a profile</H2>
+    <Steps>
+      <Step title="Fill in the save form">
+        <p>
+          Only <Ui>Beans Name</Ui> is required. Add <Ui>Origin</Ui>, and both <Ui>Initial Weight</Ui> and{" "}
+          <Ui>Final Weight</Ui> if you can: with both weights the app calculates weight loss, which is one of the best
+          clues to how dark the roast went. The notes fields are for anything you'll want to remember, like the weather
+          or a mistake.
+        </p>
+      </Step>
+      <Step title="Sign in if asked">
+        <p>
+          Press <Ui>Save Roast Profile</Ui>. If you aren't signed in, the form asks you to create an account or sign in
+          with your email and a password. Once you're in, the roast saves automatically.
+        </p>
+      </Step>
+      <Step title="Find your roast">
+        <p>
+          You land on <Ui>My Roast Profiles</Ui> (your <Link to="/dashboard">dashboard</Link>). Open the roast to see its
+          summary, temperature curve and the steps you logged.
+        </p>
+      </Step>
+    </Steps>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>2. Select Your Roaster</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>On the home page, use the roaster dropdown to select your coffee roasting equipment.</p>
-                <p>We support 12+ roasters including Gene Cafe CBR-101, Behmor 2000AB, FreshRoast SR800, KALDI, Hottop, and more.</p>
-                <p>The app will remember your selection for next time.</p>
-                <p className="text-sm text-muted-foreground">
-                  Not sure which roaster to choose? Check our <Link to="/how-to" className="text-primary hover:underline">roaster-specific guides</Link>.
-                </p>
-              </CardContent>
-            </Card>
+    <Callout title="Saved roasts are public">
+      Every saved roast appears on <Link to="/discover">Discover</Link> so other people with the same roaster can learn
+      from it. Keep anything private out of the notes fields.
+    </Callout>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>3. Start Your First Roast</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Click the "Start Roasting" button to begin tracking.</p>
-                <p>The timer will start automatically. Record key events as they happen:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Temperature changes (for roasters with temperature control)</li>
-                  <li>First crack - when you hear the first popping sounds</li>
-                  <li>Second crack - louder, faster cracks (if you roast dark)</li>
-                </ul>
-                <p>The interface adapts to your roaster type, showing only relevant controls.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>4. End and Save Your Roast</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>When your roast is complete, click "End Roast" to stop the timer.</p>
-                <p>A save dialog will appear. Fill in the details:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Bean name (required)</li>
-                  <li>Origin (e.g., Ethiopia)</li>
-                  <li>Farm name</li>
-                  <li>Processing method (washed, natural, honey)</li>
-                  <li>Initial and final weight (for calculating weight loss)</li>
-                  <li>Notes about the roast</li>
-                </ul>
-                <p>Click "Save Roast" to add it to your dashboard.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>5. View Your Dashboard</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Access your saved roasts anytime from the Dashboard page.</p>
-                <p>Features include:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>View all your roast profiles</li>
-                  <li>Filter by roaster type</li>
-                  <li>Search by bean name or origin</li>
-                  <li>Compare multiple roasts side-by-side</li>
-                  <li>Share profiles with the community</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Next Steps</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Now that you know the basics, explore these guides:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>
-                    <Link to="/how-to/using-profiles" className="text-primary hover:underline">
-                      Using Roast Profiles
-                    </Link> - Learn how to replicate successful roasts
-                  </li>
-                  <li>
-                    <Link to="/how-to/development-ratios" className="text-primary hover:underline">
-                      Understanding Development Ratios
-                    </Link> - Master the science behind quality roasts
-                  </li>
-                  <li>
-                    <Link to="/how-to" className="text-primary hover:underline">
-                      Roaster-Specific Guides
-                    </Link> - Detailed instructions for your equipment
-                  </li>
-                  <li>
-                    <Link to="/discover" className="text-primary hover:underline">
-                      Discover Page
-                    </Link> - Browse community roast profiles for inspiration
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
+    <H2 id="what-you-learned">What you just did</H2>
+    <p>
+      You now have a complete record of one roast: when first crack happened, how long you developed the beans after it,
+      and what you changed along the way. That record is what makes the next batch better.
+    </p>
+    <p>
+      Once the coffee has rested for a few days, taste it and{" "}
+      <Link to="/how-to/cupping-notes">add tasting notes</Link>. Then use the profile as the plan for your next roast:{" "}
+      <Link to="/how-to/using-profiles">repeat or compare a roast</Link> shows you how.
+    </p>
+  </DocsLayout>
+);
 
 export default GettingStarted;

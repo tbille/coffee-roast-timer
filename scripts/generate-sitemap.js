@@ -54,6 +54,7 @@ const staticRoutes = [
   { loc: '/how-to/roast-defects', changefreq: 'monthly', priority: 0.7 },
   { loc: '/how-to/behmor-2000ab-troubleshooting', changefreq: 'monthly', priority: 0.7 },
   { loc: '/how-to/popcorn-popper-safety', changefreq: 'monthly', priority: 0.7 },
+  { loc: '/how-to/roast-numbers', changefreq: 'monthly', priority: 0.7 },
   
   // Roaster-Specific Guides
   { loc: '/how-to/roasters/gene-cafe-cbr-101', changefreq: 'monthly', priority: 0.6 },

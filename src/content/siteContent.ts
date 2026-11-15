@@ -6,6 +6,8 @@
  * must not import React, path aliases, or browser-only code.
  */
 
+import { DOCS, type DocEntry } from "./docs";
+
 export const SITE_URL = "https://roast-timer.com";
 export const SITE_NAME = "Coffee Roast Timer";
 
@@ -34,7 +36,7 @@ export const HOME_FEATURES: { title: string; text: string }[] = [
   },
   {
     title: "Roast profiles you can repeat",
-    text: "Every saved roast becomes a profile with a timeline. Compare roasts side by side and replay a profile to reproduce your best batch.",
+    text: "Every saved roast becomes a profile with a timeline. Compare two roasts side by side and use a saved profile as the plan for your next batch.",
   },
   {
     title: "Community profiles by roaster",
@@ -46,81 +48,21 @@ export const HOME_FEATURES: { title: string; text: string }[] = [
   },
 ];
 
-export const SUPPORTED_ROASTERS: ContentLink[] = [
-  {
-    title: "Gene Cafe CBR-101",
-    path: "/how-to/roasters/gene-cafe-cbr-101",
-    description: "Drum roaster with dual temperature tracking and a transparent drum.",
-  },
-  {
-    title: "Behmor 2000AB Plus",
-    path: "/how-to/roasters/behmor-2000ab",
-    description: "Drum roaster with pre-programmed profiles, time extensions and large batches.",
-  },
-  {
-    title: "FreshRoast SR800",
-    path: "/how-to/roasters/freshroast-sr800",
-    description: "Fluid-bed air roaster with manual heat and fan control.",
-  },
-  {
-    title: "KALDI Wide",
-    path: "/how-to/roasters/kaldi-wide",
-    description: "Gas-fired drum roaster with manual flame control; supports hands-free voice input.",
-  },
-  {
-    title: "Hottop KN-8828B-2K+",
-    path: "/how-to/roasters/hottop-kn-8828",
-    description: "Programmable drum roaster with rate-of-rise tracking and automatic modes.",
-  },
-  {
-    title: "Air popcorn popper",
-    path: "/how-to/roasters/popcorn-popper",
-    description: "Low-cost entry point to roasting, with batch-size limits and visual cue tracking.",
-  },
-];
+const toLink = (doc: DocEntry): ContentLink => ({
+  title: doc.navTitle ?? doc.title,
+  path: doc.path,
+  description: doc.description,
+});
 
-export const GUIDES: ContentLink[] = [
-  {
-    title: "Getting started",
-    path: "/how-to/getting-started",
-    description: "Set up the app, choose your roaster, and track your first roast.",
-  },
-  {
-    title: "Using roast profiles",
-    path: "/how-to/using-profiles",
-    description: "Read timelines, temperature curves and sensory checkpoints to replicate a roast.",
-  },
-  {
-    title: "First crack timing",
-    path: "/how-to/first-crack-timing",
-    description: "Diagnose early or late first crack and adjust the next roast.",
-  },
-  {
-    title: "Development ratios",
-    path: "/how-to/development-ratios",
-    description: "What development ratio is, how to calculate it, and how it affects flavor.",
-  },
-  {
-    title: "Roast defects and fixes",
-    path: "/how-to/roast-defects",
-    description: "Identify baked, underdeveloped, scorched and tipped roasts and how to fix them.",
-  },
-  {
-    title: "Cupping notes",
-    path: "/how-to/cupping-notes",
-    description: "Document taste evaluations and link them to roast decisions.",
-  },
-  {
-    title: "Behmor 2000AB Plus troubleshooting",
-    path: "/how-to/behmor-2000ab-troubleshooting",
-    description: "Fix late first crack, stalled roasts and uneven development on a Behmor.",
-  },
-  {
-    title: "Popcorn popper safety",
-    path: "/how-to/popcorn-popper-safety",
-    description: "Safer batch sizes, ventilation, and a starter profile for air poppers.",
-  },
-];
+/** One entry per supported machine (roaster guides only). */
+export const SUPPORTED_ROASTERS: ContentLink[] = DOCS.filter((d) => d.kind === "Roaster guide").map(toLink);
+
+/** Every other guide, in reading order. */
+export const GUIDES: ContentLink[] = DOCS.filter((d) => d.kind !== "Roaster guide").map((d) => ({
+  title: d.title,
+  path: d.path,
+  description: d.description,
+}));
 
 export const MAIN_PAGES: ContentLink[] = [
   {
@@ -159,7 +101,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Which coffee roasters are supported?",
     answer:
-      "Coffee Roast Timer has dedicated setups for the Gene Cafe CBR-101, Behmor 2000AB Plus, FreshRoast SR800 and SR540, KALDI Wide, Hottop KN-8828B-2K+, and air popcorn poppers. Other roasters can be tracked with a custom configuration.",
+      "Coffee Roast Timer has dedicated setups for the Gene Cafe CBR-101, Behmor 2000AB Plus, FreshRoast SR800, KALDI Wide, Hottop KN-8828B-2K+, and air popcorn poppers. Any other roaster can be tracked with the general temperature-logging setup.",
   },
   {
     question: "What is a development ratio in coffee roasting?",

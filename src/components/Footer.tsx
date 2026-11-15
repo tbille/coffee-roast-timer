@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { FEEDBACK_URL } from "@/components/landing/FeedbackSection";
+import { getDoc } from "@/content/docs";
+import { SUPPORTED_ROASTERS } from "@/content/siteContent";
 
 type FooterLink = { label: string; to: string } | { label: string; href: string };
 
@@ -14,21 +16,16 @@ const LINK_GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Guides",
     links: [
-      { label: "Getting started", to: "/how-to/getting-started" },
-      { label: "First crack timing", to: "/how-to/first-crack-timing" },
-      { label: "Development ratios", to: "/how-to/development-ratios" },
-      { label: "Roast defects", to: "/how-to/roast-defects" },
+      ...["getting-started", "first-crack-timing", "roast-defects", "development-ratios"].map((slug) => {
+        const doc = getDoc(slug)!;
+        return { label: doc.navTitle ?? doc.title, to: doc.path };
+      }),
       { label: "All guides", to: "/how-to" },
     ],
   },
   {
     title: "Roasters",
-    links: [
-      { label: "Gene Cafe CBR-101", to: "/how-to/roasters/gene-cafe-cbr-101" },
-      { label: "Behmor 2000AB Plus", to: "/how-to/roasters/behmor-2000ab" },
-      { label: "FreshRoast SR800", to: "/how-to/roasters/freshroast-sr800" },
-      { label: "Popcorn popper", to: "/how-to/roasters/popcorn-popper" },
-    ],
+    links: SUPPORTED_ROASTERS.map((r) => ({ label: r.title, to: r.path })),
   },
   {
     title: "About",

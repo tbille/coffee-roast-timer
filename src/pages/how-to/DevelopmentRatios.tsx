@@ -1,272 +1,101 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { DocsLayout } from "@/components/guides/DocsLayout";
+import { Callout, Formula, H2, RefTable } from "@/components/guides/prose";
 
-const DevelopmentRatios = () => {
-  return (
-    <>
-      <Helmet>
-        <title>Understanding Coffee Roast Development Ratios</title>
-        <meta name="description" content="Master development ratios to improve coffee roast quality. Learn the science behind balanced roasts and how timing after first crack affects flavor." />
-        <meta name="keywords" content="development ratio, coffee roasting science, first crack, development time, roast quality, balanced roast" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://roast-timer.com/how-to/development-ratios" />
-      </Helmet>
-
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-3xl px-4 py-8">
-          <Link to="/how-to" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="h-4 w-4" />
-            Back to How To
-          </Link>
-
-          <h1 className="text-4xl font-bold mb-4">Understanding Development Ratios</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Master the single most important metric for coffee roast quality.
-          </p>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>What is Development Ratio?</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Development ratio is the percentage of total roast time spent after first crack begins.</p>
-                <p className="font-mono text-sm bg-muted p-3 rounded">
-                  Development Ratio = (Development Time ÷ Total Roast Time) × 100%
-                </p>
-                <p><strong>Example:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Total roast time: 15:00 (900 seconds)</li>
-                  <li>First crack at: 11:00 (660 seconds)</li>
-                  <li>Development time: 4:00 (240 seconds)</li>
-                  <li>Development ratio: 240 ÷ 900 = 26.7%</li>
-                </ul>
-                <p>This single number predicts cup quality better than any other metric.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  The Golden Range
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span>Under 15%</span>
-                    <Badge variant="destructive">Very Underdeveloped</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground ml-4">
-                    Grassy, sour, astringent. Beans not fully developed. Avoid.
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span>15-20%</span>
-                    <Badge variant="secondary">Light Roast</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground ml-4">
-                    Bright acidity, delicate flavors. Good for Nordic/filter styles.
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span>20-25%</span>
-                    <Badge variant="default">Ideal Balanced</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground ml-4">
-                    Sweet spot for most roasts. Balanced acidity, body, and sweetness.
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span>25-30%</span>
-                    <Badge variant="secondary">Dark Roast</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground ml-4">
-                    Fuller body, lower acidity. Chocolate and caramel notes dominant.
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span>Over 30%</span>
-                    <Badge variant="destructive">Overdeveloped</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground ml-4">
-                    Ashy, bitter, flat. Origin character lost. Avoid unless intentional.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Why Development Ratio Matters</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Chemical reactions during development:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Caramelization of sugars (sweetness)</li>
-                  <li>Maillard reactions complete (flavor complexity)</li>
-                  <li>Organic acids transform (balanced acidity)</li>
-                  <li>Volatile aromatics develop (fragrance)</li>
-                </ul>
-                <p><strong>Too little development:</strong> Reactions incomplete. Flavors remain grassy, vegetal, or sour.</p>
-                <p><strong>Too much development:</strong> Reactions go too far. Flavors become ashy, bitter, or burned.</p>
-                <p><strong>Just right:</strong> Sweetness emerges, acidity balances, origin character shines.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>How to Control Development Ratio</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>To increase development ratio</strong> (make it longer):</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Reduce heat after first crack</li>
-                  <li>Extend time before dropping beans</li>
-                  <li>Start with higher initial temperature (shorter pre-crack time)</li>
-                </ul>
-                <p><strong>To decrease development ratio</strong> (make it shorter):</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Maintain heat after first crack</li>
-                  <li>Drop beans earlier</li>
-                  <li>Start with lower initial temperature (longer pre-crack time)</li>
-                </ul>
-                <p><strong>Key insight:</strong> Development ratio is relative to total time, not absolute minutes.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Development Time vs Ratio</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Absolute time matters less than the ratio.</strong></p>
-                <p><strong>Example 1:</strong> 15-minute roast, 3:45 development = 25%</p>
-                <p><strong>Example 2:</strong> 10-minute roast, 2:30 development = 25%</p>
-                <p>Both have the same development ratio despite different absolute times.</p>
-                <p><strong>Why this matters:</strong> Different roasters and batch sizes change total time, but targeting the same ratio produces similar cup quality.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Viewing Development Stats in Roast Timer</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Roast Timer automatically calculates development statistics for every profile.</p>
-                <p><strong>Where to find it:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Profile details page - Roaster Settings card</li>
-                  <li>Dashboard - Hover over profile cards</li>
-                  <li>Comparison view - Side-by-side stats</li>
-                </ul>
-                <p><strong>What you'll see:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>First crack time</li>
-                  <li>Development time (minutes:seconds)</li>
-                  <li>Development ratio (percentage)</li>
-                  <li>Visual indicator (good/needs adjustment)</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Bean Density and Development</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Denser beans need longer development:</strong></p>
-                <p><strong>High-grown/dense beans</strong> (African, Central American high-altitude):</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Target 22-25% development ratio</li>
-                  <li>May need 3-4 minutes after first crack</li>
-                  <li>Can handle higher temperatures</li>
-                </ul>
-                <p><strong>Lower-grown/softer beans</strong> (Brazilian, Indonesian low-altitude):</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Target 18-22% development ratio</li>
-                  <li>May need only 2-3 minutes after first crack</li>
-                  <li>More delicate, easier to overdevelop</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Common Development Mistakes</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Mistake 1: Rushing to first crack, then coasting.</strong></p>
-                <p className="text-sm text-muted-foreground ml-4">
-                  Result: High development ratio but baked flavor (long, slow development).
-                </p>
-                <p><strong>Mistake 2: Dropping immediately after first crack.</strong></p>
-                <p className="text-sm text-muted-foreground ml-4">
-                  Result: Underdeveloped, sour, grassy flavors.
-                </p>
-                <p><strong>Mistake 3: Extending development too long.</strong></p>
-                <p className="text-sm text-muted-foreground ml-4">
-                  Result: Ashy, bitter, origin character lost.
-                </p>
-                <p><strong>The solution:</strong> Target 20-25% development with good momentum maintained throughout.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Using Development Ratio for Replication</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>When replicating a roast profile:</strong></p>
-                <p>Match the development ratio, even if absolute times differ.</p>
-                <p><strong>Example scenario:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Reference roast: 14:00 total, 10:30 to first crack, 3:30 development (25%)</li>
-                  <li>Your roast: First crack at 11:00</li>
-                  <li>To match 25% ratio: Develop for 3:40 (11:00 + 3:40 = 14:40 total)</li>
-                </ul>
-                <p>This approach accounts for differences in roaster, batch size, and environmental factors.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Next Steps</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>
-                    <Link to="/dashboard" className="text-primary hover:underline">
-                      Review Your Dashboard
-                    </Link> - Check development ratios on your past roasts
-                  </li>
-                  <li>
-                    <Link to="/how-to/cupping-notes" className="text-primary hover:underline">
-                      Add Cupping Notes
-                    </Link> - Connect development ratios to cup quality
-                  </li>
-                  <li>
-                    <Link to="/discover" className="text-primary hover:underline">
-                      Browse Community Profiles
-                    </Link> - See development ratios from successful roasts
-                  </li>
-                  <li>
-                    <Link to="/how-to/using-profiles" className="text-primary hover:underline">
-                      Learn Profile Replication
-                    </Link> - Use development ratios to replicate roasts
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is development ratio in coffee roasting?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Development ratio (also called development time ratio or DTR) is the share of the total roast time that happens after first crack begins. For example, 2:30 of development in a 10:00 roast is 25%.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is a good development ratio?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Many roasters aim for roughly 20 to 25% for medium roasts, and the 15 to 25% band covers most light-to-medium roasts. Treat it as a way to compare your own roasts, not as a target that guarantees good coffee.",
+      },
+    },
+  ],
 };
+
+const DevelopmentRatios = () => (
+  <DocsLayout slug="development-ratios" schemas={[faqSchema]}>
+    <H2 id="definition">The short version</H2>
+    <p>
+      First crack is the point where the beans start to crackle as moisture and gas escape. Everything after it is called{" "}
+      <strong>development</strong>. Development ratio is how much of the whole roast that last part takes up.
+    </p>
+    <Formula caption="Example: first crack at 7:30, drop at 10:00. Development time is 2:30, so 2:30 ÷ 10:00 = 25%.">
+      development ratio = development time ÷ total roast time × 100
+    </Formula>
+    <p>
+      Roast Timer works this out as soon as you press <strong>First Crack</strong>. You'll see it live under the timer,
+      in each roast's summary, on Discover cards and in comparisons.
+    </p>
+
+    <H2 id="why-it-matters">Why it's useful</H2>
+    <p>
+      Two roasts of different lengths aren't easy to compare by minutes alone. A ratio makes them comparable: 2:30 of
+      development in a 10-minute air roast and 3:45 in a 15-minute drum roast are both 25%.
+    </p>
+    <p>
+      During development, sugars caramelize and acids break down. Too little time and the coffee can taste grassy or
+      sour. Too much and it can turn flat, bitter or ashy, and the character of the origin fades.
+    </p>
+
+    <H2 id="ranges">What the numbers usually mean</H2>
+    <p>
+      Roast Timer shows the ratio in green between 15% and 25%, orange below and red above. Those bands are a rough
+      guide:
+    </p>
+    <RefTable
+      caption="Development ratio ranges"
+      columns={["Ratio", "Often tastes", "Notes"]}
+      rows={[
+        ["Under 15%", "Grassy, sour, thin", "Usually underdeveloped, unless the roast is very fast and light on purpose"],
+        ["15–20%", "Bright, delicate, lively acidity", "Common for light roasts meant for filter"],
+        ["20–25%", "Balanced, sweet", "A common target for medium roasts"],
+        ["Over 25%", "Heavier, roastier, less acidity", "Fine for darker styles, but watch for flat or ashy flavors"],
+      ]}
+    />
+
+    <H2 id="limits">Where it stops being useful</H2>
+    <p>Development ratio is one indicator among many. It doesn't tell you:</p>
+    <ul>
+      <li>
+        <strong>How dark the roast is.</strong> A short, hot roast and a long, gentle one can share a ratio and taste very
+        different. Weight loss and color tell you more about roast level.
+      </li>
+      <li>
+        <strong>Whether the roast stalled.</strong> If the roast stalls before first crack, the ratio can look fine
+        while the coffee tastes{" "}
+        <Link to="/how-to/roast-defects">baked</Link>. The ratio can't see what happened before first crack.
+      </li>
+      <li>
+        <strong>Anything without a well-marked first crack.</strong> If you press First Crack late one day and early the
+        next, the ratio moves without the roast changing. See{" "}
+        <Link to="/how-to/first-crack-timing">marking first crack consistently</Link>.
+      </li>
+    </ul>
+
+    <Callout>
+      Use the ratio to compare your own roasts of the same coffee on the same machine. That's where it's most reliable.
+    </Callout>
+
+    <H2 id="change-it">How to change it</H2>
+    <p>
+      To <strong>raise</strong> the ratio, ease off the heat slightly as first crack starts so the beans spend longer
+      developing, or drop a little later. To <strong>lower</strong> it, keep more energy going into first crack or drop
+      earlier. Change it in small steps: 15–30 seconds of development is a noticeable difference in the cup.
+    </p>
+  </DocsLayout>
+);
 
 export default DevelopmentRatios;

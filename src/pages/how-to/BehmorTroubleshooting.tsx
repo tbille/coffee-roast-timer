@@ -1,136 +1,83 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { DocsLayout } from "@/components/guides/DocsLayout";
+import { Callout, H2 } from "@/components/guides/prose";
 
-const BehmorTroubleshooting = () => {
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Why is first crack late on my Behmor 2000AB?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Late first crack on Behmor is commonly caused by oversized batch size, low ambient heat, or an energy-light profile."
-        }
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Why is first crack late on my Behmor 2000AB?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Late first crack on a Behmor is usually caused by too large a batch, a cold room or roaster, or low line voltage. Try a smaller batch, a hotter profile such as P1, and roasting at the same starting temperature each time.",
       },
-      {
-        "@type": "Question",
-        name: "How should I use extensions on Behmor?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Use extensions earlier in the roast to maintain momentum, instead of stacking them at the end."
-        }
+    },
+    {
+      "@type": "Question",
+      name: "What does Err 7 mean on a Behmor?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Err 7 means Start was not pressed at the 75% safety prompt, so the roaster stopped heating and went into cooling. Stay with the roaster and press Start when it beeps.",
       },
-      {
-        "@type": "Question",
-        name: "What causes uneven color in Behmor roasts?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Uneven color often comes from overloaded batches, poor bean movement, or maintenance issues such as dirty drum or chaff components."
-        }
-      }
-    ]
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>Behmor 2000AB Troubleshooting for Better Roasts</title>
-        <meta
-          name="description"
-          content="Troubleshoot common Behmor 2000AB roasting issues: late first crack, stalled roasts, uneven color, and extension timing. Practical fixes for repeatable results."
-        />
-        <meta
-          name="keywords"
-          content="Behmor troubleshooting, Behmor 2000AB roast guide, first crack late, uneven roast, coffee roasting"
-        />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Behmor 2000AB Troubleshooting for Better Roasts" />
-        <meta property="og:description" content="Fix late first crack, stalled roasts, and uneven development on Behmor with practical, repeatable adjustments." />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content="https://roast-timer.com/how-to/behmor-2000ab-troubleshooting" />
-        <link rel="canonical" href="https://roast-timer.com/how-to/behmor-2000ab-troubleshooting" />
-        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-      </Helmet>
-
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-3xl px-4 py-8">
-          <Link to="/how-to" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="h-4 w-4" />
-            Back to How To
-          </Link>
-
-          <h1 className="text-4xl font-bold mb-4">Behmor 2000AB Troubleshooting</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Fix the most common Behmor issues with simple, testable adjustments.
-          </p>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>First Crack Is Too Late</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Likely causes are oversized batch, cool ambient room, or too conservative profile.</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Drop batch size toward 300-340g</li>
-                  <li>Preheat consistently before charging</li>
-                  <li>Start from a profile with more early energy</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Roast Stalls Near First Crack</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>If momentum drops, cup quality becomes flat and baked.</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Use extensions earlier, not all at the end</li>
-                  <li>Avoid over-venting during Maillard</li>
-                  <li>Compare your first-crack timing against successful past batches</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Uneven Color or Spotty Development</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Uneven roasts usually come from bean movement and load issues.</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Check that chaff tray and drum are clean</li>
-                  <li>Reduce batch size if bean movement looks sluggish</li>
-                  <li>Use consistent green coffee moisture and density</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>How to Improve Repeatability</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Log profile choice and each extension moment</li>
-                  <li>Track first crack and drop time on every roast</li>
-                  <li>Target a stable development ratio range (often 20-25%)</li>
-                </ul>
-                <p>
-                  Pair this with the full <Link to="/how-to/roasters/behmor-2000ab" className="text-primary hover:underline">Behmor setup guide</Link>.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+    },
+    {
+      "@type": "Question",
+      name: "How should I use extensions on a Behmor?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Add time earlier in the roast to keep momentum, rather than stacking extensions at the very end.",
+      },
+    },
+  ],
 };
+
+const BehmorTroubleshooting = () => (
+  <DocsLayout slug="behmor-2000ab-troubleshooting" schemas={[faqSchema]}>
+    <p>
+      Change one thing per roast, and compare the new roast's first crack time with the last one. New to the Behmor?
+      Start with <Link to="/how-to/roasters/behmor-2000ab">Roasting on the Behmor 2000AB Plus</Link>.
+    </p>
+
+    <H2 id="late-first-crack">First crack is late, or never comes</H2>
+    <p>The roaster isn't getting enough energy into the beans.</p>
+    <ol>
+      <li>Reduce the batch size. Try around 340 g instead of a full pound.</li>
+      <li>Use a hotter profile. P1 applies full power throughout.</li>
+      <li>Roast somewhere warmer. A cold garage or a breeze can add minutes.</li>
+      <li>
+        Avoid extension cords and shared circuits. The Behmor is sensitive to low voltage, and it shows up as slow
+        roasts.
+      </li>
+    </ol>
+
+    <H2 id="stall">The roast stalls after adding time</H2>
+    <p>
+      If you add all your time in the last minute, the roast often loses momentum and tastes flat. Add extensions in the
+      middle of the roast instead, and log each one with <strong>Add 30 Seconds</strong> so you can see when you added
+      it.
+    </p>
+
+    <H2 id="err-7">The roaster stopped and shows Err 7</H2>
+    <p>
+      You missed the 75% prompt. About three quarters through the roast, the Behmor beeps and flashes; you have a few
+      seconds to press <strong>Start</strong>. The roast is over at that point. Let it cool, weigh the beans and save the
+      roast with a note so you don't compare it with complete roasts.
+    </p>
+
+    <H2 id="uneven">Color is uneven</H2>
+    <ol>
+      <li>Reduce the batch size so beans can tumble freely.</li>
+      <li>Clean the chaff tray and drum. Built-up chaff blocks heat.</li>
+      <li>Check that the drum is seated properly and turning.</li>
+    </ol>
+
+    <Callout variant="warning" title="If you see flames">
+      Press <strong>Cool</strong> and keep the door closed. Opening it feeds the fire with air. Unplug the roaster if
+      it's safe to reach the plug, and let it burn out inside.
+    </Callout>
+  </DocsLayout>
+);
 
 export default BehmorTroubleshooting;

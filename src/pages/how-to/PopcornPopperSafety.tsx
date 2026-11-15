@@ -1,136 +1,97 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { DocsLayout } from "@/components/guides/DocsLayout";
+import { Callout, H2 } from "@/components/guides/prose";
 
-const PopcornPopperSafety = () => {
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "How much coffee can I roast in a popcorn popper?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A practical range is often 50 to 85 grams, and 100 grams should be treated as a hard ceiling for many poppers."
-        }
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "How much coffee can I roast in a popcorn popper?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Start around 75 grams. Most poppers handle 50 to 80 grams well, and 100 grams should be treated as a hard ceiling.",
       },
-      {
-        "@type": "Question",
-        name: "Is roasting coffee in a popcorn popper safe?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "It can be done more safely with strict ventilation, active supervision, and conservative batch sizes, but it still carries heat and smoke risk."
-        }
+    },
+    {
+      "@type": "Question",
+      name: "Is roasting coffee in a popcorn popper safe?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "It can be done more safely with good ventilation, constant supervision and small batches, but it still carries heat, smoke and fire risk, and may void the popper's warranty.",
       },
-      {
-        "@type": "Question",
-        name: "When should I drop the roast on a popcorn popper?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A common starter approach is dropping 60 to 120 seconds after first crack for light to medium results, then adjusting by taste."
-        }
-      }
-    ]
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>Popcorn Popper Coffee Roasting Safety and Profile Tips</title>
-        <meta
-          name="description"
-          content="Safe popcorn popper coffee roasting guide: batch size limits, ventilation, fire-risk reduction, and a repeatable starter profile for better results."
-        />
-        <meta
-          name="keywords"
-          content="popcorn popper coffee roasting safety, popcorn popper batch size, coffee roasting beginner guide"
-        />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Popcorn Popper Coffee Roasting Safety and Profile Tips" />
-        <meta property="og:description" content="Use safer batch sizes, better ventilation, and a practical starter profile when roasting with an air popper." />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content="https://roast-timer.com/how-to/popcorn-popper-safety" />
-        <link rel="canonical" href="https://roast-timer.com/how-to/popcorn-popper-safety" />
-        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-      </Helmet>
-
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-3xl px-4 py-8">
-          <Link to="/how-to" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="h-4 w-4" />
-            Back to How To
-          </Link>
-
-          <h1 className="text-4xl font-bold mb-4">Popcorn Popper Safety and Starter Profile</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            A safer way to start home roasting with air poppers while still getting useful results.
-          </p>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Non-Negotiable Safety Rules</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Roast outdoors or under very strong ventilation</li>
-                  <li>Never leave the popper unattended</li>
-                  <li>Keep a metal colander and cooling plan ready before charge</li>
-                  <li>Stop immediately if smoke escalates unexpectedly</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Batch Size Limits</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Air poppers are easy to overload, which increases fire risk.</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Beginner range: 50-60g</li>
-                  <li>Typical working range: 70-85g</li>
-                  <li>Hard ceiling: 100g</li>
-                </ul>
-                <p>Use the Roast Timer batch-size warning as your guardrail.</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Starter Profile (Visual Cues)</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>Without a probe, visual and audio milestones are your best controls.</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>0:00-1:30: green to yellow transition</li>
-                  <li>1:30-3:30: yellow to light brown (drying/Maillard)</li>
-                  <li>3:30-5:00: first crack window on many poppers</li>
-                  <li>Drop 60-120 seconds after first crack for light-medium</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Troubleshooting</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Too fast, uneven roast:</strong> lower batch or increase agitation.</p>
-                <p><strong>Muted cup:</strong> likely baked from stalled middle phase.</p>
-                <p><strong>Harsh smoky cup:</strong> likely overshot development past your target.</p>
-                <p>
-                  Continue with the full <Link to="/how-to/roasters/popcorn-popper" className="text-primary hover:underline">popcorn popper guide</Link> and compare against <Link to="/how-to/roast-defects" className="text-primary hover:underline">defect patterns</Link>.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+    },
+  ],
 };
+
+const PopcornPopperSafety = () => (
+  <DocsLayout slug="popcorn-popper-safety" schemas={[faqSchema]}>
+    <p>
+      Once you've done this a few times it becomes habit. For how to actually run the roast, see{" "}
+      <Link to="/how-to/roasters/popcorn-popper">Roasting in an air popcorn popper</Link>.
+    </p>
+
+    <H2 id="before">Before you switch it on</H2>
+    <ul>
+      <li>
+        <strong>Use a side-vented popper.</strong> Air should enter from the side of the chamber so the beans swirl. Avoid
+        models with a mesh floor directly over the heating element.
+      </li>
+      <li>
+        <strong>Weigh the beans.</strong> 75 g is a good start. Never go above 100 g.
+      </li>
+      <li>
+        <strong>Ventilate.</strong> Roast outside or right under a strong extractor fan. Roasting makes a lot of smoke,
+        especially past first crack.
+      </li>
+      <li>
+        <strong>Clear the area.</strong> Nothing flammable nearby, on a stable heat-safe surface.
+      </li>
+      <li>
+        <strong>Have a fire extinguisher</strong> or fire blanket within reach.
+      </li>
+      <li>
+        <strong>Get your cooling ready:</strong> a metal colander and an oven glove.
+      </li>
+    </ul>
+
+    <H2 id="during">During the roast</H2>
+    <ul>
+      <li>
+        <strong>Stay with it the whole time.</strong> Things change in seconds.
+      </li>
+      <li>
+        <strong>Stop before second crack goes on for long.</strong> Very dark beans and loose chaff are what catch fire.
+      </li>
+      <li>
+        <strong>Don't touch the chamber.</strong> It gets hot enough to burn.
+      </li>
+    </ul>
+
+    <H2 id="after">After the roast</H2>
+    <ul>
+      <li>
+        <strong>Let the popper cool for at least 10 minutes</strong> before the next batch. Back-to-back roasts overheat
+        the motor and the thermal cutoff.
+      </li>
+      <li>
+        <strong>Empty the chaff</strong> from the chamber and around the popper.
+      </li>
+    </ul>
+
+    <Callout variant="warning" title="If something catches fire">
+      Switch off and unplug the popper if you can do it safely. Don't pour water on it: it's electrical. Use the fire
+      extinguisher or blanket, or let it burn out if it's outdoors and contained.
+    </Callout>
+
+    <p>
+      Poppers also tend to break when used for coffee, and doing so usually voids the warranty. When you're ready for
+      more control, a dedicated air roaster like the{" "}
+      <Link to="/how-to/roasters/freshroast-sr800">FreshRoast SR800</Link> works the same way with adjustable heat and
+      fan.
+    </p>
+  </DocsLayout>
+);
 
 export default PopcornPopperSafety;

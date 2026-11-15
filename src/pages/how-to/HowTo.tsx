@@ -1,380 +1,181 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Timer, BookOpen, Thermometer } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, Compass, Flame, Wrench } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { DocsSidebar } from "@/components/guides/DocsLayout";
+import { DOC_SECTIONS, DOCS, docsBySection, getDoc, type DocEntry, type DocSectionId } from "@/content/docs";
+import { absoluteUrl } from "@/content/siteContent";
+import { getRoasterPrimaryColor } from "@/utils/roasterColors";
+import type { RoasterType } from "@/types/roaster.types";
+
+const SECTION_ICONS: Record<DocSectionId, LucideIcon> = {
+  start: Compass,
+  tasks: Wrench,
+  roasters: Flame,
+  concepts: BookOpen,
+};
+
+function GuideRow({ doc }: { doc: DocEntry }) {
+  return (
+    <li>
+      <Link to={doc.path} className="group flex items-start justify-between gap-4 py-4">
+        <span className="min-w-0">
+          <span className="block font-medium text-foreground group-hover:text-primary">{doc.title}</span>
+          <span className="mt-0.5 block text-sm leading-relaxed text-muted-foreground">{doc.description}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2 pt-0.5 text-xs text-muted-foreground">
+          <span className="hidden sm:inline">{doc.readingMinutes} min</span>
+          <ChevronRight className="h-4 w-4 group-hover:text-primary" aria-hidden />
+        </span>
+      </Link>
+    </li>
+  );
+}
+
+function RoasterTile({ doc }: { doc: DocEntry }) {
+  const extras = DOCS.filter((d) => d.section === "roasters" && !d.roasterId && d.related?.includes(doc.slug));
+  return (
+    <li className="rounded-lg border p-4 transition-colors hover:border-primary/40">
+      <Link to={doc.path} className="group flex items-center gap-2 font-medium hover:text-primary">
+        <span
+          className="h-2.5 w-2.5 shrink-0 rounded-full"
+          style={{ backgroundColor: getRoasterPrimaryColor(doc.roasterId as RoasterType) }}
+          aria-hidden
+        />
+        {doc.navTitle ?? doc.title}
+      </Link>
+      {extras.map((extra) => (
+        <Link
+          key={extra.slug}
+          to={extra.path}
+          className="mt-2 block text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          {extra.navTitle ?? extra.title}
+        </Link>
+      ))}
+    </li>
+  );
+}
 
 const HowTo = () => {
+  const groups = docsBySection();
+  const firstRoast = getDoc("getting-started")!;
+
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://roast-timer.com"
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "How To",
-        item: "https://roast-timer.com/how-to"
-      }
-    ]
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      { "@type": "ListItem", position: 2, name: "Guides", item: absoluteUrl("/how-to") },
+    ],
   };
-
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Coffee Roasting Guides",
-    itemListElement: [
-      "https://roast-timer.com/how-to/getting-started",
-      "https://roast-timer.com/how-to/using-profiles",
-      "https://roast-timer.com/how-to/cupping-notes",
-      "https://roast-timer.com/how-to/development-ratios",
-      "https://roast-timer.com/how-to/first-crack-timing",
-      "https://roast-timer.com/how-to/roast-defects",
-      "https://roast-timer.com/how-to/behmor-2000ab-troubleshooting",
-      "https://roast-timer.com/how-to/popcorn-popper-safety",
-      "https://roast-timer.com/how-to/roasters/gene-cafe-cbr-101",
-      "https://roast-timer.com/how-to/roasters/behmor-2000ab",
-      "https://roast-timer.com/how-to/roasters/freshroast-sr800",
-      "https://roast-timer.com/how-to/roasters/kaldi-wide",
-      "https://roast-timer.com/how-to/roasters/hottop-kn-8828",
-      "https://roast-timer.com/how-to/roasters/popcorn-popper"
-    ].map((url, index) => ({
+    itemListElement: DOC_SECTIONS.flatMap((s) => groups[s.id]).map((doc, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url
-    }))
+      url: absoluteUrl(doc.path),
+      name: doc.title,
+    })),
   };
 
   return (
     <>
       <Helmet>
         <title>Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup</title>
-        <meta name="description" content="Step-by-step coffee roasting guides for Gene Cafe, Behmor, FreshRoast, KALDI, Hottop, and popcorn poppers. Learn first crack timing, defect fixes, and profile replication." />
-        <meta name="keywords" content="coffee roast timer, how to roast coffee, coffee roasting guide, roast tracking, roast profiles" />
+        <meta
+          name="description"
+          content="Guides for home coffee roasting with Roast Timer: log your first roast, fix first crack timing and defects, and set up a Gene Cafe, Behmor, FreshRoast, KALDI, Hottop or popcorn popper."
+        />
         <meta name="robots" content="index, follow" />
         <meta property="og:title" content="Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup" />
-        <meta property="og:description" content="Learn practical home roasting workflows, troubleshooting, and roaster-specific setup guides." />
+        <meta
+          property="og:description"
+          content="Practical home roasting guides: your first roast, troubleshooting, and roaster-specific setup."
+        />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://roast-timer.com/how-to" />
-        <link rel="canonical" href="https://roast-timer.com/how-to" />
+        <meta property="og:url" content={absoluteUrl("/how-to")} />
+        <link rel="canonical" href={absoluteUrl("/how-to")} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-4xl px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-4">How to Use Roast Timer</h1>
-            <p className="text-lg text-muted-foreground">
-              Master coffee roasting with Roast Timer. Track temperatures, save profiles, and replicate your best roasts.
+      <div className="container max-w-7xl px-4 py-8 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2">
+            <DocsSidebar />
+          </div>
+        </aside>
+
+        <div className="min-w-0 max-w-3xl">
+          <header>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Roasting guides</h1>
+            <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
+              Practical help for home roasters, from your first batch to dialing in a coffee you love. Written for
+              Roast Timer, but most of it applies to any roast.
             </p>
-          </div>
+          </header>
 
-          {/* Quick Start */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Timer className="h-5 w-5" />
-                Quick Start
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ol className="list-decimal list-inside space-y-2">
-                <li>Create a free account or sign in</li>
-                <li>Select your coffee roaster from the dropdown</li>
-                <li>Click "Start Roasting" to begin tracking</li>
-                <li>Record crack events and temperatures during your roast</li>
-                <li>Save your profile with bean details and notes</li>
-              </ol>
-              <Link 
-                to="/how-to/getting-started" 
-                className="text-primary hover:underline mt-4 inline-block"
-              >
-                View detailed getting started guide →
-              </Link>
-            </CardContent>
-          </Card>
+          <Link
+            to={firstRoast.path}
+            className="group mt-8 flex items-center justify-between gap-4 rounded-lg border border-primary/30 bg-secondary/40 p-5 transition-colors hover:border-primary/60"
+          >
+            <span>
+              <span className="text-sm font-medium text-primary">New here? Start with</span>
+              <span className="mt-0.5 block text-lg font-semibold text-foreground">{firstRoast.title}</span>
+              <span className="mt-1 block text-sm text-muted-foreground">{firstRoast.description}</span>
+            </span>
+            <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </Link>
 
-          {/* Essential Guides */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Essential Guides</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <BookOpen className="h-5 w-5" />
-                    Getting Started
-                  </CardTitle>
-                  <CardDescription>
-                    Set up your account and start your first roast
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/getting-started" 
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
+          <nav aria-label="Guide sections" className="mt-6 grid gap-3 sm:grid-cols-3">
+            {DOC_SECTIONS.filter((s) => s.id !== "start").map((section) => {
+              const Icon = SECTION_ICONS[section.id];
+              return (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="group rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/40"
+                >
+                  <span className="inline-flex rounded-full bg-primary/10 p-2 text-primary">
+                    <Icon className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="mt-2 block font-medium group-hover:text-primary">{section.title}</span>
+                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">{section.blurb}</span>
+                </a>
+              );
+            })}
+          </nav>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Coffee className="h-5 w-5" />
-                    Using Roast Profiles
-                  </CardTitle>
-                  <CardDescription>
-                    Learn how to replicate roasts using saved profiles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/using-profiles" 
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
+          {DOC_SECTIONS.filter((s) => s.id !== "start").map((section) => (
+            <section key={section.id} aria-labelledby={section.id} className="mt-14 scroll-mt-24" id={`${section.id}-section`}>
+              <h2 id={section.id} className="scroll-mt-24 text-2xl font-semibold tracking-tight">
+                {section.title}
+              </h2>
+              <p className="mt-1 text-muted-foreground">{section.blurb}</p>
+              {section.id === "roasters" ? (
+                <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {groups.roasters
+                    .filter((d) => d.roasterId)
+                    .map((doc) => (
+                      <RoasterTile key={doc.slug} doc={doc} />
+                    ))}
+                </ul>
+              ) : (
+                <ul className="mt-4 divide-y border-y">
+                  {groups[section.id].map((doc) => (
+                    <GuideRow key={doc.slug} doc={doc} />
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Thermometer className="h-5 w-5" />
-                    Understanding Development Ratios
-                  </CardTitle>
-                  <CardDescription>
-                    Master the science behind quality roasts
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/development-ratios" 
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Coffee className="h-5 w-5" />
-                    Adding Cupping Notes
-                  </CardTitle>
-                  <CardDescription>
-                    Document taste evaluations and improve your roasts
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/cupping-notes" 
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Thermometer className="h-5 w-5" />
-                    First Crack Timing
-                  </CardTitle>
-                  <CardDescription>
-                    Learn to diagnose early or late first crack and roast with consistency
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link
-                    to="/how-to/first-crack-timing"
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Coffee className="h-5 w-5" />
-                    Roast Defects
-                  </CardTitle>
-                  <CardDescription>
-                    Fix baked, scorched, and underdeveloped roasts with clear adjustments
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link
-                    to="/how-to/roast-defects"
-                    className="text-primary hover:underline"
-                  >
-                    Read guide →
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Troubleshooting and Safety</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Behmor 2000AB Troubleshooting</CardTitle>
-                  <CardDescription>
-                    Resolve late first crack, stalled roasts, and extension timing issues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link
-                    to="/how-to/behmor-2000ab-troubleshooting"
-                    className="text-primary hover:underline"
-                  >
-                    View troubleshooting guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Popcorn Popper Safety</CardTitle>
-                  <CardDescription>
-                    Batch size limits, ventilation checklist, and safer starter profile
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link
-                    to="/how-to/popcorn-popper-safety"
-                    className="text-primary hover:underline"
-                  >
-                    View safety guide →
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Roaster-Specific Guides */}
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Roaster-Specific Guides</h2>
-            <p className="text-muted-foreground mb-4">
-              Detailed instructions for tracking roasts with your specific coffee roaster.
-            </p>
-            
-            <div className="space-y-3">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Gene Cafe CBR-101</CardTitle>
-                  <CardDescription>
-                    Dual temperature tracking with transparent drum monitoring
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/gene-cafe-cbr-101" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View Gene Cafe guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Behmor 2000AB Plus</CardTitle>
-                  <CardDescription>
-                    Profile-based roasting with time extensions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/behmor-2000ab" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View Behmor guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">FreshRoast SR800</CardTitle>
-                  <CardDescription>
-                    Heat and fan control for small batch roasting
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/freshroast-sr800" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View FreshRoast SR800 guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">KALDI Wide</CardTitle>
-                  <CardDescription>
-                    Manual roasting with voice input and hands-free tracking
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/kaldi-wide" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View KALDI Wide guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Hottop KN-8828B-2K+</CardTitle>
-                  <CardDescription>
-                    Advanced controls with RoR tracking and automatic modes
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/hottop-kn-8828" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View Hottop guide →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Air Popcorn Popper</CardTitle>
-                  <CardDescription>
-                    Budget-friendly roasting with visual cue tracking and safety tips
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link 
-                    to="/how-to/roasters/popcorn-popper" 
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View Popcorn Popper guide →
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <p className="mt-14 text-sm text-muted-foreground">
+            Spotted something missing or out of date? Tell us with the feedback link at the bottom of the page.
+          </p>
         </div>
       </div>
     </>
