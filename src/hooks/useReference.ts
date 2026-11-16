@@ -80,7 +80,7 @@ function cuesFromRow(row: ReferenceRow): { cues: Cue[]; starting: Record<string,
     if (isNum(data.baseDuration) && data.baseDuration > 0) starting.lcd = data.baseDuration;
     if (typeof data.weightButton === 'string') starting.weight = data.weightButton;
     asArray<Record<string, unknown>>(data.extensions).forEach((e) => {
-      if (isNum(e.time)) cues.push({ s: e.time, label: `+${isNum(e.duration) ? e.duration : 30} s` });
+      if (isNum(e.time)) cues.push({ s: e.time, label: controlLabel('extend', isNum(e.duration) ? e.duration : 30) });
     });
     // Hottop (heat/fan %) and Behmor manual presses
     asArray<Record<string, unknown>>(data.manualControls).forEach((c, i) => {

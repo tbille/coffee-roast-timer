@@ -18,7 +18,8 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     imageUrl: '/assets/roasters/gene-cbr-101.png',
     
     // Physical specs
-    maxBatchSize: 300,
+    // Manual: "Capacity Max. 0.5 lbs / 250 g"
+    maxBatchSize: 250,
     minBatchSize: 100,
     recommendedBatchSize: 225,
     
@@ -44,7 +45,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       {
         id: 'precise-control',
         name: 'Precise Temperature Control',
-        description: 'Adjust target temperature in 5°C increments during roast'
+        description: 'Set the target temperature in one-degree steps, 0–250 °C (0–482 °F), during the roast'
       },
       {
         id: 'transparent-drum',
@@ -55,15 +56,16 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'The setpoint dial covers 0–250 °C (482 °F). Log each turn so you can repeat it',
-      'First crack typically occurs between 8-12 minutes',
+      'The TEMP dial sets 0–250 °C (0–482 °F) in one-degree steps. Log each turn so you can repeat it',
+      'The TIME dial sets 0–30 minutes in 6-second steps (it starts at 15:00) and can add time during the roast',
+      'The manual suggests 230–250 °C; many owners run near 250 °C until first crack, then turn it down',
       'The temperature on the display is the air leaving the drum, not the beans',
       'Keep batches between 200-250g for most consistent results',
       'Clean chaff collector after every 3-4 roasts'
     ],
     warnings: [
-      'Do not exceed 300g batch size - may cause uneven roasting',
-      'Allow 5 minutes cooling time between roasts',
+      'Do not exceed 250 g (the fill line on the chamber)',
+      'The manual asks for an hour of cooling before a second batch; check your manual if you roast back-to-back',
       'Ensure adequate ventilation - produces smoke'
     ],
     
@@ -73,7 +75,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
 
     implemented: true,
     controls: [
-      { id: 'setpoint', label: 'Setpoint', min: 100, max: 250, step: 5, unit: '°C', default: 240, kind: 'heat' },
+      { id: 'setpoint', label: 'Setpoint', min: 0, max: 250, step: 1, unit: '°C', default: 240, kind: 'heat' },
     ],
     tempLabel: 'Drum temp',
     guidePath: '/how-to/roasters/gene-cafe-cbr-101',
@@ -94,7 +96,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     // Timing
     typicalDuration: {
       min: 510,    // 8:30, 1/4 lb default
-      max: 1230    // 18:00 (1 lb default) plus added time
+      max: 1230    // 20:30, the P1 1 lb maximum the panel allows
     },
     
     // Interface
@@ -113,7 +115,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       {
         id: 'extensions',
         name: 'Added time',
-        description: 'Press + during the roast to add time'
+        description: 'Press + during the roast to add 15 seconds, up to the maximum for the program and weight'
       },
       {
         id: 'large-capacity',
@@ -131,9 +133,11 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     tips: [
       'The weight button sets the starting time on the display. Standard defaults: 8:30 for 1/4 lb, 12:00 for 1/2 lb, 18:00 for 1 lb',
       'P1 is the default program. Programs change how heat is applied, not the length of the roast',
+      'Each press of + adds 15 seconds and each press of − takes off 10 seconds. The panel caps total time per program and weight (20:30 for P1 at 1 lb)',
       'With P3-P5 you will usually need to add time with + before the roast finishes',
       'After Start, pressing P1-P5 switches to manual power: P1 0%, P2 25%, P3 50%, P4 75%, P5 100%. D changes drum speed',
-      'At about 75% of the roast the timer blinks: press Start again or it goes into cooling (Err 7)',
+      'The manual keeps P4-P5 for the drying phase; after first crack they can scorch the beans',
+      'At 75% of the default time the timer blinks and beeps: press Start within about 30 seconds or it goes into cooling (Err 7)',
       'Around 340 g (12 oz) leaves more room to steer than a full pound',
       'Cool beans immediately after roast - use colander or cooling tray'
     ],
@@ -205,7 +209,8 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Heat and fan each go from 1 to 9. The machine starts at heat 9, fan 5',
+      'Heat and fan each go from 1 to 9. Factory defaults are heat 9, fan 5, timer 6.0 minutes; the manual explains how to change them',
+      'The timer counts down in tenths of a minute, up to 20 minutes. Add time before it reaches zero, or the roaster switches to cool',
       'Many roasters keep heat high and steer with the fan: lower fan means more heat in the beans',
       'With a full 8 oz load, start the fan high enough that the beans move, then lower it as they lose weight',
       'A fan left at 9 can keep the beans from ever reaching first crack',
@@ -213,7 +218,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       'Experiment with heat and fan combinations for different beans'
     ],
     warnings: [
-      'Small batch size - not suitable for bulk roasting',
+      'Up to 8 oz (226 g) of washed coffee, less for chaffy dry-process coffee. The extension tube helps the beans move but does not raise the batch limit',
       'Requires active monitoring and adjustments',
       'Limited capacity makes it less forgiving'
     ],
@@ -305,25 +310,23 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
         description: 'Direct flame control for hands-on roasting'
       },
       {
-        id: 'mechanical',
-        name: 'Mechanical Simplicity',
-        description: 'No electronics - pure mechanical roasting'
+        id: 'motorized-drum',
+        name: 'Motorized drum',
+        description: 'A small motor turns the drum; you control the gas burner'
       }
     ],
     
     // User guidance
     tips: [
-      'Log flame changes on a 1-10 scale of your own burner, and keep the scale the same between roasts',
+      'Burners have no standard scale: log flame changes on a 1-10 scale of your own, and keep it the same between roasts',
       'Where your browser supports it, voice input can log a probe reading or first crack while your hands are busy',
-      'Focus on smell and sound cues while cranking',
+      'The included thermometer reads the drum, not the beans; use it to repeat your own roasts',
       'Wind affects heat significantly when roasting outdoors',
-      'Maintain steady cranking rhythm (2-3 RPM)',
       'Consider environmental factors in your notes'
     ],
     warnings: [
-      'Both hands busy cranking - keep the phone where you can reach it',
-      'External heat source required',
-      'Temperature probe required',
+      'Your eyes and hands are on the burner - keep the phone where you can reach it',
+      'Gas burner required, not included',
       'Use outdoors or with excellent ventilation'
     ],
     
@@ -458,16 +461,18 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       {
         id: 'auto-manual',
         name: 'Auto and manual modes',
-        description: 'Auto runs the built-in program; manual lets you set heat and fan'
+        description: 'Auto runs the built-in program; manual lets you set heat (0-100%) and fan (0-10) at any time'
       }
     ],
     
     // User guidance
     tips: [
-      'Auto mode runs the built-in program and adjusts heat and fan for you; it is a good start for the first roasts',
-      'In manual mode, log heat and fan as you change them',
+      'Auto mode runs the built-in program and adjusts heat and fan for you. It ejects at the target time or bean temperature (defaults 18:00 and 402 °F, maximum 25:00 and 412 °F)',
+      'The panel sets heat in 1% steps; the app logs it in 10% steps, so round to the nearest 10',
+      'The panel shows fan as 0-10 (10% steps): fan 6 on the panel is 60% in the app',
+      'The display shows bean temperature (BT) and environment temperature (ET); log both if you can',
+      'At 356 °F and 395 °F bean temperature the roaster beeps: press Enter or it ejects the beans',
       'A falling rate of rise approaching first crack is the usual target',
-      'Log the environment temperature too if you read it',
       'Compatible with Artisan for advanced analysis and profile import',
       'Keep batches between 200-250g for most even roasting',
       'First crack typically at 195-205°C depending on bean density'
@@ -533,23 +538,22 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Never exceed 100 g per batch - serious fire risk',
-      'Start with 50-60g for first roasts, max 75-85g once experienced',
+      'Most poppers take about 75-85 g; treat 100 g as a ceiling',
+      'If the beans are not moving within 30 seconds, the batch is too big: stop and use fewer',
       'Roasts complete in 4-6 minutes - very fast, watch closely',
       'Listen for first crack around 3-4 minutes',
       'Stir occasionally for even roasting',
       'Cool beans immediately in metal colander after roasting',
       'Use outdoors or with excellent ventilation (produces smoke)',
       'Track color progression if you don\'t have a thermometer',
-      'Machine may fail after 50-100 roasts - they\'re not designed for this',
+      'Poppers are not built for coffee and can wear out quickly',
       'Never leave unattended - fire risk is real'
     ],
     warnings: [
-      'Fire hazard: more than 100 g can overheat the popper and catch fire',
+      'Fire hazard: an overloaded popper overheats, and chaff can catch fire',
       'Not designed for coffee roasting - use at your own risk',
       'Requires constant supervision - never leave unattended',
       'Produces significant smoke - outdoor use strongly recommended',
-      'Machine lifespan is limited (50-100 roasts typical)',
       'No temperature control - results vary',
       'Chaff can accumulate and ignite - clean after each use'
     ],
@@ -692,8 +696,9 @@ export function isImplementedRoaster(type: string | null | undefined): type is R
 
 /**
  * Behmor 2000AB Plus panel vocabulary (owner's manual):
- * - weight buttons set the starting time on the LCD; standard defaults 8:30 / 12:00 / 18:00
- * - P1 (default) to P5 programs before Start
+ * - weight buttons set the starting time on the LCD; standard defaults 8:30 / 12:00 / 18:00 for every program
+ * - P1 (default) to P5 programs before Start; each has its own maximum time (P1: 10:00 / 13:30 / 20:30)
+ * - + adds 15 s, − removes 10 s
  * - after Start, P1-P5 switch to manual power (0 / 25 / 50 / 75 / 100 %) and D changes drum speed
  */
 export const BEHMOR_WEIGHTS = [
@@ -710,8 +715,14 @@ export type BehmorProgram = (typeof BEHMOR_PROGRAMS)[number];
 /** Manual-mode element power for each P button, percent. */
 export const BEHMOR_MANUAL_POWER: Record<BehmorProgram, number> = { P1: 0, P2: 25, P3: 50, P4: 75, P5: 100 };
 
-/** Seconds logged per "+" press. The app's assumption; check against your display. */
-export const BEHMOR_PLUS_SECONDS = 30;
+/**
+ * Seconds logged per "+" press. Owner's manual: "Pressing '+' adds 15 seconds, '–' subtracts 10 seconds",
+ * up to the program's maximum time (20:30 for P1 at 1 lb). Older roasts keep the value they logged.
+ */
+export const BEHMOR_PLUS_SECONDS = 15;
+
+/** Seconds removed per "−" press, logged as a negative 'extend' value. */
+export const BEHMOR_MINUS_SECONDS = 10;
 
 /** Hottop KN-8828B-2K+ modes as named on the machine. */
 export const HOTTOP_MODES = [

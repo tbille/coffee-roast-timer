@@ -437,7 +437,7 @@ function SnackbarBar({ snackbar, onDismiss }: { snackbar: Snackbar; onDismiss: (
   );
 }
 
-/** End of the Behmor countdown (display time + added time), seconds. */
+/** End of the Behmor countdown (display time + signed time added or removed), seconds. */
 function behmorEnd(log: ConsoleLog): number | undefined {
   if (log.roasterType !== 'behmor-2000ab' || typeof log.startingSettings.lcd !== 'number') return undefined;
   const added = log.controlChanges

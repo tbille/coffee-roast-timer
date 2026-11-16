@@ -26,8 +26,8 @@ import type {
 } from '@/types/roast-data.types';
 import type { RoasterType } from '@/types/roaster.types';
 import type { PhaseBarMarker, PhaseBarSegment } from '@/components/roast-card/PhaseBar';
-import { formatTemp, msToSeconds, type TempUnit } from '@/lib/format';
-import { BEHMOR_MANUAL_POWER, ROASTER_SPECS, type BehmorProgram } from '@/utils/roasterRegistry';
+import { formatSignedSeconds, formatTemp, msToSeconds, type TempUnit } from '@/lib/format';
+import { BEHMOR_MANUAL_POWER, BEHMOR_PLUS_SECONDS, ROASTER_SPECS, type BehmorProgram } from '@/utils/roasterRegistry';
 
 export const SCHEMA_VERSION = 2;
 
@@ -128,7 +128,7 @@ export function defaultStartingSettings(type: RoasterType): StartingSettings {
 /* Labels                                                              */
 /* ------------------------------------------------------------------ */
 
-/** "Heat 7", "Fan 40%", "Setpoint 240 °C", "+30 s", "Manual P3 (50%)" */
+/** "Heat 7", "Fan 40%", "Setpoint 240 °C", "+15 s", "−10 s", "Manual P3 (50%)" */
 export function controlLabel(control: string, value: number | string, unit: TempUnit = 'C'): string {
   const spec = Object.values(ROASTER_SPECS)
     .flatMap((s) => s.controls ?? [])
@@ -137,7 +137,7 @@ export function controlLabel(control: string, value: number | string, unit: Temp
     case 'setpoint':
       return typeof value === 'number' ? `Setpoint ${formatTemp(value, unit)}` : `Setpoint ${value}`;
     case 'extend':
-      return `+${value} s`;
+      return typeof value === 'number' ? formatSignedSeconds(value) : `${value}`;
     case 'manual': {
       const power = BEHMOR_MANUAL_POWER[value as BehmorProgram];
       return power === undefined ? `Manual ${value}` : `Manual ${value} (${power}%)`;
@@ -322,7 +322,8 @@ export function buildModeData(log: ConsoleLog, chargedAt: number, durationMs: nu
         weightButton: typeof log.startingSettings.weight === 'string' ? log.startingSettings.weight : undefined,
         extensions: changesFor(log, 'extend').map((c) => ({
           time: sec(c.t),
-          duration: num(c.value) ?? 30,
+          // Signed: + presses are positive, − presses negative (seconds removed)
+          duration: num(c.value) ?? BEHMOR_PLUS_SECONDS,
           timestamp: at(c.t),
         })),
         crackEvents: crackEvents(log, chargedAt, false),

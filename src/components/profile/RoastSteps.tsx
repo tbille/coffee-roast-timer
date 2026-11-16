@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowDownToLine, Play, Plus, SlidersHorizontal, StickyNote, Zap } from "lucide-react";
+import { ArrowDownToLine, Minus, Play, Plus, SlidersHorizontal, StickyNote, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatClock } from "@/lib/format";
@@ -32,7 +32,9 @@ export function RoastSteps({ steps, footer }: { steps: RoastStep[]; footer?: Rea
       <CardContent>
         <ol className="relative">
           {steps.map((step, index) => {
-            const { icon: Icon, className } = KIND_STYLE[step.kind];
+            const { icon: KindIcon, className } = KIND_STYLE[step.kind];
+            // Time removed on the Behmor ("−10 s") reads as a minus, not a plus
+            const Icon = step.kind === "extension" && step.values?.[0]?.startsWith("−") ? Minus : KindIcon;
             const isLast = index === steps.length - 1;
             const guidance = GENERAL_GUIDANCE[step.kind];
             return (

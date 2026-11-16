@@ -22,9 +22,16 @@ const FreshRoastSR800 = () => (
       </li>
     </ul>
     <p>
-      Heat and fan each have nine steps, 1 to 9, and the roaster starts at heat 9, fan 5. Roast Timer uses the same
-      numbers, so “Heat 7, Fan 5” in the app is exactly what you set on the roaster, and anyone else with an SR800 can
-      repeat it.
+      Heat and fan each have nine steps, 1 to 9. Out of the box the roaster starts at heat 9, fan 5 with the timer at
+      6.0 minutes; the manual explains how to change those defaults, so check what yours shows. Roast Timer uses the
+      same numbers, so “Heat 7, Fan 5” in the app is exactly what you set on the roaster, and anyone else with an SR800
+      can repeat it.
+    </p>
+
+    <p>
+      The roaster's own timer counts down in tenths of a minute, up to 20 minutes, and switches to cool when it reaches
+      zero. Set it longer than you need and press cool yourself; Roast Timer keeps the real clock. The optional
+      extension tube helps the beans move but doesn't raise the 8 oz (226 g) batch limit.
     </p>
 
     <Callout variant="warning" title="Stay with it">

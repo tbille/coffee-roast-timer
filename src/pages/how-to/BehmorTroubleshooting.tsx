@@ -19,7 +19,7 @@ const faqSchema = {
       name: "What does Err 7 mean on a Behmor?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Err 7 means Start was not pressed within about 30 seconds of the safety prompt at 75% of the roast time, so the roaster stopped heating. Stay with the roaster and press Start when it beeps.",
+        text: "Err 7 means Start was not pressed within 30 seconds of the safety prompt at 75% of the default roast time, so the roaster went into cooling. Stay with the roaster and press Start when it beeps.",
       },
     },
     {
@@ -27,7 +27,7 @@ const faqSchema = {
       name: "How should I use extensions on a Behmor?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Press + to add time earlier in the roast to keep momentum, rather than stacking extensions at the very end. Log each press with +30 s in Roast Timer, as many taps as matches what your machine added.",
+        text: "Press + to add time earlier in the roast to keep momentum, rather than stacking extensions at the very end. Each press adds 15 seconds, up to the maximum for your program and weight. Log each press with +15 s in Roast Timer, one tap per press, and each press of − with −10 s.",
       },
     },
   ],
@@ -55,14 +55,14 @@ const BehmorTroubleshooting = () => (
     <H2 id="stall">The roast stalls after adding time</H2>
     <p>
       If you add all your time in the last minute, the roast often loses momentum and tastes flat. Add extensions in the
-      middle of the roast instead, and log each one with <strong>+30 s</strong> so you can see when you added it on
+      middle of the roast instead, and log each press with <strong>+15 s</strong> so you can see when you added it on
       the saved roast.
     </p>
 
     <H2 id="err-7">The roaster stopped and shows Err 7</H2>
     <p>
-      You missed the 75% prompt. About three quarters through the set time, the Behmor beeps and flashes; you have about
-      30 seconds to press <strong>Start</strong>. The roast is over at that point. Tap <strong>Drop</strong>, let the
+      You missed the 75% prompt. At 75% of the default time, the Behmor beeps and the timer blinks; you have 30
+      seconds to press <strong>Start</strong>, or it goes into cooling. The roast is over at that point. Tap <strong>Drop</strong>, let the
       beans cool, weigh them and save the roast with a note so you don't compare it with complete roasts.
     </p>
 

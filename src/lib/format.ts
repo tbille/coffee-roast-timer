@@ -43,6 +43,13 @@ export function formatClockDelta(seconds: number): string {
   return `${rounded > 0 ? '+' : '-'}${formatClock(Math.abs(rounded))}`;
 }
 
+/** Signed seconds to "+15 s" / "−10 s" (true minus sign), for Behmor time added or removed. */
+export function formatSignedSeconds(seconds: number): string {
+  if (!isFiniteNumber(seconds)) return '+0 s';
+  const rounded = Math.round(seconds);
+  return `${rounded < 0 ? '−' : '+'}${Math.abs(rounded)} s`;
+}
+
 /** 12.345 -> "12.3%" (digits default 1). Returns "—" for missing values. */
 export function formatPercent(value: number | null | undefined, digits = 1): string {
   if (!isFiniteNumber(value)) return '—';

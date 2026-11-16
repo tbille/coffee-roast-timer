@@ -45,13 +45,13 @@ export interface TemperatureDataPoint {
 
 /**
  * Behmor 2000AB: Profile-based with extensions
- * Uses built-in profiles (P1-P5) with ability to add 30-second extensions
+ * Uses built-in profiles (P1-P5); "+" adds 15 s and "−" removes 10 s (older roasts logged 30 s per +)
  */
 export interface ProfileBasedRoastData extends BaseRoastData {
   mode: 'profile-based';
   profile: BehmorProfile;           // Program chosen before Start
   baseDuration: number;             // Time shown on the LCD at Start (seconds)
-  extensions: Extension[];          // "+" presses (time added)
+  extensions: Extension[];          // "+" / "−" presses (time added or removed)
   temperatureData?: OptionalTempDataPoint[]; // Optional external probe readings
   /** Weight button pressed before Start: '1/4 lb' | '1/2 lb' | '1 lb' */
   weightButton?: string;
@@ -69,7 +69,7 @@ export interface BehmorManualPress {
 
 export interface Extension {
   time: number;                     // Seconds elapsed when extension added
-  duration: number;                 // Duration added (typically 30 seconds)
+  duration: number;                 // Signed seconds: +15 per "+", -10 per "−" (older roasts: +30)
   timestamp: number;                // Unix timestamp when added
 }
 

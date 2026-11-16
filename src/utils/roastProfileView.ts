@@ -29,7 +29,7 @@ import { convertTemperature, type TemperatureUnit } from "@/utils/temperatureCon
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { tidyLabel } from "@/utils/textDisplay";
 import { normaliseOrigin } from "@/lib/origins";
-import { formatClock as formatClockBase, msToSeconds } from "@/lib/format";
+import { formatClock as formatClockBase, formatSignedSeconds, msToSeconds } from "@/lib/format";
 import type { RoasterType } from "@/types/roaster.types";
 import type { RoastMilestone, RoasterSettings } from "@/types/roast.types";
 import {
@@ -367,7 +367,7 @@ const CONTROL_LABELS: Record<string, string> = {
 
 const capitalise = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]+/g, " ") : s);
 
-/** "Heat 7", "Setpoint 220 °C", "Extend +30 s", "Program P3". */
+/** "Heat 7", "Setpoint 220 °C", "Extend +15 s", "Remove 10 s", "Program P3". */
 export function formatControl(
   control: string,
   value: number | string,
@@ -381,7 +381,10 @@ export function formatControl(
   if (key === "setpoint" && isNum(value)) {
     return `${label} ${Math.round(viewUnit === "F" ? convertTemperature(value, "C", "F") : value)} °${viewUnit}`;
   }
-  if (key === "extend") return `${label} +${isNum(value) ? value : String(value).replace(/^\+/, "")}${isNum(value) ? " s" : ""}`;
+  if (key === "extend") {
+    if (isNum(value)) return value < 0 ? `Remove ${Math.abs(Math.round(value))} s` : `${label} ${formatSignedSeconds(value)}`;
+    return `${label} +${String(value).replace(/^\+/, "")}`;
+  }
   if ((key === "program" || key === "profile") && typeof value === "string") return `${label} ${value}`;
   if (roasterType?.startsWith("hottop") && (key === "heat" || key === "fan") && isNum(value)) return `${label} ${value}%`;
   return `${label} ${value}`;
@@ -462,9 +465,9 @@ function v2SettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): RoastS
       });
     }
     if (extensions.length) {
-      // Each extension tap counts: sum the group
+      // Each tap counts: sum the group's signed values (+15 per "+", -10 per "−")
       const total = group.filter((c) => c.control.toLowerCase() === "extend").reduce((n, c) => n + (isNum(c.value) ? c.value : 30), 0);
-      steps.push({ time, kind: "extension", title: "Extend roast", values: [`+${total} s`] });
+      steps.push(timeAdjustStep(time, total));
     }
     group = [];
   };
@@ -484,6 +487,11 @@ function v2SettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): RoastS
     });
   }
   return steps;
+}
+
+/** One step for a burst of Behmor +/− presses, from their signed total in seconds. */
+function timeAdjustStep(time: number, totalS: number): RoastStep {
+  return { time, kind: "extension", title: totalS < 0 ? "Shorten roast" : "Extend roast", values: [formatSignedSeconds(totalS)] };
 }
 
 function legacySettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): RoastStep[] {
@@ -514,7 +522,7 @@ function legacySettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): Ro
   let groupTotal = 0;
   const flushExt = () => {
     if (groupStart === undefined) return;
-    steps.push({ time: groupStart, kind: "extension", title: "Extend roast", values: [`+${groupTotal} s`] });
+    steps.push(timeAdjustStep(groupStart, groupTotal));
     groupStart = undefined;
     groupTotal = 0;
   };
@@ -522,7 +530,7 @@ function legacySettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): Ro
   extensions.forEach((ext) => {
     if (groupStart !== undefined && ext.time - lastTime > 5) flushExt();
     if (groupStart === undefined) groupStart = ext.time;
-    groupTotal += ext.duration ?? 30;
+    groupTotal += isNum(ext.duration) ? ext.duration : 30; // signed; legacy taps without a duration were +30
     lastTime = ext.time;
   });
   flushExt();

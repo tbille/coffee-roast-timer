@@ -9,11 +9,32 @@ const HottopKN8828 = () => (
 
     <H2 id="how-it-works">How the Hottop works</H2>
     <p>
-      The Hottop is an electric drum roaster with a bean temperature probe. It has two modes: <strong>Auto</strong>,
-      which runs its one built-in program, and <strong>Manual</strong>, where you set heat and fan power yourself. Because it reads bean temperature, it's the roaster where logging temperatures pays
+      The Hottop KN-8828B-2K+ is an electric drum roaster with two thermocouples: the display shows bean temperature
+      (BT) and environment temperature (ET) throughout the roast. It has two modes: <strong>Auto</strong>, which runs
+      its one built-in program and adjusts heat and fan for you, and <strong>Manual</strong>, where you set heat and fan
+      yourself. Because it reads bean temperature, it's the roaster where logging temperatures pays
       off most: your readings become a curve, and its slope is the <strong>rate of rise</strong> (RoR), how many
       degrees per minute the beans are gaining.
     </p>
+
+    <ul>
+      <li>
+        <strong>Heat</strong> is the power to the element, 0–100% in 1% steps on the panel. The app logs it in 10% steps,
+        so round to the nearest 10.
+      </li>
+      <li>
+        <strong>Fan</strong> moves in 10% steps and the panel shows it as 0 to 10. Fan 6 on the panel is 60% in the app.
+      </li>
+      <li>
+        <strong>Target time and target temperature</strong> end the roast in both modes: the Hottop ejects the beans
+        when either is reached. Auto starts at 18:00 and 402 °F; the most it allows is 25:00 and 412 °F.
+      </li>
+    </ul>
+
+    <Callout variant="warning" title="Two safety points">
+      At 356 °F and again at 395 °F bean temperature, the Hottop beeps and shows <strong>Enter</strong>. Press it to keep
+      roasting, or the beans are ejected and cooling starts.
+    </Callout>
 
     <H2 id="setup">Set up Roast Timer</H2>
     <Steps>
@@ -24,8 +45,8 @@ const HottopKN8828 = () => (
       </Step>
       <Step title="Set the starting heat and fan">
         <p>
-          Set <Ui>Heat</Ui> and <Ui>Fan</Ui> in percent to match the roaster. If the Hottop is in Auto mode, leave
-          them and just log the moments.
+          Set <Ui>Heat</Ui> and <Ui>Fan</Ui> in percent to match what the panel shows. If the Hottop is in Auto mode,
+          leave them and just log the moments.
         </p>
       </Step>
     </Steps>
@@ -40,7 +61,8 @@ const HottopKN8828 = () => (
       </Step>
       <Step title="Record bean temperature every 30–60 seconds">
         <p>
-          Type the bean temperature and press Enter (or <Ui>Log</Ui>). Environment temperature is optional. Regular
+          Type the bean temperature (BT on the display) and press Enter (or <Ui>Log</Ui>). The environment temperature
+          (ET) is optional. Regular
           readings are what make the curve and its rate of rise meaningful.
         </p>
       </Step>
@@ -91,7 +113,7 @@ const HottopKN8828 = () => (
       columns={["Time", "Heat", "Fan"]}
       rows={[
         ["0:00", "100%", "0%"],
-        ["~5:00", "90%", "25%"],
+        ["~5:00", "90%", "30%"],
         ["~9:00", "75%", "50%"],
         ["~10:30 (first crack)", "60%", "50%"],
         ["~12:30", "Eject", "–"],

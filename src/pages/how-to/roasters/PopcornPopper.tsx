@@ -33,8 +33,8 @@ const PopcornPopper = () => (
       </Step>
       <Step title="Enter your batch weight">
         <p>
-          Start with about 75 g. The app warns you as you go above what a popper should take; treat 100 g as a hard
-          ceiling.
+          Start with about 75 g; most poppers take 75–85 g. There's no standard, so the app warns you as you go above
+          what a popper should take; treat 100 g as a hard ceiling.
         </p>
       </Step>
       <Step title="Note your popper model">
@@ -86,7 +86,8 @@ const PopcornPopper = () => (
     <H2 id="problems">Common problems</H2>
     <ul>
       <li>
-        <strong>Beans barely move:</strong> too many beans. Go below 75 g.
+        <strong>Beans barely move:</strong> too many beans. If they aren't moving within 30 seconds, stop and use
+        fewer.
       </li>
       <li>
         <strong>Very uneven color:</strong> normal to a degree with poppers. A slightly smaller batch, or gently shaking

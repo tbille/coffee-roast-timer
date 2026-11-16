@@ -15,26 +15,29 @@ const Behmor2000AB = () => (
     <ul>
       <li>
         <strong>Weight button</strong> (¼ lb, ½ lb, 1 lb). It sets the time shown on the display: 8:30 for ¼ lb, 12:00
-        for ½ lb and 18:00 for 1 lb. Pick the one closest to your batch.
+        for ½ lb and 18:00 for 1 lb, whichever program you pick. Choose the one closest to your batch.
       </li>
       <li>
         <strong>Program</strong> (P1 to P5). P1 is the default. The programs change how heat is applied over that time,
         not how long the roast is; P3 to P5 apply less heat, so they often need time added.
       </li>
       <li>
-        <strong>+ and −</strong> change the time left on the display. Pressing + during the roast is how you extend
-        it.
+        <strong>+ and −</strong> change the time left on the display: each press of + adds 15 seconds, each press of
+        − takes off 10. Pressing + during the roast is how you extend it. The panel won't go past a maximum for each
+        program and weight (for P1, 10:00 at ¼ lb, 13:30 at ½ lb and 20:30 at 1 lb; the other programs allow a little
+        more).
       </li>
     </ul>
     <p>
       The 2000AB Plus can also be run by hand. After you press <strong>Start</strong>, P1 to P5 act as manual power
-      levels: P1 0%, P2 25%, P3 50%, P4 75% and P5 100%. <strong>D</strong> changes the drum speed.
+      levels: P1 0%, P2 25%, P3 50%, P4 75% and P5 100%. <strong>D</strong> changes the drum speed. The manual keeps
+      P4 and P5 for the drying phase: used after first crack, they can scorch the beans.
     </p>
     <p>There's no temperature readout, so you roast by time, sight and sound. That's exactly what Roast Timer records.</p>
 
     <Callout variant="warning" title="Press Start at the 75% prompt">
-      About three quarters of the way through the set time, the Behmor beeps and flashes. You have about 30 seconds to
-      press <strong>Start</strong> again, or it stops heating and shows <strong>Err 7</strong>. It's a safety feature
+      At 75% of the default time for your weight button, the Behmor beeps and the timer blinks. You have 30 seconds to
+      press <strong>Start</strong> again, or it goes into cooling and shows <strong>Err 7</strong>. It's a safety feature
       to make sure someone is watching. Stay with the roaster, and keep the chaff tray clean: built-up chaff is what
       catches fire.
     </Callout>
@@ -65,8 +68,9 @@ const Behmor2000AB = () => (
       </Step>
       <Step title="Log every extension">
         <p>
-          Each time you press + on the roaster, tap <Ui>+30 s</Ui> in the app. Each tap is logged as 30 seconds at the
-          moment you added it, so tap it as many times as matches what your machine actually added.
+          Each time you press + on the roaster, tap <Ui>+15 s</Ui> in the app: one tap per press, logged as 15
+          seconds at the moment you added it. If you press − on the roaster, tap <Ui>−10 s</Ui>, so the app's
+          countdown and the saved time match the display.
         </p>
       </Step>
       <Step title="Running by hand? Log the power changes">

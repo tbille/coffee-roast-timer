@@ -1,14 +1,15 @@
 /**
  * Live machine controls for the Roast state, configured from the registry vocabulary.
  * Steppers report through `onControl` (debounced by the console); discrete panel
- * presses (Behmor +, P1-P5, D; Hottop mode) go through `onPress` (logged at once).
+ * presses (Behmor + and −, P1-P5, D; Hottop mode) go through `onPress` (logged at once).
  */
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatClock, type TempUnit } from '@/lib/format';
 import {
   BEHMOR_MANUAL_POWER,
+  BEHMOR_MINUS_SECONDS,
   BEHMOR_PLUS_SECONDS,
   BEHMOR_PROGRAMS,
   ROASTER_SPECS,
@@ -79,6 +80,7 @@ function StepperControls({ roasterType, values, unit, disabled, onControl, onPre
 function BehmorControls({ log, values, elapsedS, disabled, onPress }: MachineControlsProps) {
   const [manualOpen, setManualOpen] = useState(() => log.controlChanges.some((c) => c.control === 'manual'));
   const lcdStart = typeof log.startingSettings.lcd === 'number' ? log.startingSettings.lcd : 0;
+  // Signed: + presses log positive seconds, − presses negative
   const added = log.controlChanges
     .filter((c) => c.control === 'extend')
     .reduce((sum, c) => sum + (typeof c.value === 'number' ? c.value : 0), 0);
@@ -96,10 +98,25 @@ function BehmorControls({ log, values, elapsedS, disabled, onPress }: MachineCon
           <p className="text-xs text-muted-foreground">
             {String(log.startingSettings.weight ?? '')} · {String(log.startingSettings.program ?? 'P1')}
             {added > 0 && ` · +${formatClock(added)} added`}
+            {added < 0 && ` · −${formatClock(-added)} removed`}
             {manual && ` · manual ${manual}`}
           </p>
         </div>
-        <PressButton className={panelButton} onPress={() => onPress('extend', BEHMOR_PLUS_SECONDS)} disabled={disabled}>
+        <PressButton
+          className={panelButton}
+          onPress={() => onPress('extend', -BEHMOR_MINUS_SECONDS)}
+          disabled={disabled}
+          aria-label={`Remove ${BEHMOR_MINUS_SECONDS} s`}
+        >
+          <Minus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+          {BEHMOR_MINUS_SECONDS} s
+        </PressButton>
+        <PressButton
+          className={panelButton}
+          onPress={() => onPress('extend', BEHMOR_PLUS_SECONDS)}
+          disabled={disabled}
+          aria-label={`Add ${BEHMOR_PLUS_SECONDS} s`}
+        >
           <Plus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
           {BEHMOR_PLUS_SECONDS} s
         </PressButton>

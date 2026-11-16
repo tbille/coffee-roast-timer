@@ -27,7 +27,9 @@ const GeneCafeCBR101 = () => (
       </Step>
       <Step title="Set the starting target temperature">
         <p>
-          Set the <Ui>Setpoint</Ui> to what you dial in on the roaster. The Gene Cafe goes up to 250 °C (482 °F).
+          Set the <Ui>Setpoint</Ui> to what you dial in on the roaster. The TEMP dial moves one degree at a time, up to
+          250 °C (482 °F), and the app does the same. Set the roast time on the TIME dial as usual: up to 30 minutes in
+          6-second steps, and you can turn it up during the roast to add time.
         </p>
       </Step>
     </Steps>
@@ -63,8 +65,9 @@ const GeneCafeCBR101 = () => (
 
     <H2 id="starting-point">A starting point</H2>
     <p>
-      A common approach for a medium roast with about 225 g: run at or near the maximum until close to first crack, then
-      step down to slow the finish. Your numbers will vary with beans and room temperature.
+      The manual's roasting guide uses 230–250 °C, with 12 to 23 minutes depending on how dark you go. A common approach
+      for a medium roast with about 225 g: run at or near the maximum until close to first crack, then step down to slow
+      the finish. Your numbers will vary with beans, voltage and room temperature.
     </p>
     <RefTable
       caption="Example Gene Cafe schedule for a medium roast"

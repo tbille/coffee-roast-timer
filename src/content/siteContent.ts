@@ -42,7 +42,7 @@ export const HOME_FEATURES: { title: string; text: string }[] = [
   },
   {
     title: "Controls that match your machine",
-    text: "SR800 heat and fan 1–9, Behmor weight, program and +30 s, Gene Cafe setpoint, Hottop heat and fan in percent, KALDI flame, and a popcorn popper mode with safety cues. Each tap is logged with its time. Temperature logging is optional.",
+    text: "SR800 heat and fan 1–9, Behmor weight, program, +15 s and −10 s, Gene Cafe setpoint, Hottop heat and fan in percent, KALDI flame, and a popcorn popper mode with safety cues. Each tap is logged with its time. Temperature logging is optional.",
   },
   {
     title: "A post-roast card with the numbers that matter",

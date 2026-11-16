@@ -1,4 +1,4 @@
-import { useId, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useId, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,10 @@ export interface StepperProps {
   id?: string;
 }
 
+/** Hold-to-repeat timing: first repeat after HOLD_DELAY_MS, then every HOLD_INTERVAL_MS. */
+const HOLD_DELAY_MS = 400;
+const HOLD_INTERVAL_MS = 80;
+
 const decimals = (n: number) => {
   const text = String(n);
   const dot = text.indexOf(".");
@@ -34,6 +38,7 @@ const decimals = (n: number) => {
 /**
  * Minus / value / plus control with spinbutton semantics.
  * Keyboard on the value: ArrowUp/Right +step, ArrowDown/Left -step, PageUp/PageDown x10, Home/End min/max.
+ * Pressing and holding − / + repeats (after 400 ms, then every 80 ms); onChange fires once per step.
  */
 export function Stepper({
   label,
@@ -62,6 +67,77 @@ export function Stepper({
     const next = clamp(v);
     if (next !== value) onChange(next);
   };
+
+  /* Hold to repeat. Timers read the latest value from a ref, advanced locally on each
+     step so a repeat never re-sends a stale value while the parent re-renders. */
+  const valueRef = useRef(value);
+  const latest = useRef({ min, max, step, precision, onChange });
+  useEffect(() => {
+    valueRef.current = value;
+    latest.current = { min, max, step, precision, onChange };
+  });
+  const holdTimer = useRef<number | undefined>(undefined);
+  /** True once a hold has repeated, so the click that ends it doesn't add another step */
+  const heldRef = useRef(false);
+
+  const stopHold = useCallback(() => {
+    window.clearTimeout(holdTimer.current);
+    holdTimer.current = undefined;
+  }, []);
+
+  const startHold = (dir: 1 | -1) => {
+    stopHold();
+    heldRef.current = false;
+    const tick = () => {
+      const { min: lo, max: hi, step: s, precision: p, onChange: emit } = latest.current;
+      const current = valueRef.current;
+      const next = Math.min(hi, Math.max(lo, Number((current + dir * s).toFixed(p))));
+      if (next === current) {
+        stopHold(); // at the limit: the button disables and won't see pointerup
+        return;
+      }
+      heldRef.current = true;
+      valueRef.current = next;
+      emit(next);
+      holdTimer.current = window.setTimeout(tick, HOLD_INTERVAL_MS);
+    };
+    holdTimer.current = window.setTimeout(tick, HOLD_DELAY_MS);
+  };
+
+  // Stop on window blur, a pointerup outside the button, and unmount
+  useEffect(() => {
+    window.addEventListener("blur", stopHold);
+    window.addEventListener("pointerup", stopHold);
+    return () => {
+      window.removeEventListener("blur", stopHold);
+      window.removeEventListener("pointerup", stopHold);
+      stopHold();
+    };
+  }, [stopHold]);
+  useEffect(() => {
+    if (disabled) stopHold();
+  }, [disabled, stopHold]);
+
+  const holdProps = (dir: 1 | -1) => ({
+    onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
+      if (disabled || e.button !== 0) return;
+      startHold(dir);
+    },
+    onPointerUp: stopHold,
+    onPointerLeave: stopHold,
+    onPointerCancel: stopHold,
+    onBlur: stopHold,
+    onContextMenu: (e: MouseEvent<HTMLButtonElement>) => e.preventDefault(),
+    onClick: (e: MouseEvent<HTMLButtonElement>) => {
+      // A pointer click (detail > 0) ending a hold is swallowed; a plain tap or an
+      // assistive-tech click (detail 0) steps once.
+      if (e.detail > 0 && heldRef.current) {
+        heldRef.current = false;
+        return;
+      }
+      set(value + dir * step);
+    },
+  });
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return;
@@ -94,10 +170,10 @@ export function Stepper({
         <button
           type="button"
           className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-md border border-input bg-background text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
+            "inline-flex shrink-0 touch-manipulation select-none items-center justify-center rounded-md border border-input bg-background text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
             btn,
           )}
-          onClick={() => set(value - step)}
+          {...holdProps(-1)}
           disabled={disabled || value <= min}
           aria-label={`Decrease ${label}`}
           tabIndex={-1}
@@ -125,10 +201,10 @@ export function Stepper({
         <button
           type="button"
           className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-md border border-input bg-background text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
+            "inline-flex shrink-0 touch-manipulation select-none items-center justify-center rounded-md border border-input bg-background text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
             btn,
           )}
-          onClick={() => set(value + step)}
+          {...holdProps(1)}
           disabled={disabled || value >= max}
           aria-label={`Increase ${label}`}
           tabIndex={-1}

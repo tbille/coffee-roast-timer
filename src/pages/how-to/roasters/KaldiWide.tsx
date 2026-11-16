@@ -9,8 +9,9 @@ const KaldiWide = () => (
 
     <H2 id="how-it-works">How the KALDI Wide works</H2>
     <p>
-      A motorized drum turns over a gas burner. You steer the roast with the flame, and read temperature from the
-      roaster's thermometer. Because your hands and eyes are on the burner, Roast Timer lets you log temperatures by
+      A motorized drum, up to 300 g, turns over a gas burner you supply. You steer the roast with the flame, and read
+      temperature from the roaster's thermometer. Burners have no standard scale, so the app's <Ui>Flame</Ui> runs 1 to
+      10 and you decide what each step means on yours. Because your hands and eyes are on the burner, Roast Timer lets you log temperatures by
       voice as well as by typing.
     </p>
 
@@ -27,7 +28,10 @@ const KaldiWide = () => (
         </p>
       </Step>
       <Step title="Set the starting flame">
-        <p>Set <Ui>Flame</Ui> to your burner setting, on whatever scale you use for your burner.</p>
+        <p>
+          Set <Ui>Flame</Ui> to your burner setting on your own 1–10 scale, and keep that scale the same from roast to
+          roast.
+        </p>
       </Step>
     </Steps>
 

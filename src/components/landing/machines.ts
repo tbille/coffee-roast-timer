@@ -8,10 +8,10 @@ export const LANDING_ROASTERS: RoasterType[] = IMPLEMENTED_ROASTERS;
 
 /** How the console adapts to each machine: one short, factual line, plus an icon for the main control. */
 const ADAPTS: Record<string, { icon: LucideIcon; text: string }> = {
-  "gene-cbr-101": { icon: Thermometer, text: "Log the setpoint as you turn the dial, plus optional bean readings." },
-  "behmor-2000ab": { icon: Timer, text: "Weight button, program P1–P5 and +30 s extensions, next to the LCD countdown." },
+  "gene-cbr-101": { icon: Thermometer, text: "Log the setpoint to the degree as you turn the dial, plus optional bean readings." },
+  "behmor-2000ab": { icon: Timer, text: "Weight button, program P1–P5 and +15 s presses, next to the LCD countdown." },
   "freshroast-sr800": { icon: Fan, text: "Heat and fan on the same 1–9 scale as the dials. One tap per change." },
-  "kaldi-wide": { icon: Flame, text: "Flame changes and probe readings, typed or spoken, without leaving the burner." },
+  "kaldi-wide": { icon: Flame, text: "Flame changes on your own burner scale, and readings typed or spoken." },
   "hottop-kn8828": { icon: Gauge, text: "Heat and fan in percent, bean and environment temperature, turning point." },
   "popcorn-popper": { icon: Popcorn, text: "Just the clock and the cracks, with batch limits and safety cues." },
 };

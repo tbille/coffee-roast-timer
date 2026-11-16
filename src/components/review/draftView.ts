@@ -7,7 +7,7 @@ import { deriveRoastFacts, deriveRoastPhases, roasterName, type ProfileViewInput
 import type { RoastCardData } from "@/components/roast-card/RoastCard";
 import { normaliseOrigin } from "@/lib/origins";
 import { LOCAL_REF_PREFIX } from "@/lib/drafts";
-import { msToSeconds } from "@/lib/format";
+import { formatSignedSeconds, msToSeconds } from "@/lib/format";
 import { crackEvents, findEvent, milestones, UNNAMED_BEAN } from "@/lib/saveRoast";
 import type { RoasterType } from "@/types/roaster.types";
 import type { RoastMilestone } from "@/types/roast.types";
@@ -74,7 +74,7 @@ const CONTROL_LABELS: Record<string, string> = {
 };
 
 export function controlLabel(c: Pick<ControlChange, "control" | "value">): string {
-  if (c.control === "extend") return `+${typeof c.value === "number" ? `${c.value} s` : c.value}`;
+  if (c.control === "extend") return typeof c.value === "number" ? formatSignedSeconds(c.value) : `+${c.value}`;
   if (c.control === "setpoint" && typeof c.value === "number") return `Setpoint ${Math.round(c.value)} °C`;
   const name = CONTROL_LABELS[c.control] ?? `${c.control.charAt(0).toUpperCase()}${c.control.slice(1)}`;
   return `${name} ${c.value}`;
