@@ -18,39 +18,45 @@ const GeneCafeCBR101 = () => (
     <Steps>
       <Step title="Choose the Gene Cafe">
         <p>
-          Open <Link to="/roast?roaster=gene-cbr-101">the timer</Link> and pick <Ui>Gene CBR-101</Ui> from the roaster
-          menu. Choose °C or °F to match your display.
+          Open <Link to="/roast?roaster=gene-cbr-101">the timer</Link> and pick <Ui>Gene Cafe CBR-101</Ui>. Choose °C or °F to
+          match your display.
         </p>
       </Step>
       <Step title="Set your batch size">
-        <p>Enter the green weight. The app warns you if you go over what the drum handles evenly.</p>
+        <p>Enter the green weight. The app only warns you if you go over what the drum handles evenly.</p>
       </Step>
       <Step title="Set the starting target temperature">
         <p>
-          Type it in or use the <Ui>-5°</Ui> and <Ui>+5°</Ui> buttons, so it matches what you dial in on the roaster.
+          Set the <Ui>Setpoint</Ui> to what you dial in on the roaster.
         </p>
       </Step>
     </Steps>
 
     <H2 id="during">During the roast</H2>
     <Steps>
-      <Step title="Press Start Roast when you start the Gene Cafe">
-        <p>Load the drum and start both at the same moment.</p>
-      </Step>
-      <Step title="Record a reading whenever something changes">
+      <Step title="Charge when you start the Gene Cafe">
         <p>
-          When you change the target on the roaster, change it in the app too. Type the temperature the display shows
-          and press <Ui>Record Temperature</Ui>. Each entry saves both the target and the reading, which builds your
-          temperature curve. Every minute or so is plenty.
+          Load the drum and press <Ui>Charge — start timer</Ui> as you start the roaster.
+        </p>
+      </Step>
+      <Step title="Log every setpoint change">
+        <p>
+          When you turn the dial on the roaster, change the setpoint in the app too. Each change is logged with its time.
+          If you want a curve, also type the temperature the display shows into the temperature field and press Enter;
+          every minute or so is plenty. It's optional.
         </p>
       </Step>
       <Step title="Watch the color through the drum">
-        <p>Green turns to yellow, then tan, then brown. Logging when the beans turn yellow helps you split the phases.</p>
-      </Step>
-      <Step title="Mark first crack, then stop">
         <p>
-          Press <Ui>First Crack</Ui> when it starts. When you reach your color, press the cool button on the roaster and{" "}
-          <Ui>Stop</Ui> in the app.
+          Green turns to yellow, then tan, then brown. Tap <Ui>Yellowing</Ui> when they turn yellow: that splits the
+          phase ribbon into drying and Maillard. Beans hitting the glass can sound like cracks, so listen for a steady
+          run of cracking.
+        </p>
+      </Step>
+      <Step title="Tap first crack, then drop">
+        <p>
+          Tap <Ui>First crack</Ui> when it starts. When you reach your color, press the cool button on the roaster and{" "}
+          <Ui>Drop</Ui> in the app.
         </p>
       </Step>
     </Steps>
@@ -73,7 +79,8 @@ const GeneCafeCBR101 = () => (
     />
     <Callout variant="tip" title="Cold room?">
       The Gene Cafe is sensitive to room temperature. On a cold day first crack can arrive a few minutes later. Note the
-      room temperature in your roast notes so you can account for it.
+      room temperature on the post-roast card (where you roasted, plus the ambient temperature) so you can account for
+      it. Keep the chaff collector clean and stay with the roaster.
     </Callout>
 
     <RoasterLinks roaster="gene-cbr-101" />

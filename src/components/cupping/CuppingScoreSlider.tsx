@@ -6,18 +6,21 @@ interface CuppingScoreSliderProps {
   onChange: (value: number) => void;
 }
 
+/** 0–100 score, presented plainly: a number out of 100, no colour judgement. */
 export function CuppingScoreSlider({ value, onChange }: CuppingScoreSliderProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Label htmlFor="cupping-score">Cupping Score</Label>
-        <div className="text-2xl font-semibold text-gray-700">
-          {value}/100
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <Label id="cupping-score-label" htmlFor="cupping-score">Score</Label>
+        <div className="font-mono text-2xl font-semibold tabular-nums text-foreground" aria-hidden>
+          {value}
+          <span className="ml-1 text-sm font-normal text-muted-foreground">/ 100</span>
         </div>
       </div>
-      
+
       <Slider
         id="cupping-score"
+        aria-labelledby="cupping-score-label"
         value={[value]}
         onValueChange={(values) => onChange(values[0])}
         min={0}
@@ -25,11 +28,11 @@ export function CuppingScoreSlider({ value, onChange }: CuppingScoreSliderProps)
         step={1}
         className="w-full"
       />
-      
-      <div className="flex justify-between text-xs text-gray-500">
-        <span>0 - Poor</span>
-        <span>50 - Average</span>
-        <span>100 - Exceptional</span>
+
+      <div className="flex justify-between font-mono text-xs tabular-nums text-muted-foreground" aria-hidden>
+        <span>0</span>
+        <span>50</span>
+        <span>100</span>
       </div>
     </div>
   );

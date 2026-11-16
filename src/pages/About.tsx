@@ -1,78 +1,65 @@
 import { Helmet } from "react-helmet-async";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Coffee, ExternalLink } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { pageTitle } from "@/components/PageTitle";
+import { absoluteUrl } from "@/content/siteContent";
 
-const About = () => {
-  return (
-    <>
-      <Helmet>
-        <title>About Coffee Roast Timer - Why I Built This Roasting App</title>
-        <meta name="description" content="Learn why Coffee Roast Timer was built, how it helps home roasters track better batches, and the journey from Gene CBR-101 experiments to a full roast logging tool." />
-        <meta name="keywords" content="about coffee roast timer, home coffee roasting, Gene CBR-101, coffee roasting enthusiast" />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="About Coffee Roast Timer - Why I Built This Roasting App" />
-        <meta property="og:description" content="The story behind Coffee Roast Timer and the home roasting workflow it was built to improve." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://roast-timer.com/about" />
-        <link rel="canonical" href="https://roast-timer.com/about" />
-      </Helmet>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-4">About</h1>
-        <p className="text-xl text-muted-foreground">
-          The story behind this coffee roasting journey
+const DESCRIPTION =
+  "Why Roast Timer exists: a home roaster with a Gene Cafe CBR-101 who wanted a better roast log than a notebook, and built one for fun.";
+
+const About = () => (
+  <>
+    <Helmet>
+      <title>{pageTitle("About")}</title>
+      <meta name="description" content={DESCRIPTION} />
+      <meta name="robots" content="index, follow" />
+      <meta property="og:title" content={pageTitle("About")} />
+      <meta property="og:description" content={DESCRIPTION} />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={absoluteUrl("/about")} />
+      <link rel="canonical" href={absoluteUrl("/about")} />
+    </Helmet>
+
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 md:py-14">
+      <PageHeader title="About" description="Who builds Roast Timer, and why." />
+
+      <div className="prose prose-neutral max-w-none prose-p:leading-relaxed">
+        <h2>My coffee journey</h2>
+        <p>
+          Hi there! I'm toto, a coffee enthusiast who owns a <strong>Gene Cafe CBR-101</strong> home coffee roaster. Like
+          many coffee lovers, I wanted to dive deeper into the art and science of coffee roasting to truly understand how
+          different variables affect the final cup.
+        </p>
+        <p>
+          What started as curiosity quickly became a passion project. I found myself wanting to track my roasting
+          sessions, write down what I changed, and learn from each batch. Rather than using spreadsheets or notebooks, I
+          decided to build this small site for fun to digitally track all the roasts I'm making.
+        </p>
+        <p>
+          Today it times my roasts, keeps a record of when first crack came and what I turned on the roaster, and saves
+          each batch with its weight loss and notes, with optional temperature logging and curves when I log readings.
+          It's become a personal database of my roasting experiments, and a learning tool that combines my love for
+          coffee with my passion for building things.
+        </p>
+        <p>
+          It's free, and it works for other machines too. If you roast at home, <Link to="/roast">give it a try</Link>,
+          and tell me what's missing with the feedback link at the bottom of the page.
         </p>
       </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coffee className="h-6 w-6 text-primary" />
-            My Coffee Journey
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">
-            Hi there! I'm toto, a coffee enthusiast who owns a <strong>Gene CBR-101</strong> home coffee roaster. 
-            Like many coffee lovers, I wanted to dive deeper into the art and science of coffee roasting 
-            to truly understand how different variables affect the final cup.
-          </p>
-          
-          <p className="text-muted-foreground leading-relaxed">
-            What started as curiosity quickly became a passion project. I found myself wanting to track 
-            my roasting sessions, document different profiles, and learn from each batch. Rather than 
-            using spreadsheets or notebooks, I decided to build this small site for fun to digitally 
-            track all the roasts I'm making.
-          </p>
-
-          <p className="text-muted-foreground leading-relaxed">
-            This platform helps me monitor timing, temperature curves, and roast profiles while 
-            building a personal database of my coffee roasting experiments. It's been an incredible 
-            learning tool that combines my love for coffee with my passion for creating digital solutions.
-          </p>
-
-          <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground mb-4">
-              Want to learn more about my other projects?
-            </p>
-            <Button asChild variant="outline">
-              <a 
-                href="https://bille.dev" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                Visit my website
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mt-10 border-t pt-6">
+        <p className="mb-4 text-sm text-muted-foreground">Want to learn more about my other projects?</p>
+        <Button asChild variant="outline">
+          <a href="https://bille.dev" target="_blank" rel="noopener noreferrer">
+            Visit my website
+            <ExternalLink strokeWidth={1.75} aria-hidden />
+          </a>
+        </Button>
+      </div>
     </div>
-    </>
-  );
-};
+  </>
+);
 
 export default About;

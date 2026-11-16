@@ -27,14 +27,14 @@ const PopcornPopper = () => (
     <Steps>
       <Step title="Choose the popcorn popper">
         <p>
-          Open <Link to="/roast?roaster=popcorn-popper">the timer</Link> and pick <Ui>Popcorn Popper</Ui> from the roaster
-          menu.
+          Open <Link to="/roast?roaster=popcorn-popper">the timer</Link> and pick <Ui>Air popcorn popper</Ui>. The first time,
+          the setup shows a short safety checklist.
         </p>
       </Step>
       <Step title="Enter your batch weight">
         <p>
-          Start with about 75 g. The batch meter warns you above 80 g and turns red as you approach 100 g, the most a
-          popper should take.
+          Start with about 75 g. The app warns you as you go above what a popper should take; treat 100 g as a hard
+          ceiling.
         </p>
       </Step>
       <Step title="Note your popper model">
@@ -44,25 +44,27 @@ const PopcornPopper = () => (
 
     <H2 id="during">During the roast</H2>
     <Steps>
-      <Step title="Press Start Roast when the beans go in">
-        <p>Pour the beans in, switch the popper on and start the timer together.</p>
-      </Step>
-      <Step title="Track the color">
+      <Step title="Charge when the beans go in">
         <p>
-          Tap the current color in <Ui>Visual Cues</Ui> as the beans change. Without a thermometer, this is your record of
-          how the roast progressed. If you do have one, log readings with <Ui>Record Temperature</Ui>.
+          Pour the beans in, switch the popper on and press <Ui>Charge — start timer</Ui> together.
+        </p>
+      </Step>
+      <Step title="Tap yellowing">
+        <p>
+          Tap <Ui>Yellowing</Ui> when the beans turn pale yellow. Without a thermometer, the moments you tap are your
+          record of how the roast progressed.
         </p>
       </Step>
       <Step title="Listen for first crack">
         <p>
-          The app shows a <Ui>First Crack Alert</Ui> at 3 minutes as a reminder to listen. Press <Ui>First Crack</Ui>{" "}
-          when it starts.
+          The app beeps at 3 minutes as a reminder to listen and check on the popper. Tap <Ui>First crack</Ui> when it
+          starts.
         </p>
       </Step>
       <Step title="Pour out just before your target color">
         <p>
           Beans keep roasting from their own heat for a little while after you stop. Pour them into a metal colander a
-          shade lighter than you want, press <Ui>Stop</Ui>, and stir or shake until they're cool to the touch.
+          shade lighter than you want, tap <Ui>Drop</Ui>, and stir or shake until they're cool to the touch.
         </p>
       </Step>
     </Steps>

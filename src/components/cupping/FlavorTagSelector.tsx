@@ -38,7 +38,7 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
 
   return (
     <div className="space-y-3">
-      <Label>Flavor Profile</Label>
+      <Label>Flavour tags</Label>
       
       {/* Selected tags */}
       {selected.length > 0 && (
@@ -47,16 +47,16 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
             <Badge 
               key={tag} 
               variant="secondary" 
-              className="bg-amber-100 text-amber-800 hover:bg-amber-200"
+              className="gap-1 border bg-background font-normal text-foreground hover:bg-muted"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-1 hover:text-amber-900"
+                className="ml-0.5 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={`Remove ${tag} tag`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" strokeWidth={1.75} />
               </button>
             </Badge>
           ))}
@@ -74,19 +74,19 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
           >
             {selected.length >= MAX_FLAVOR_TAGS 
               ? `Maximum ${MAX_FLAVOR_TAGS} tags selected`
-              : 'Add Flavor Tags...'
+              : 'Add flavour tags'
             }
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
           <Command className="overflow-hidden">
             <CommandInput
-              placeholder="Search flavors..."
+              placeholder="Search flavours"
               value={search}
               onValueChange={setSearch}
             />
             <CommandList className="max-h-64">
-              <CommandEmpty>No flavors found.</CommandEmpty>
+              <CommandEmpty>No flavours found.</CommandEmpty>
               <CommandGroup>
                 {filtered.map((tag) => {
                   const isSelected = selected.includes(tag);
@@ -98,10 +98,10 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
                     >
                       <div 
                         className={`h-4 w-4 border rounded flex items-center justify-center ${
-                          isSelected ? 'bg-primary border-primary' : 'border-gray-300'
+                          isSelected ? 'bg-primary border-primary' : 'border-input'
                         }`}
                       >
-                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                        {isSelected && <Check className="h-3 w-3 text-primary-foreground" strokeWidth={1.75} />}
                       </div>
                       {tag}
                     </CommandItem>
@@ -115,7 +115,7 @@ export function FlavorTagSelector({ selected, onChange }: FlavorTagSelectorProps
 
       {/* Helper text */}
       {selected.length >= MAX_FLAVOR_TAGS && (
-        <p className="text-xs text-amber-600">
+        <p className="text-xs text-muted-foreground">
           Maximum {MAX_FLAVOR_TAGS} tags selected
         </p>
       )}

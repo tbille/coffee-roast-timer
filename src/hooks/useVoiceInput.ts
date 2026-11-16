@@ -16,171 +16,110 @@ export interface UseVoiceInputReturn {
   resetTranscript: () => void;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- Web Speech API has no TS lib types */
+const getRecognitionCtor = (): any =>
+  typeof window === 'undefined' ? undefined : (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+/** True when the browser has the Web Speech API (not on iOS home-screen apps, Firefox). */
+export const isVoiceInputSupported = () => !!getRecognitionCtor();
+
 /**
- * Hook for Web Speech API voice recognition
- * Supports continuous listening and interim results
+ * Web Speech API recognition with continuous listening.
+ * Callbacks are read through refs, so passing inline functions is fine.
  */
 export const useVoiceInput = (
   onResult?: (result: VoiceInputResult) => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
 ): UseVoiceInputReturn => {
   const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported] = useState(isVoiceInputSupported);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const recognitionRef = useRef<any>(null);
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
-  // Check for Web Speech API support
   useEffect(() => {
-    const SpeechRecognition = 
-      (window as any).SpeechRecognition || 
-      (window as any).webkitSpeechRecognition;
-    
-    setIsSupported(!!SpeechRecognition);
+    const SpeechRecognition = getRecognitionCtor();
+    if (!SpeechRecognition) return;
 
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-      recognition.maxAlternatives = 3;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 3;
 
-      recognition.onstart = () => {
-        setIsListening(true);
-        setError(null);
-        console.log('Voice recognition started');
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-        console.log('Voice recognition ended');
-      };
-
-      recognition.onresult = (event: any) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        // Process all results
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          const transcriptText = result[0].transcript;
-          
-          if (result.isFinal) {
-            finalTranscript += transcriptText + ' ';
-            
-            // Call result callback with final result
-            if (onResult) {
-              onResult({
-                transcript: transcriptText.trim(),
-                confidence: result[0].confidence,
-                isFinal: true
-              });
-            }
-          } else {
-            interimTranscript += transcriptText;
-            
-            // Call result callback with interim result
-            if (onResult) {
-              onResult({
-                transcript: transcriptText.trim(),
-                confidence: result[0].confidence,
-                isFinal: false
-              });
-            }
-          }
-        }
-
-        // Update transcript state
-        const fullTranscript = (finalTranscript + interimTranscript).trim();
-        setTranscript(fullTranscript);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Voice recognition error:', event.error);
-        let errorMessage: string;
-        
-        switch (event.error) {
-          case 'no-speech':
-            errorMessage = 'No speech detected. Please try again.';
-            break;
-          case 'audio-capture':
-            errorMessage = 'Microphone not accessible. Please check permissions.';
-            break;
-          case 'not-allowed':
-            errorMessage = 'Microphone permission denied.';
-            break;
-          case 'network':
-            errorMessage = 'Network error occurred.';
-            break;
-          default:
-            errorMessage = `Voice recognition error: ${event.error}`;
-        }
-        
-        setError(errorMessage);
-        setIsListening(false);
-        
-        if (onError) {
-          onError(errorMessage);
-        }
-      };
-
-      recognitionRef.current = recognition;
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // Ignore errors on cleanup
-        }
-      }
+    recognition.onstart = () => {
+      setIsListening(true);
+      setError(null);
     };
-  }, [onResult, onError]);
+    recognition.onend = () => setIsListening(false);
+
+    recognition.onresult = (event: any) => {
+      let text = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        const piece: string = result[0].transcript;
+        text += piece;
+        onResultRef.current?.({ transcript: piece.trim(), confidence: result[0].confidence, isFinal: !!result.isFinal });
+      }
+      setTranscript(text.trim());
+    };
+
+    recognition.onerror = (event: any) => {
+      const messages: Record<string, string> = {
+        'no-speech': 'No speech detected.',
+        'audio-capture': 'Microphone not available.',
+        'not-allowed': 'Microphone permission denied.',
+        network: 'Network error.',
+      };
+      const message = messages[event.error] ?? `Voice input error: ${event.error}`;
+      setError(message);
+      setIsListening(false);
+      onErrorRef.current?.(message);
+    };
+
+    recognitionRef.current = recognition;
+    return () => {
+      try {
+        recognition.abort?.();
+      } catch {
+        /* ignore */
+      }
+      recognitionRef.current = null;
+    };
+  }, []);
 
   const startListening = useCallback(() => {
-    if (!isSupported) {
-      const errorMsg = 'Voice recognition is not supported in this browser.';
-      setError(errorMsg);
-      if (onError) onError(errorMsg);
+    if (!recognitionRef.current) {
+      const message = 'Voice input is not supported in this browser.';
+      setError(message);
+      onErrorRef.current?.(message);
       return;
     }
-
-    if (recognitionRef.current && !isListening) {
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        console.error('Failed to start recognition:', e);
-        const errorMsg = 'Failed to start voice recognition.';
-        setError(errorMsg);
-        if (onError) onError(errorMsg);
-      }
+    try {
+      recognitionRef.current.start();
+    } catch {
+      // Already started
     }
-  }, [isSupported, isListening, onError]);
+  }, []);
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current && isListening) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        console.error('Failed to stop recognition:', e);
-      }
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* ignore */
     }
-  }, [isListening]);
+  }, []);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
     setError(null);
   }, []);
 
-  return {
-    isListening,
-    isSupported,
-    transcript,
-    error,
-    startListening,
-    stopListening,
-    resetTranscript
-  };
+  return { isListening, isSupported, transcript, error, startListening, stopListening, resetTranscript };
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */

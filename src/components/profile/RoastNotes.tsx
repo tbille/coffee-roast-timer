@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { formatDate } from "@/lib/format";
+import { parseDateOnly, restDaysBetween } from "@/utils/roastProfileView";
 
 export interface RoastNotesData {
+  created_at?: string | null;
   notes?: string | null;
   cupping_score?: number | null;
   cupping_date?: string | null;
@@ -29,6 +31,15 @@ function hasTastingContent(d: RoastNotesData): boolean {
   );
 }
 
+function Fact({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className="mt-1 text-sm">{children}</dd>
+    </div>
+  );
+}
+
 export function RoastNotes({ data, isOwner, onSaveNotes, onEditCupping }: RoastNotesProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(data.notes ?? "");
@@ -45,44 +56,53 @@ export function RoastNotes({ data, isOwner, onSaveNotes, onEditCupping }: RoastN
     if (ok) setEditing(false);
   };
 
-  const meta = [
-    data.cupping_date && `Cupped ${format(new Date(data.cupping_date), "MMM d, yyyy")}`,
-    data.rest_days != null && `${data.rest_days} days rest`,
-    data.brew_method && `Brewed as ${data.brew_method}`,
-  ].filter(Boolean) as string[];
+  const cuppedOn = parseDateOnly(data.cupping_date);
+  // Rest is derived from the roast date and the cupping date; the stored value is a fallback.
+  const restDays = restDaysBetween(data.created_at, data.cupping_date) ?? data.rest_days ?? undefined;
+  const hasCupping = data.cupping_score != null || Boolean(data.flavor_tags?.length) || Boolean(cuppedOn) || Boolean(data.brew_method);
 
   return (
-    <Card>
+    <Card id="notes" className="scroll-mt-24" aria-labelledby="notes-title">
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-3">
-        <CardTitle as="h2" className="text-lg">Tasting notes</CardTitle>
+        <CardTitle as="h2" id="notes-title" className="text-lg">Tasting notes</CardTitle>
         {isOwner && (
           <Button variant="ghost" size="sm" onClick={onEditCupping}>
-            {data.cupping_score != null || data.flavor_tags?.length ? "Edit cupping" : "Add cupping"}
+            {data.cupping_score != null || data.flavor_tags?.length ? "Edit tasting" : "Add tasting"}
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-4">
-        {(data.cupping_score != null || Boolean(data.flavor_tags?.length)) && (
-          <div className="flex flex-wrap items-center gap-3">
+      <CardContent className="space-y-5">
+        {hasCupping && (
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-4">
             {data.cupping_score != null && (
-              <div className="flex items-baseline gap-1">
-                <span className="font-mono text-3xl font-semibold tabular-nums">{data.cupping_score}</span>
-                <span className="text-sm text-muted-foreground">/ 100</span>
-              </div>
+              <Fact label="Score">
+                <span className="font-mono text-2xl font-semibold tabular-nums">{data.cupping_score}</span>
+                <span className="ml-1 font-mono text-sm text-muted-foreground tabular-nums">/ 100</span>
+              </Fact>
             )}
-            {data.flavor_tags?.length ? (
-              <ul className="flex flex-wrap gap-1.5" aria-label="Flavor tags">
-                {data.flavor_tags.map((tag) => (
-                  <li key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-sm text-secondary-foreground">
-                    {tag}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+            {cuppedOn && (
+              <Fact label="Tasted">
+                <time dateTime={data.cupping_date ?? undefined} className="font-mono tabular-nums">{formatDate(cuppedOn)}</time>
+              </Fact>
+            )}
+            {restDays !== undefined && (
+              <Fact label="Rest">
+                <span className="font-mono tabular-nums">{restDays}</span> {restDays === 1 ? "day" : "days"}
+              </Fact>
+            )}
+            {data.brew_method && <Fact label="Brewed as">{data.brew_method}</Fact>}
+          </dl>
         )}
 
-        {meta.length > 0 && <p className="text-xs text-muted-foreground">{meta.join(" · ")}</p>}
+        {data.flavor_tags?.length ? (
+          <ul className="flex flex-wrap gap-1.5" aria-label="Flavour tags">
+            {data.flavor_tags.map((tag) => (
+              <li key={tag} className="rounded-full border px-2.5 py-0.5 text-sm text-foreground">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         {data.flavor_notes?.trim() && <p className="whitespace-pre-wrap leading-relaxed">{data.flavor_notes}</p>}
 
@@ -113,11 +133,14 @@ export function RoastNotes({ data, isOwner, onSaveNotes, onEditCupping }: RoastN
             </div>
           </div>
         ) : data.notes?.trim() ? (
-          <div className="group flex items-start gap-2">
-            <p className="flex-1 whitespace-pre-wrap leading-relaxed">{data.notes}</p>
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              {hasCupping && <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Roast notes</h3>}
+              <p className="whitespace-pre-wrap leading-relaxed">{data.notes}</p>
+            </div>
             {isOwner && (
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setEditing(true)} aria-label="Edit notes">
-                <Pencil />
+                <Pencil strokeWidth={1.75} />
               </Button>
             )}
           </div>
@@ -126,7 +149,7 @@ export function RoastNotes({ data, isOwner, onSaveNotes, onEditCupping }: RoastN
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="w-full rounded-md border border-dashed p-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/50"
+              className="w-full rounded-md border border-dashed p-4 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               Add notes: how it tasted, and what you would change next time.
             </button>

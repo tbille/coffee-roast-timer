@@ -9,7 +9,6 @@ import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RoasterProvider } from "@/contexts/RoasterContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
@@ -18,6 +17,7 @@ import { BottomTabBar } from "@/components/layout/BottomTabBar";
 import { RoastingProvider, useRoasting } from "@/contexts/RoastingContext";
 import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
+import { DraftSync } from "@/components/review/DraftSync";
 
 // Lazy-load non-critical routes to improve first load
 const RoastTimer = lazy(() => import("./pages/RoastTimer"));
@@ -91,6 +91,7 @@ const App = () => (
           <RoastingProvider>
           <div className="min-h-screen flex flex-col">
             <Toaster />
+            <DraftSync />
             <BrowserRouter>
               <AnalyticsTracker />
               <DocsScrollTop />
@@ -112,11 +113,8 @@ const App = () => (
                 {/* Discovery & Profiles */}
                 <Route path="/discover" element={withPageLoader(<Discover />)} />
                 <Route path="/profile/:id" element={withPageLoader(<RoastProfileDetails />)} />
-                <Route path="/compare" element={
-                  <ProtectedRoute>
-                    {withPageLoader(<ComparisonPage />)}
-                  </ProtectedRoute>
-                } />
+                {/* Compare works signed-out for public roasts */}
+                <Route path="/compare" element={withPageLoader(<ComparisonPage />)} />
                 
                 {/* Info Pages */}
                 <Route path="/about" element={withPageLoader(<About />)} />

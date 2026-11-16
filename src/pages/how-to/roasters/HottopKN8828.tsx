@@ -10,63 +10,62 @@ const HottopKN8828 = () => (
     <H2 id="how-it-works">How the Hottop works</H2>
     <p>
       The Hottop is an electric drum roaster with a bean temperature probe. You can let it run its own program, or set
-      heat and fan power yourself. Because it reads bean temperature, it's the one roaster where Roast Timer can show a
-      live <strong>rate of rise</strong> (RoR): how many degrees per minute the beans are gaining.
+      heat and fan power yourself. Because it reads bean temperature, it's the roaster where logging temperatures pays
+      off most: your readings become a curve, and its slope is the <strong>rate of rise</strong> (RoR), how many
+      degrees per minute the beans are gaining.
     </p>
 
     <H2 id="setup">Set up Roast Timer</H2>
     <Steps>
       <Step title="Choose the Hottop">
         <p>
-          Open <Link to="/roast?roaster=hottop-kn8828">the timer</Link> and pick <Ui>Hottop KN-8828</Ui> from the roaster
-          menu.
+          Open <Link to="/roast?roaster=hottop-kn8828">the timer</Link> and pick <Ui>Hottop KN-8828B-2K+</Ui>.
         </p>
       </Step>
-      <Step title="Pick the roast mode">
+      <Step title="Set the starting heat and fan">
         <p>
-          Under <Ui>Roast Mode</Ui>, choose <Ui>Auto Light</Ui>, <Ui>Auto Medium</Ui> or <Ui>Auto Dark</Ui> if the
-          Hottop is running a program, or <Ui>Manual</Ui> if you'll set heat and fan yourself. Manual adds{" "}
-          <Ui>Heat Power</Ui> and <Ui>Fan Speed</Ui> sliders, with quick presets from 0% to 100%.
+          Set <Ui>Heat</Ui> and <Ui>Fan</Ui> in percent to match the roaster. If the Hottop is running one of its own
+          programs, leave them and just log the moments.
         </p>
       </Step>
     </Steps>
 
     <H2 id="during">During the roast</H2>
     <Steps>
-      <Step title="Press Start Roast when the beans drop in">
-        <p>Start the timer as the beans go into the drum.</p>
+      <Step title="Charge when the beans drop in">
+        <p>
+          Press <Ui>Charge — start timer</Ui> as the beans go into the drum. Right after charge the probe reading falls,
+          then turns: tap <Ui>Turning point</Ui> at the lowest reading if you want it on record.
+        </p>
       </Step>
       <Step title="Record bean temperature every 30–60 seconds">
         <p>
-          Type the bean temperature into <Ui>Bean Temp</Ui> and press <Ui>Record Temperature</Ui>. <Ui>Env Temp</Ui> is
-          optional. Regular readings are what make the rate of rise meaningful.
+          Type the bean temperature and press Enter (or <Ui>Log</Ui>). Environment temperature is optional. Regular
+          readings are what make the curve and its rate of rise meaningful.
         </p>
       </Step>
-      <Step title="In Manual mode, log every heat and fan change">
-        <p>Move the sliders to match the roaster each time you change it. That's the schedule you'll repeat.</p>
-      </Step>
-      <Step title="Watch the rate of rise">
+      <Step title="Log every heat and fan change">
         <p>
-          The <Ui>Advanced Metrics</Ui> panel shows the current RoR and flags it as optimal, too fast, slow or stalling.
-          See the ranges below.
+          Press <Ui>+</Ui> or <Ui>−</Ui> on the matching control each time you change it on the roaster. That's the
+          schedule you'll repeat.
         </p>
       </Step>
-      <Step title="Mark first crack, then stop">
+      <Step title="Tap yellowing and first crack, then drop">
         <p>
-          Press <Ui>First Crack</Ui> when it starts. When you eject the beans into the cooling tray, press{" "}
-          <Ui>Stop</Ui>.
+          Tap <Ui>Yellowing</Ui> and <Ui>First crack</Ui> as they happen. When you eject the beans into the cooling
+          tray, tap <Ui>Drop</Ui>.
         </p>
       </Step>
     </Steps>
 
     <H2 id="ror">Reading rate of rise</H2>
     <p>
-      A healthy roast has an RoR that starts high and falls steadily all the way to the end. These are the ranges Roast
-      Timer uses:
+      Many roasters aim for an RoR that starts high and falls steadily all the way to the end. These ranges are a rough
+      first reference for a medium roast on a small drum, not targets; your probe placement changes the numbers:
     </p>
     <RefTable
-      caption="Rate of rise guidelines by roast stage"
-      columns={["Stage", "Target RoR"]}
+      caption="Rough rate of rise ranges by roast stage"
+      columns={["Stage", "Rough RoR"]}
       rows={[
         ["Early roast", "8–12 °C/min"],
         ["Mid roast", "5–8 °C/min"],
@@ -85,7 +84,7 @@ const HottopKN8828 = () => (
       </li>
     </ul>
 
-    <H2 id="starting-point">A starting point for Manual mode</H2>
+    <H2 id="starting-point">A starting point for manual control</H2>
     <p>About 250 g, aiming at a medium roast. Treat these as a first draft.</p>
     <RefTable
       caption="Example Hottop manual schedule"

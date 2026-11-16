@@ -1,70 +1,48 @@
 /**
- * RoasterSwitcher Component
- * Dropdown in header to switch between user's roasters
+ * RoasterSwitcher — machine select for the roast console Setup.
+ * Lists implemented machines only, the user's own roasters first.
  */
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useRoaster } from '@/contexts/RoasterContext';
+import { useId } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRoasterPreferences } from '@/hooks/useRoasterPreferences';
 import { useAuth } from '@/hooks/useAuth';
-import { getRoasterSpec } from '@/utils/roasterRegistry';
+import { IMPLEMENTED_ROASTERS, ROASTER_SPECS } from '@/utils/roasterRegistry';
 import type { RoasterType } from '@/types/roaster.types';
 
 interface RoasterSwitcherProps {
-  /** Roasters that have a mode implemented */
-  roasters: RoasterType[];
+  value: RoasterType;
+  onChange: (type: RoasterType) => void;
   disabled?: boolean;
+  label?: string;
 }
 
-export function RoasterSwitcher({ roasters, disabled = false }: RoasterSwitcherProps) {
+export function RoasterSwitcher({ value, onChange, disabled = false, label = 'Roaster' }: RoasterSwitcherProps) {
+  const id = useId();
   const { user } = useAuth();
-  const { currentRoaster, switchRoaster } = useRoaster();
   const { preferences } = useRoasterPreferences(user?.id);
 
-  const currentSpec = getRoasterSpec(currentRoaster);
+  const owned = (preferences ?? []).map((p) => p.roaster_type).filter((t) => IMPLEMENTED_ROASTERS.includes(t));
+  const options: RoasterType[] = [...new Set([...owned, ...IMPLEMENTED_ROASTERS])];
+  const primary = preferences?.find((p) => p.is_primary)?.roaster_type;
 
-  // Show implemented roasters, user's preferred ones first
-  const userRoasters = preferences?.map(p => p.roaster_type) || [];
-  const availableRoasters: RoasterType[] = [
-    ...new Set([...userRoasters, ...roasters])
-  ].filter(r => roasters.includes(r));
-
-  const getOptionLabel = (roasterType: RoasterType) => {
-    const spec = getRoasterSpec(roasterType);
-    const preference = preferences?.find(p => p.roaster_type === roasterType);
-
-    if (preference?.is_primary) {
-      return `${spec.name} (Primary)`;
-    }
-
-    return spec.name;
-  };
-  
   return (
-    <Select value={currentRoaster} onValueChange={(value) => switchRoaster(value as RoasterType)} disabled={disabled}>
-      <SelectTrigger className="w-[200px]" aria-label="Roaster">
-        <SelectValue>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">☕</span>
-            <span className="truncate">{currentSpec.name}</span>
-          </div>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {availableRoasters.map(roasterType => {
-          return (
-            <SelectItem key={roasterType} value={roasterType}>
-              {getOptionLabel(roasterType)}
+    <div className="space-y-1.5">
+      <label id={`${id}-label`} className="text-sm font-medium text-foreground">
+        {label}
+      </label>
+      <Select value={value} onValueChange={(v) => onChange(v as RoasterType)} disabled={disabled}>
+        <SelectTrigger className="h-12 w-full max-w-sm text-base" aria-labelledby={`${id}-label`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((type) => (
+            <SelectItem key={type} value={type}>
+              {ROASTER_SPECS[type].displayName}
+              {type === primary ? ' (your main roaster)' : ''}
             </SelectItem>
-          );
-        })}
-      </SelectContent>
-    </Select>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

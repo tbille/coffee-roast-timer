@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { FEEDBACK_URL } from "@/components/landing/FeedbackSection";
+import { FEEDBACK_URL } from "@/content/siteContent";
 import { useRoasting } from "@/contexts/RoastingContext";
 
 type FooterLink = { label: string; to: string } | { label: string; href: string; external?: boolean };

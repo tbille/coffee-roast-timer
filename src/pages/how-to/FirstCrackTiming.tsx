@@ -42,14 +42,14 @@ const FirstCrackTiming = () => (
 
     <H2 id="mark-it">Mark first crack the same way every time</H2>
     <p>
-      Your timings are only comparable if you mark them consistently. Press <Ui>First Crack</Ui> when you hear the
+      Your timings are only comparable if you mark them consistently. Tap <Ui>First crack</Ui> when you hear the
       first run of several cracks close together, not at the first lone pop. Write down which rule you use in the roast
-      notes and stick to it.
+      notes and stick to it. Tapped it late? Correct the time on the post-roast card before you save.
     </p>
 
     <H2 id="find-your-window">Find your normal window</H2>
     <p>
-      These are typical starting points. After a few roasts, your own past profiles are a better guide than this table.
+      These are typical starting points. After a few roasts, your own past roasts are a better guide than this table.
     </p>
     <RefTable
       caption="Typical first crack times by roaster type"
@@ -97,7 +97,8 @@ const FirstCrackTiming = () => (
 
     <H2 id="check">Check the result</H2>
     <p>
-      Open your new roast and the previous one and compare the <Ui>First crack</Ui> time in each summary. Then check the{" "}
+      Open your new roast and the previous one and compare the <Ui>First crack</Ui> time in each summary, or use{" "}
+      <Link to="/how-to/using-profiles">Roast again</Link> next time to see the difference live. Then check the{" "}
       <Link to="/how-to/development-ratios">development ratio</Link>: once first crack is steady, how long you roast after
       it is the next thing to tune.
     </p>

@@ -10,7 +10,9 @@ import {
   HOME_FAQ,
   HOME_FEATURES,
   MAIN_PAGES,
+  SITE_DESCRIPTION,
   SITE_NAME,
+  SITE_SEO_NAME,
   SITE_SUMMARY,
   SITE_TAGLINE,
   SITE_URL,
@@ -42,7 +44,7 @@ const linkList = (links: ContentLink[]) =>
 /**
  * Semantic HTML injected inside <div id="root">. React replaces it on mount,
  * so it is only ever seen before JavaScript runs (crawlers, slow networks).
- * The <h1> and lead copy match the React hero so the swap reads as one page.
+ * The eyebrow, <h1> and lead copy match the React hero so the swap reads as one page.
  */
 export function renderStaticShell(): string {
   return `
@@ -55,32 +57,34 @@ export function renderStaticShell(): string {
         </header>
         <main class="flex-1 container mx-auto max-w-6xl px-4 py-12 space-y-12">
           <section>
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Perfect Your Coffee Roast, <span class="text-primary">One Timer at a Time</span></h1>
-            <p class="mt-4 text-lg text-muted-foreground max-w-2xl">${escapeHtml(SITE_SUMMARY)}</p>
-            <p class="mt-6"><a href="/roast" class="text-primary font-semibold hover:underline">Start a roast →</a></p>
+            <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Free · works in your browser · no account needed</p>
+            <h1 class="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">The roast companion for home roasters</h1>
+            <p class="mt-4 text-lg text-muted-foreground max-w-2xl">A clock you can read from across the garage, one tap for first crack, and every batch saved so you can roast it again.</p>
+            <p class="mt-4 text-muted-foreground max-w-2xl">${escapeHtml(SITE_SUMMARY)}</p>
+            <p class="mt-6"><a href="/roast" class="text-primary font-semibold hover:underline">Start roasting</a> · <a href="/discover" class="text-primary hover:underline">Browse community roasts</a></p>
           </section>
           <section>
-            <h2 class="text-2xl font-bold">Features</h2>
+            <h2 class="text-2xl font-semibold">Roast, review, repeat</h2>
             <ul class="mt-3 space-y-3">
               ${HOME_FEATURES.map((f) => `<li><h3 class="font-semibold">${escapeHtml(f.title)}</h3><p class="text-muted-foreground">${escapeHtml(f.text)}</p></li>`).join("\n              ")}
             </ul>
           </section>
           <section>
-            <h2 class="text-2xl font-bold">Supported home coffee roasters</h2>
+            <h2 class="text-2xl font-semibold">Supported home coffee roasters</h2>
             ${linkList(SUPPORTED_ROASTERS)}
           </section>
           <section>
-            <h2 class="text-2xl font-bold">Home roasting guides</h2>
+            <h2 class="text-2xl font-semibold">Roasting guides</h2>
             ${linkList(GUIDES)}
           </section>
           <section>
-            <h2 class="text-2xl font-bold">Frequently asked questions</h2>
+            <h2 class="text-2xl font-semibold">Questions people ask</h2>
             <dl class="mt-3 space-y-4">
               ${HOME_FAQ.map((q) => `<div><dt class="font-semibold">${escapeHtml(q.question)}</dt><dd class="text-muted-foreground">${escapeHtml(q.answer)}</dd></div>`).join("\n              ")}
             </dl>
           </section>
         </main>
-        <noscript><p class="px-4 pb-8 text-center text-muted-foreground">The roast timer needs JavaScript enabled.</p></noscript>
+        <noscript><p class="px-4 pb-8 text-muted-foreground">The roast timer needs JavaScript. The guides above can be read without it.</p></noscript>
       </div>`;
 }
 
@@ -97,6 +101,7 @@ export function renderSiteJsonLd(): string {
         "@type": "WebSite",
         "@id": `${SITE_URL}/#website`,
         name: SITE_NAME,
+        alternateName: SITE_SEO_NAME,
         url: SITE_URL,
         description: SITE_SUMMARY,
         inLanguage: "en",
@@ -153,9 +158,11 @@ const mdLinks = (links: ContentLink[]) =>
 export function renderLlmsTxt(): string {
   return `# ${SITE_NAME}
 
-> ${SITE_TAGLINE}. ${SITE_SUMMARY}
+> ${SITE_TAGLINE}. ${SITE_DESCRIPTION}
 
-The app is client-rendered; the pages below are the canonical sources. All core features are free.
+${SITE_SUMMARY}
+
+The app is client-rendered; the pages below are the canonical sources. Everything is free, and the timer works without an account. Roasts saved to an account are public on Discover.
 
 ## Features
 
@@ -179,6 +186,6 @@ ${HOME_FAQ.map((q) => `### ${q.question}\n\n${q.answer}`).join("\n\n")}
 
 ## Optional
 
-- [Sitemap](${SITE_URL}/sitemap.xml): Every public page, including community roast profiles.
+- [Sitemap](${SITE_URL}/sitemap.xml): Every public page, including community roasts.
 `;
 }

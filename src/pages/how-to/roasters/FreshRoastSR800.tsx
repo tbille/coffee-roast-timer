@@ -22,67 +22,76 @@ const FreshRoastSR800 = () => (
       </li>
     </ul>
     <p>
-      The SR800 has nine steps on each dial. Roast Timer logs them as <strong>Low</strong>, <strong>Medium</strong> and{" "}
-      <strong>High</strong>, so decide once how your dial numbers map to those (for example 1–3, 4–6, 7–9) and note it
-      in your roast notes.
+      Each dial has nine steps, 1 to 9. Roast Timer uses the same numbers, so “Heat 7, Fan 5” in the app is exactly what
+      you set on the roaster, and anyone else with an SR800 can repeat it.
     </p>
+
+    <Callout variant="warning" title="Stay with it">
+      Air roasters are fast and throw chaff. Roast under an extractor or outdoors, keep the chaff collector clean, and
+      never leave the SR800 running unattended.
+    </Callout>
 
     <H2 id="setup">Set up Roast Timer</H2>
     <Steps>
       <Step title="Choose the SR800">
         <p>
-          Open <Link to="/roast?roaster=freshroast-sr800">the timer</Link> and pick <Ui>FreshRoast SR800</Ui> from the
-          roaster menu.
+          Open <Link to="/roast?roaster=freshroast-sr800">the timer</Link> and pick <Ui>FreshRoast SR800</Ui>.
         </p>
       </Step>
-      <Step title="Enter your batch weight and starting settings">
+      <Step title="Enter your batch weight and starting dials">
         <p>
-          Set <Ui>HEAT LEVEL</Ui> and <Ui>FAN SPEED</Ui> to match the roaster before you start.
+          Set the starting <Ui>Heat</Ui> and <Ui>Fan</Ui> (1–9) to match the roaster before you charge.
         </p>
       </Step>
     </Steps>
 
     <H2 id="during">During the roast</H2>
     <Steps>
-      <Step title="Press Start Roast when the beans go in">
-        <p>Things move fast on an air roaster, so keep the phone or tablet within reach.</p>
+      <Step title="Charge when the beans go in">
+        <p>
+          Press <Ui>Charge — start timer</Ui> as you start the roaster. Things move fast on an air roaster, so keep the
+          phone or tablet within reach.
+        </p>
       </Step>
       <Step title="Log every dial change">
         <p>
-          Each time you change heat or fan on the roaster, tap the matching level in the app. The{" "}
-          <Ui>Change History</Ui> list fills up as you go and becomes your schedule for next time.
+          Each time you turn heat or fan on the roaster, press <Ui>+</Ui> or <Ui>−</Ui> on the matching control in the
+          app. Every step is logged with its time and becomes your schedule for next time.
         </p>
       </Step>
       <Step title="Lower the fan as the beans lighten">
         <p>
           Beans lose water and get lighter as they roast. Reduce the fan once they're moving freely, so they don't fly up
-          the chamber, and the roast keeps its pace.
+          the chamber and the roast keeps its pace.
         </p>
       </Step>
-      <Step title="Mark first crack, then stop">
+      <Step title="Tap yellowing and first crack, then drop">
         <p>
-          Press <Ui>First Crack</Ui> when it starts. When you reach your color, switch the roaster to cool and press{" "}
-          <Ui>Stop</Ui>.
+          Tap <Ui>Yellowing</Ui> and <Ui>First crack</Ui> as they happen. When you reach your color, switch the roaster
+          to cool and tap <Ui>Drop</Ui>.
         </p>
       </Step>
     </Steps>
 
     <H2 id="starting-point">A starting point</H2>
-    <p>For about 120 g aiming at a medium roast. Adjust for your beans, voltage and room.</p>
+    <p>
+      For about 120 g aiming at a medium roast. A common approach is to start with high fan to move the dense green
+      beans, then bring the fan down as they lighten. Adjust for your beans, voltage and room.
+    </p>
     <RefTable
       caption="Example SR800 heat and fan schedule"
       columns={["Time", "Heat", "Fan", "Why"]}
       rows={[
-        ["0:00", "Medium", "High", "Keep the dense green beans moving"],
-        ["2:00", "High", "Medium", "Beans are lighter; push heat through drying"],
-        ["~5:30", "High", "Medium", "First crack starts"],
-        ["6:30", "Medium", "Medium", "Slow the finish so the inside catches up"],
-        ["~8:00", "Cool", "–", "Drop: about 2:30 of development"],
+        ["0:00", "9", "9", "Keep the dense green beans moving"],
+        ["~1:30", "9", "7", "Beans moving freely; let them hold more heat"],
+        ["~3:30", "9", "6", "Push through drying into Maillard"],
+        ["~6:00", "7", "6", "First crack starts: ease off so it doesn't run away"],
+        ["~8:00", "Cool", "–", "Drop: about 2 minutes of development"],
       ]}
     />
     <Callout variant="tip" title="Roasts too fast?">
       Raise the fan a step or lower the heat early on. If first crack still comes before 5 minutes, try a slightly
-      bigger batch.
+      bigger batch. Too slow? Lower the fan a step.
     </Callout>
 
     <RoasterLinks roaster="freshroast-sr800" />

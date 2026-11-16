@@ -35,7 +35,7 @@ export function usePhotoUpload() {
       if (uploadError) {
         // Provide more helpful error messages
         if (uploadError.message.includes('Bucket not found')) {
-          throw new Error('Storage bucket not configured. Please run database migrations first. See MIGRATION_INSTRUCTIONS.md');
+          throw new Error('Photo storage is not available right now.');
         }
         throw uploadError;
       }

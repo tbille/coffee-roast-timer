@@ -55,9 +55,9 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Start with target temp around 200°C for medium roasts',
+      'The setpoint dial covers 0–250 °C (482 °F). Log each turn so you can repeat it',
       'First crack typically occurs between 8-12 minutes',
-      'Adjust target temp during roast for finer control',
+      'The temperature on the display is the air leaving the drum, not the beans',
       'Keep batches between 200-250g for most consistent results',
       'Clean chaff collector after every 3-4 roasts'
     ],
@@ -69,7 +69,14 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Community
     communitySize: 5000,
-    popularityRank: 1
+    popularityRank: 1,
+
+    implemented: true,
+    controls: [
+      { id: 'setpoint', label: 'Setpoint', min: 100, max: 250, step: 5, unit: '°C', default: 240, kind: 'heat' },
+    ],
+    tempLabel: 'Drum temp',
+    guidePath: '/how-to/roasters/gene-cafe-cbr-101',
   },
 
   'behmor-2000ab': {
@@ -81,13 +88,13 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Physical specs
     maxBatchSize: 454,  // 1 lb
-    minBatchSize: 200,
+    minBatchSize: 113,  // 1/4 lb weight button
     recommendedBatchSize: 340,  // 12 oz
     
     // Timing
     typicalDuration: {
-      min: 840,    // 14 minutes (P1)
-      max: 1380    // 23 minutes (P5 + extensions)
+      min: 510,    // 8:30, 1/4 lb default
+      max: 1230    // 18:00 (1 lb default) plus added time
     },
     
     // Interface
@@ -101,12 +108,12 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       {
         id: 'profiles',
         name: 'Pre-Programmed Profiles',
-        description: '5 built-in roast profiles (P1-P5) optimized for different roast levels'
+        description: 'Five programs (P1-P5) that change how heat is applied over the time set by the weight button'
       },
       {
         id: 'extensions',
-        name: 'Time Extensions',
-        description: 'Add up to 6 thirty-second extensions to extend roast time'
+        name: 'Added time',
+        description: 'Press + during the roast to add time'
       },
       {
         id: 'large-capacity',
@@ -122,15 +129,16 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'P3 (18 min) is ideal for medium roasts - great starting point',
-      'First crack typically occurs at 12-15 minutes remaining',
-      'Add 1-2 extensions after first crack for medium roasts',
-      'P1-P2 for light roasts, P3-P4 for medium, P5 for dark',
-      'Use 75-80% capacity (12 oz / 340g) for best results',
+      'The weight button sets the starting time on the display. Standard defaults: 8:30 for 1/4 lb, 12:00 for 1/2 lb, 18:00 for 1 lb',
+      'P1 is the default program. Programs change how heat is applied, not the length of the roast',
+      'With P3-P5 you will usually need to add time with + before the roast finishes',
+      'After Start, pressing P1-P5 switches to manual power: P1 0%, P2 25%, P3 50%, P4 75%, P5 100%. D changes drum speed',
+      'At about 75% of the roast the timer blinks: press Start again or it goes into cooling (Err 7)',
+      'Around 340 g (12 oz) leaves more room to steer than a full pound',
       'Cool beans immediately after roast - use colander or cooling tray'
     ],
     warnings: [
-      'Manual mode requires close monitoring - use profiles for beginners',
+      'Never roast more than a few seconds into second crack in a Behmor',
       'Do not open door during roast - heat loss affects results',
       'Chaff can ignite - clean between roasts',
       'Allow 15 minutes cooling between back-to-back roasts'
@@ -141,8 +149,15 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     popularityRank: 2,
     
     // Behmor-specific
-    defaultProfile: 'P3',
-    profileOptions: ['P1', 'P2', 'P3', 'P4', 'P5', 'Manual']
+    defaultProfile: 'P1',
+    profileOptions: ['P1', 'P2', 'P3', 'P4', 'P5'],
+
+    implemented: true,
+    // Weight, program and starting time are chosen in Setup (BEHMOR_* below);
+    // +time and manual P1-P5 / D presses are logged during the roast.
+    controls: [],
+    tempLabel: 'Probe temp',
+    guidePath: '/how-to/roasters/behmor-2000ab',
   },
 
   'freshroast-sr800': {
@@ -173,13 +188,13 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     capabilities: [
       {
         id: 'heat-control',
-        name: 'Manual Heat Control',
-        description: 'Adjust heat level (Low/Medium/High) during roast'
+        name: 'Heat dial',
+        description: 'Heat from 1 to 9, adjustable during the roast'
       },
       {
         id: 'fan-control',
-        name: 'Manual Fan Control',
-        description: 'Adjust fan speed (Low/Medium/High) during roast'
+        name: 'Fan dial',
+        description: 'Fan from 1 to 9, adjustable during the roast'
       },
       {
         id: 'compact',
@@ -190,8 +205,10 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Start with high heat and medium fan',
-      'Reduce heat after first crack to control development',
+      'Heat and fan each go from 1 to 9. The machine starts at heat 9, fan 5',
+      'Many roasters keep heat high and steer with the fan: lower fan means more heat in the beans',
+      'With a full 8 oz load, start the fan high enough that the beans move, then lower it as they lose weight',
+      'A fan left at 9 can keep the beans from ever reaching first crack',
       'Small batches roast quickly - stay attentive',
       'Experiment with heat/fan combinations for different profiles'
     ],
@@ -203,7 +220,15 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Community
     communitySize: 3000,
-    popularityRank: 3
+    popularityRank: 3,
+
+    implemented: true,
+    controls: [
+      { id: 'heat', label: 'Heat', min: 1, max: 9, step: 1, unit: '', default: 9, kind: 'heat' },
+      { id: 'fan', label: 'Fan', min: 1, max: 9, step: 1, unit: '', default: 5, kind: 'air' },
+    ],
+    tempLabel: 'Chamber temp',
+    guidePath: '/how-to/roasters/freshroast-sr800',
   },
 
   'freshroast-sr540': {
@@ -288,16 +313,15 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      'Use voice input for hands-free temperature recording while cranking',
-      'Say "one hundred ninety two" to record 192°C, or "first crack" for events',
-      'Enable auto-record timer for regular temperature logging',
+      'Log flame changes on a 1-10 scale of your own burner, and keep the scale the same between roasts',
+      'Where your browser supports it, voice input can log a probe reading or first crack while your hands are busy',
       'Focus on smell and sound cues while cranking',
       'Wind affects heat significantly when roasting outdoors',
       'Maintain steady cranking rhythm (2-3 RPM)',
       'Consider environmental factors in your notes'
     ],
     warnings: [
-      'Both hands busy cranking - use auto-record feature',
+      'Both hands busy cranking - keep the phone where you can reach it',
       'External heat source required',
       'Temperature probe required',
       'Use outdoors or with excellent ventilation'
@@ -305,7 +329,15 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Community
     communitySize: 2000,
-    popularityRank: 4
+    popularityRank: 4,
+
+    implemented: true,
+    controls: [
+      { id: 'flame', label: 'Flame', min: 1, max: 10, step: 1, unit: '', default: 5, kind: 'heat' },
+    ],
+    probe: true,
+    tempLabel: 'Probe temp',
+    guidePath: '/how-to/roasters/kaldi-wide',
   },
 
   'kaldi-fortis': {
@@ -424,24 +456,21 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
         description: 'Professional-grade control over all roast parameters'
       },
       {
-        id: 'programmable',
-        name: 'Programmable Profiles',
-        description: 'Create and save custom roast profiles'
+        id: 'auto-manual',
+        name: 'Auto and manual modes',
+        description: 'Auto runs the built-in program; manual lets you set heat and fan'
       }
     ],
     
     // User guidance
     tips: [
-      'Automatic modes (Light/Medium/Dark) are great for consistent results',
-      'Manual mode gives full control - start with 50% heat and 50% fan',
-      'Watch Rate of Rise (RoR) - should decrease approaching first crack',
-      'Optimal RoR: 8-12°C/min early, 5-8°C/min mid, 3-5°C/min approaching 1C',
-      'Use environmental temp sensor for better roast consistency',
+      'Auto mode runs the built-in program and adjusts heat and fan for you; it is a good start for the first roasts',
+      'In manual mode, log heat and fan as you change them',
+      'A falling rate of rise approaching first crack is the usual target',
+      'Log the environment temperature too if you read it',
       'Compatible with Artisan for advanced analysis and profile import',
       'Keep batches between 200-250g for most even roasting',
-      'RoR slowing too much? Increase heat. Too fast? Reduce heat or increase fan',
-      'First crack typically at 195-205°C depending on bean density',
-      'Development time (after 1C) affects flavor - 15-25% of total time is ideal'
+      'First crack typically at 195-205°C depending on bean density'
     ],
     warnings: [
       'Premium roaster - requires investment ($1,500-2,000)',
@@ -452,13 +481,22 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Community
     communitySize: 1200,
-    popularityRank: 5
+    popularityRank: 5,
+
+    implemented: true,
+    controls: [
+      { id: 'heat', label: 'Heat', min: 0, max: 100, step: 10, unit: '%', default: 100, kind: 'heat' },
+      { id: 'fan', label: 'Fan', min: 0, max: 100, step: 10, unit: '%', default: 0, kind: 'air' },
+    ],
+    probe: true,
+    tempLabel: 'Bean temp',
+    guidePath: '/how-to/roasters/hottop-kn-8828',
   },
 
   'popcorn-popper': {
     id: 'popcorn-popper',
     name: 'Popcorn Popper',
-    displayName: 'Air Popcorn Popper',
+    displayName: 'Air popcorn popper',
     manufacturer: 'Various',
     imageUrl: '/assets/roasters/popcorn-popper.png',
     
@@ -495,7 +533,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // User guidance
     tips: [
-      '⚠️ NEVER exceed 100g batch size - serious fire risk!',
+      'Never exceed 100 g per batch - serious fire risk',
       'Start with 50-60g for first roasts, max 75-85g once experienced',
       'Roasts complete in 4-6 minutes - very fast, watch closely',
       'Listen for first crack around 3-4 minutes',
@@ -507,7 +545,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       'Never leave unattended - fire risk is real'
     ],
     warnings: [
-      '🔥 FIRE HAZARD: Exceeding 100g can cause overheating and fire',
+      'Fire hazard: more than 100 g can overheat the popper and catch fire',
       'Not designed for coffee roasting - use at your own risk',
       'Requires constant supervision - never leave unattended',
       'Produces significant smoke - outdoor use strongly recommended',
@@ -518,7 +556,12 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
     
     // Community
     communitySize: 4000,
-    popularityRank: 9
+    popularityRank: 9,
+
+    implemented: true,
+    controls: [],
+    tempLabel: 'Bean temp',
+    guidePath: '/how-to/roasters/popcorn-popper',
   },
 
   'other-manual': {
@@ -667,3 +710,48 @@ export function getAllRoasterTypes(): RoasterType[] {
 export function isValidRoasterType(type: string): type is RoasterType {
   return type in ROASTER_SPECS;
 }
+
+/** Machines the roast console has a mode for, in menu order. */
+export const IMPLEMENTED_ROASTERS: RoasterType[] = (Object.keys(ROASTER_SPECS) as RoasterType[])
+  .filter((type) => ROASTER_SPECS[type].implemented)
+  .sort((a, b) => (ROASTER_SPECS[a].popularityRank ?? 99) - (ROASTER_SPECS[b].popularityRank ?? 99));
+
+export function isImplementedRoaster(type: string | null | undefined): type is RoasterType {
+  return !!type && type in ROASTER_SPECS && !!ROASTER_SPECS[type as RoasterType].implemented;
+}
+
+/**
+ * Behmor 2000AB Plus panel vocabulary (owner's manual):
+ * - weight buttons set the starting time on the LCD; standard defaults 8:30 / 12:00 / 18:00
+ * - P1 (default) to P5 programs before Start
+ * - after Start, P1-P5 switch to manual power (0 / 25 / 50 / 75 / 100 %) and D changes drum speed
+ */
+export const BEHMOR_WEIGHTS = [
+  { id: '1/4 lb', label: '1/4 lb', grams: 113, defaultLcdS: 8 * 60 + 30 },
+  { id: '1/2 lb', label: '1/2 lb', grams: 227, defaultLcdS: 12 * 60 },
+  { id: '1 lb', label: '1 lb', grams: 454, defaultLcdS: 18 * 60 },
+] as const;
+
+export type BehmorWeight = (typeof BEHMOR_WEIGHTS)[number]['id'];
+
+export const BEHMOR_PROGRAMS = ['P1', 'P2', 'P3', 'P4', 'P5'] as const;
+export type BehmorProgram = (typeof BEHMOR_PROGRAMS)[number];
+
+/** Manual-mode element power for each P button, percent. */
+export const BEHMOR_MANUAL_POWER: Record<BehmorProgram, number> = { P1: 0, P2: 25, P3: 50, P4: 75, P5: 100 };
+
+/** Seconds logged per "+" press. The app's assumption; check against your display. */
+export const BEHMOR_PLUS_SECONDS = 30;
+
+/** Weight button closest to a batch size in grams. */
+export function behmorWeightFor(grams: number): BehmorWeight {
+  if (grams <= 170) return '1/4 lb';
+  if (grams <= 340) return '1/2 lb';
+  return '1 lb';
+}
+
+/** Hottop KN-8828B-2K+ modes as named on the machine. */
+export const HOTTOP_MODES = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'manual', label: 'Manual' },
+] as const;

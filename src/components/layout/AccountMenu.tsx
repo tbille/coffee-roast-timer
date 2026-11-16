@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { ListChecks, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,6 +14,7 @@ const ITEM =
 export function AccountMenu({ className }: { className?: string }) {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -22,7 +23,7 @@ export function AccountMenu({ className }: { className?: string }) {
   if (!user) {
     return (
       <Button asChild variant="outline" size="sm" className={className}>
-        <Link to="/auth">Sign in</Link>
+        <Link to={`/auth?next=${encodeURIComponent(location.pathname + location.search)}`}>Sign in</Link>
       </Button>
     );
   }

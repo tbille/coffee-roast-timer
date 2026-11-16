@@ -1,54 +1,46 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { RoastProfile } from '@/types/roast.types';
-import { ComparisonProfile, getComparisonColor } from '@/types/comparison.types';
-import { calculateProfileStatistics } from '@/utils/roastStatistics';
+import type { CompareRoast, CompareSlot } from '@/types/comparison.types';
+import {
+  deriveEventMarks,
+  deriveRoastFacts,
+  deriveRoastPhases,
+  rowToCard,
+  type ProfileRowInput,
+} from '@/utils/roastProfileView';
 
-export function useProfileComparison(profileIds: string[]) {
+/** Loads one roast for a compare slot. Public rows work signed-out. */
+export function useCompareRoast(id: string | undefined, slot: CompareSlot) {
   return useQuery({
-    queryKey: ['profile_comparison', ...profileIds.sort()],
-    queryFn: async (): Promise<ComparisonProfile[]> => {
-      if (profileIds.length === 0) {
-        return [];
-      }
-
+    queryKey: ['compare-roast', id, slot],
+    enabled: Boolean(id),
+    staleTime: 1000 * 60 * 5,
+    queryFn: async (): Promise<CompareRoast | null> => {
       const { data, error } = await supabase
         .from('roast_profiles')
-        .select('*')
-        .in('id', profileIds)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase query error:', error);
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        console.warn('No profiles found for IDs:', profileIds);
-        return [];
-      }
-
-      return (data || []).map((profile: any, index) => {
-        // Parse JSON fields
-        const parsedProfile: RoastProfile = {
-          ...profile,
-          temperature_data: Array.isArray(profile.temperature_data) 
-            ? profile.temperature_data 
-            : [],
-          crack_events: Array.isArray(profile.crack_events) 
-            ? profile.crack_events 
-            : [],
-          temperature_unit: (profile.temperature_unit || 'C') as 'C' | 'F',
-        };
-
-        return {
-          profile: parsedProfile,
-          statistics: calculateProfileStatistics(parsedProfile),
-          color: getComparisonColor(index),
-        };
-      });
+        .select('*, likes:roast_profile_likes(count)')
+        .eq('id', id!)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      const row = data as unknown as ProfileRowInput;
+      const facts = deriveRoastFacts(row);
+      return {
+        id: row.id,
+        slot,
+        row,
+        card: rowToCard(row),
+        facts,
+        phases: deriveRoastPhases(row, facts),
+        marks: deriveEventMarks(row, facts),
+      };
     },
-    enabled: profileIds.length > 0 && profileIds.length <= 2,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
+}
+
+/** Both compare slots. */
+export function useProfileComparison(aId?: string, bId?: string) {
+  const a = useCompareRoast(aId, 'a');
+  const b = useCompareRoast(bId, 'b');
+  return { a, b };
 }

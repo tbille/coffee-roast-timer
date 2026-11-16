@@ -106,12 +106,12 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
 
       setOriginalUsername(username);
       setOriginalTempUnit(defaultTempUnit);
-      toast.success("Username updated", { description: "Your username has been updated successfully." });
+      toast.success("Profile saved", { description: "Shown on the roasts you save." });
     } catch (error) {
       console.error('Error updating username:', error);
       
       if ((error as { code?: string })?.code === "23505") { // Unique constraint violation
-        toast.error("Username taken", { description: "This username is already taken. Please choose another one." });
+        toast.error("Username taken", { description: "Choose another username." });
       } else {
         toast.error("Failed to update username. Please try again.");
       }
@@ -125,12 +125,12 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
 
     // Validate passwords
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Missing fields", { description: "Please fill in all password fields." });
+      toast.error("Missing fields", { description: "Fill in all three password fields." });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords don't match", { description: "New password and confirmation password must match." });
+      toast.error("Passwords don't match", { description: "The new password and its confirmation differ." });
       return;
     }
 
@@ -152,7 +152,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
       setNewPassword("");
       setConfirmPassword("");
 
-      toast.success("Password updated", { description: "Your password has been updated successfully." });
+      toast.success("Password updated", { description: "Use it next time you sign in." });
     } catch (error) {
       console.error('Error updating password:', error);
       toast.error((error instanceof Error && error.message) || "Failed to update password. Please try again.");
@@ -189,7 +189,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
 
       // Note: Account deletion via Supabase Auth requires server-side implementation
       // For now, we'll sign the user out and show a message
-      toast.success("Account data cleared", { description: "Your roast profiles have been deleted. Please contact support to fully delete your account." });
+      toast.success("Roasts deleted", { description: "Your roasts were deleted. Contact us to remove the sign-in itself." });
       
       // Sign out the user
       await signOut();
@@ -208,22 +208,22 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+            <Settings className="h-5 w-5" strokeWidth={1.75} aria-hidden />
             Account settings
           </DialogTitle>
           <DialogDescription>
-            Manage your account settings.
+            Your public name, units, password and data.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="divide-y [&>*]:py-6 [&>*:first-child]:pt-2 [&>*:last-child]:pb-0">
           {/* Username Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+              <User className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden />
               <h3 className="text-sm font-medium">Profile</h3>
             </div>
             <div className="space-y-2">
@@ -236,27 +236,28 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
                 maxLength={50}
               />
               <p className="text-xs text-muted-foreground">
-                Your username will be displayed on your public roast profiles.
+                Shown on the roasts you save (they are visible on Discover).
               </p>
             </div>
             <Button
+              variant="outline"
               onClick={handleUpdateUsername}
               disabled={isUpdatingUsername || (username === originalUsername && defaultTempUnit === originalTempUnit)}
-              className="w-full"
+              className="h-11 w-full"
             >
-              {isUpdatingUsername ? "Updating..." : "Update Profile"}
+              {isUpdatingUsername ? "Saving…" : "Save profile"}
             </Button>
           </div>
 
           {/* Temperature Unit Preference */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Thermometer className="h-4 w-4" />
-              <h3 className="text-sm font-medium">Temperature Preference</h3>
+              <Thermometer className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+              <h3 className="text-sm font-medium">Temperature unit</h3>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label htmlFor="default-temp-unit">Default Temperature Unit</Label>
+                <Label htmlFor="default-temp-unit">Default unit</Label>
                 <div className="flex items-center gap-2">
                   <span className={`text-sm ${defaultTempUnit === 'C' ? 'font-medium' : 'text-muted-foreground'}`}>°C</span>
                   <Switch
@@ -268,7 +269,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Your preferred temperature unit will be used by default in all roast profiles and displays.
+                Used by default on the timer and roast pages. Saved with "Save profile".
               </p>
             </div>
           </div>
@@ -276,12 +277,12 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
           {/* Password Change Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4" />
-              <h3 className="text-sm font-medium">Change Password</h3>
+              <Lock className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+              <h3 className="text-sm font-medium">Change password</h3>
             </div>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
+                <Label htmlFor="current-password">Current password</Label>
                 <Input
                   id="current-password"
                   type="password"
@@ -291,7 +292,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
+                <Label htmlFor="new-password">New password</Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -301,7 +302,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Label htmlFor="confirm-password">Confirm new password</Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -315,46 +316,46 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
               </p>
             </div>
             <Button
+              variant="outline"
               onClick={handleUpdatePassword}
               disabled={isUpdatingPassword || !currentPassword || !newPassword || !confirmPassword}
-              className="w-full"
+              className="h-11 w-full"
             >
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
+              {isUpdatingPassword ? "Updating…" : "Update password"}
             </Button>
           </div>
 
           {/* Delete Account Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Trash2 className="h-4 w-4 text-destructive" />
-              <h3 className="text-sm font-medium text-destructive">Danger Zone</h3>
+              <Trash2 className="h-4 w-4 text-destructive" strokeWidth={1.75} aria-hidden />
+              <h3 className="text-sm font-medium text-destructive">Delete account</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Once you delete your account, there is no going back. This will permanently delete your account and all roast profiles.
+              This permanently deletes every roast in your account. It cannot be undone.
             </p>
             
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  Delete Account
+                <Button variant="destructive" className="h-11 w-full">
+                  Delete account
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your account
-                    and remove all your roast profiles from our servers.
+                    All your roasts are removed from Roast Timer and Discover, and you are signed out. This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>Keep my account</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAccount}
                     disabled={isDeletingAccount}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {isDeletingAccount ? "Deleting..." : "Delete Account"}
+                    {isDeletingAccount ? "Deleting…" : "Delete account"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

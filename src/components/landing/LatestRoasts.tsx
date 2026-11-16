@@ -1,187 +1,69 @@
-import { useNavigate } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Clock, ArrowRight, MapPin, Scale, ThumbsUp } from 'lucide-react';
-import { ROASTER_SPECS } from '@/utils/roasterRegistry';
-import type { RoasterType } from '@/types/roaster.types';
+import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { RoastCard, type RoastCardData } from "@/components/roast-card/RoastCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { rowToCard, type ProfileRowInput } from "@/utils/roastProfileView";
 
-interface RoastProfile {
-  id: string;
-  user_id: string;
-  beans_name: string;
-  origin?: string;
-  farm_name?: string;
-  roast_process?: string;
-  coffee_roaster?: string;
-  initial_weight?: number;
-  final_weight?: number;
-  duration_seconds: number;
-  temperature_data: unknown;
-  crack_events: unknown;
-  created_at: string;
-  likes_count: number;
-  roaster_type?: RoasterType;
+const COUNT = 6;
+
+/** Only the columns a card needs; likes counted in the same request. */
+const COLUMNS =
+  "id, beans_name, origin, farm_name, roast_process, coffee_roaster, roaster_type, duration_seconds, initial_weight, final_weight, crack_events, milestones, roaster_data, roaster_settings, created_at, likes:roast_profile_likes(count)";
+
+async function fetchLatest(): Promise<RoastCardData[]> {
+  const { data, error } = await supabase
+    .from("roast_profiles")
+    .select(COLUMNS)
+    .order("created_at", { ascending: false })
+    .limit(30);
+  if (error) throw error;
+  return ((data ?? []) as unknown as ProfileRowInput[])
+    .map(rowToCard)
+    // Keep the homepage to roasts that say something: a named coffee with first crack marked.
+    .filter((card) => card.title !== "Untitled roast" && card.facts.firstCrack && card.facts.totalSeconds > 0)
+    .slice(0, COUNT);
 }
 
 export function LatestRoasts() {
-  const navigate = useNavigate();
+  const { data: cards, isLoading, isError } = useQuery({ queryKey: ["latest-roasts", COUNT], queryFn: fetchLatest });
 
-  // Helper functions
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const getWeightLoss = (initial?: number, final?: number): string => {
-    if (!initial || !final) return "N/A";
-    const loss = initial - final;
-    const percentage = (loss / initial) * 100;
-    return `${loss.toFixed(1)}g (${percentage.toFixed(1)}%)`;
-  };
-
-  const getRoasterDisplayName = (roasterType?: RoasterType): string => {
-    if (!roasterType) return "Unknown";
-    const roaster = ROASTER_SPECS[roasterType];
-    return roaster ? roaster.displayName : roasterType;
-  };
-
-  // Fetch recent roasts and keep the latest 4 with enough data to be useful
-  // on the homepage (a named origin and a real duration).
-  const { data: roasts, isLoading } = useQuery({
-    queryKey: ['latest-roasts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('roast_profiles')
-        .select(`
-          *,
-          likes:roast_profile_likes(count)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      
-      // Transform the data to include likes_count
-      return (data || [])
-        .map(profile => ({
-          ...profile,
-          likes_count: profile.likes?.[0]?.count || 0
-        }))
-        .filter(profile => profile.origin?.trim() && profile.duration_seconds > 0)
-        .slice(0, 4) as RoastProfile[];
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <section className="py-12 px-4 bg-muted/20">
-        <div className="container max-w-6xl mx-auto">
-          <div className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">Loading latest roasts...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!roasts || roasts.length === 0) {
-    return null; // Don't show section if no roasts
-  }
+  if (isError || (!isLoading && (!cards || cards.length === 0))) return null;
 
   return (
-    <section className="py-12 px-4 bg-muted/20">
-      <div className="container max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+    <section aria-labelledby="latest-title" className="border-t px-4 py-12 sm:px-6 md:py-16">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Latest Roasts</h2>
-            <p className="text-muted-foreground">Fresh from the community</p>
+            <h2 id="latest-title" className="text-2xl font-semibold tracking-tight">
+              Latest roasts
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Fresh from the community, with the same numbers you'll get: total, first crack, development and loss.
+            </p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/discover')}>
-            View All
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link
+            to="/discover"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Browse all
+            <ArrowRight className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+          </Link>
         </div>
 
-        {/* Horizontal scrolling lane */}
-        <div className="overflow-x-auto -mx-4 px-4 pb-4">
-          <div className="flex gap-4 sm:gap-6 min-w-min">
-            {roasts.map((profile) => (
-              <Card
-                key={profile.id}
-                className="w-[280px] sm:w-[320px] shrink-0 hover:border-primary/40 transition-all duration-200 cursor-pointer group"
-                onClick={() => navigate(`/profile/${profile.id}`)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                          {profile.beans_name}
-                        </CardTitle>
-                        {profile.roaster_type && (
-                          <Badge className="text-xs border-primary/30 bg-primary/10 text-foreground">
-                            {getRoasterDisplayName(profile.roaster_type)}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    {profile.likes_count > 0 && (
-                      <div
-                        className="flex items-center gap-1"
-                        aria-label={`${profile.likes_count} ${profile.likes_count === 1 ? 'like' : 'likes'}`}
-                      >
-                        <ThumbsUp className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                        <span className="text-xs text-muted-foreground" aria-hidden="true">{profile.likes_count}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{profile.origin}</span>
-                  </div>
-                  
-                  {profile.farm_name && profile.farm_name.trim().toLowerCase() !== profile.origin?.trim().toLowerCase() && (
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Farm:</strong> {profile.farm_name}
-                    </div>
-                  )}
-                  
-                  {profile.roast_process && (
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Process:</strong> {profile.roast_process}
-                    </div>
-                  )}
-                  
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{formatTime(profile.duration_seconds)}</span>
-                    </div>
-                    {profile.initial_weight && profile.final_weight && (
-                      <div className="flex items-center gap-1">
-                        <Scale className="h-4 w-4" />
-                        <span>{getWeightLoss(profile.initial_weight, profile.final_weight)}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Hint for mobile scroll */}
-        <div className="text-center mt-4 md:hidden">
-          <p className="text-xs text-muted-foreground">← Swipe to see more →</p>
-        </div>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy={isLoading || undefined}>
+          {isLoading
+            ? Array.from({ length: COUNT }).map((_, i) => (
+                <li key={i} className="space-y-4 rounded-lg border bg-card p-4 sm:p-5" aria-hidden>
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-1.5 w-full" />
+                </li>
+              ))
+            : cards!.map((card) => <RoastCard key={card.id} card={card} headingLevel="h3" />)}
+        </ul>
       </div>
     </section>
   );

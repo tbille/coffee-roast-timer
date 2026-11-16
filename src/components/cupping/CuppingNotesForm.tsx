@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,12 +10,13 @@ import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUpdateCuppingNotes } from '@/hooks/useCuppingNotes';
-import { RoastProfile } from '@/types/roast.types';
+import type { RoastProfile } from '@/types/roast.types';
 import { CuppingScoreSlider } from './CuppingScoreSlider';
 import { FlavorTagSelector } from './FlavorTagSelector';
 import { BrewMethodSelect } from './BrewMethodSelect';
 import { PhotoUpload } from './PhotoUpload';
 import { format } from 'date-fns';
+import { parseDateOnly, restDaysBetween } from '@/utils/roastProfileView';
 
 const cuppingNotesSchema = z.object({
   cupping_score: z.number().min(0).max(100),
@@ -49,11 +49,11 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
   } = useForm<CuppingNotesFormData>({
     resolver: zodResolver(cuppingNotesSchema),
     defaultValues: {
-      cupping_score: profile.cupping_score || 70,
-      cupping_date: profile.cupping_date 
-        ? format(new Date(profile.cupping_date), 'yyyy-MM-dd')
+      cupping_score: profile.cupping_score ?? 70,
+      cupping_date: parseDateOnly(profile.cupping_date)
+        ? format(parseDateOnly(profile.cupping_date)!, 'yyyy-MM-dd')
         : format(new Date(), 'yyyy-MM-dd'),
-      rest_days: profile.rest_days || null,
+      rest_days: profile.rest_days ?? null,
       flavor_notes: profile.flavor_notes || '',
       flavor_tags: profile.flavor_tags || [],
       brew_method: profile.brew_method || '',
@@ -65,26 +65,29 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
   const flavorTags = watch('flavor_tags');
   const brewMethod = watch('brew_method');
   const photoUrl = watch('roasted_bean_photo_url');
+  const cuppingDate = watch('cupping_date');
+  // Rest is derived from the roast date and the tasting date
+  const derivedRestDays = restDaysBetween(profile.created_at, cuppingDate);
 
   const onSubmit = async (data: CuppingNotesFormData) => {
     try {
       await updateMutation.mutateAsync({
         cupping_score: data.cupping_score,
         cupping_date: data.cupping_date || null,
-        rest_days: data.rest_days || null,
+        rest_days: restDaysBetween(profile.created_at, data.cupping_date) ?? data.rest_days ?? null,
         flavor_notes: data.flavor_notes || null,
         flavor_tags: data.flavor_tags || null,
         brew_method: data.brew_method || null,
         roasted_bean_photo_url: data.roasted_bean_photo_url || null,
       });
 
-      toast.success('Tasting notes saved', { description: 'Your cupping notes have been saved successfully.' });
+      toast.success('Tasting notes saved');
 
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving cupping notes:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save cupping notes. Please try again.';
-      toast.error(errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Please try again.';
+      toast.error('Tasting notes could not be saved', { description: errorMessage });
     }
   };
 
@@ -96,28 +99,19 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
         onChange={(value) => setValue('cupping_score', value)}
       />
 
-      {/* Cupping Date & Rest Days */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="cupping-date">Cupping Date</Label>
-          <Input
-            id="cupping-date"
-            type="date"
-            {...register('cupping_date')}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="rest-days">Rest Days</Label>
-          <Input
-            id="rest-days"
-            type="number"
-            min="0"
-            placeholder="0"
-            {...register('rest_days', { 
-              setValueAs: (v) => v === '' ? null : parseInt(v, 10) 
-            })}
-          />
-        </div>
+      {/* Tasting date; rest is derived from the roast date */}
+      <div className="space-y-2">
+        <Label htmlFor="cupping-date">Tasting date</Label>
+        <Input id="cupping-date" type="date" className="font-mono tabular-nums sm:max-w-56" aria-describedby="cupping-rest" {...register('cupping_date')} />
+        <p id="cupping-rest" className="text-xs text-muted-foreground">
+          {derivedRestDays !== undefined ? (
+            <>
+              Rested <span className="font-mono tabular-nums">{derivedRestDays}</span> {derivedRestDays === 1 ? 'day' : 'days'} after roasting
+            </>
+          ) : (
+            'Rest is worked out from the roast date and this date.'
+          )}
+        </p>
       </div>
 
       {/* Photo Upload */}
@@ -133,7 +127,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
         onChange={(tags) => setValue('flavor_tags', tags)}
       />
       {errors.flavor_tags && (
-        <p className="text-sm text-red-600">{errors.flavor_tags.message}</p>
+        <p className="text-sm text-destructive">{errors.flavor_tags.message}</p>
       )}
 
       {/* Brew Method */}
@@ -144,7 +138,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
 
       {/* Flavor Notes */}
       <div className="space-y-2">
-        <Label htmlFor="flavor-notes">Tasting Notes</Label>
+        <Label htmlFor="flavor-notes">Tasting notes</Label>
         <Textarea
           id="flavor-notes"
           placeholder="Describe the flavors, acidity, body, finish, and overall impression..."
@@ -152,7 +146,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
           {...register('flavor_notes')}
         />
         {errors.flavor_notes && (
-          <p className="text-sm text-red-600">{errors.flavor_notes.message}</p>
+          <p className="text-sm text-destructive">{errors.flavor_notes.message}</p>
         )}
       </div>
 
@@ -166,7 +160,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
           Cancel
         </Button>
         <Button type="submit" disabled={updateMutation.isPending}>
-          {updateMutation.isPending ? 'Saving...' : 'Save Notes'}
+          {updateMutation.isPending ? 'Saving…' : 'Save tasting'}
         </Button>
       </div>
     </form>
@@ -177,7 +171,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Edit Tasting Notes</SheetTitle>
+            <SheetTitle>Tasting notes</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
             {formContent}
@@ -191,7 +185,7 @@ export function CuppingNotesForm({ profile, open, onOpenChange }: CuppingNotesFo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Tasting Notes</DialogTitle>
+          <DialogTitle>Tasting notes</DialogTitle>
         </DialogHeader>
         {formContent}
       </DialogContent>

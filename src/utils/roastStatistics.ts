@@ -112,18 +112,6 @@ export const getDevelopmentPercentage = (
   return (developmentTime / durationSeconds) * 100;
 };
 
-// Classify roast level based on development ratio
-export const classifyRoastLevel = (developmentRatio?: number): string => {
-  if (!developmentRatio) return 'Unknown';
-  
-  if (developmentRatio < 15) return 'Very Light';
-  if (developmentRatio < 20) return 'Light';
-  if (developmentRatio < 25) return 'Medium-Light';
-  if (developmentRatio < 30) return 'Medium';
-  if (developmentRatio < 35) return 'Medium-Dark';
-  return 'Dark';
-};
-
 // Calculate statistics from a RoastProfile object
 // Convenience wrapper around calculateRoastStatistics for comparison feature
 export const calculateProfileStatistics = (profile: {

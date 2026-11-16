@@ -36,12 +36,12 @@ export function RoasterLinks({ roaster }: { roaster: RoasterType }) {
   return (
     <div className="not-prose mt-8 flex flex-wrap gap-3">
       <Link to={`/roast?roaster=${roaster}`} className={linkClass}>
-        Start a {spec.displayName} roast
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" aria-hidden />
+        Start a roast on the {spec.displayName}
+        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" strokeWidth={1.75} aria-hidden />
       </Link>
       <Link to={`/discover?roaster=${roaster}`} className={linkClass}>
         See {spec.displayName} roasts on Discover
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" aria-hidden />
+        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" strokeWidth={1.75} aria-hidden />
       </Link>
     </div>
   );

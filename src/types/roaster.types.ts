@@ -48,6 +48,28 @@ export interface RoasterCapability {
 }
 
 /**
+ * One physical control on the machine, in the machine's own vocabulary
+ * (SR800 heat dial 1–9, Hottop heat %, Gene setpoint °C, KALDI flame).
+ * The console renders each as a Stepper; every change is logged as a ControlChange
+ * with `control` = `id`.
+ */
+export interface RoasterControlSpec {
+  /** Stable id stored in ControlChange.control ('heat', 'fan', 'setpoint', 'flame') */
+  id: string;
+  /** Sentence-case label shown on the stepper */
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  /** '%' for percentages, '°C' for temperatures (converted for display), '' for plain levels */
+  unit: '' | '%' | '°C';
+  /** Starting value suggested in Setup */
+  default: number;
+  /** Colour hint for the label: heat or air (control tokens) */
+  kind?: 'heat' | 'air';
+}
+
+/**
  * Complete roaster specification
  * Central data structure defining all characteristics of a roaster type
  */
@@ -90,6 +112,18 @@ export interface RoasterSpecification {
   // Roast profile characteristics
   defaultProfile?: string;          // Default profile for Behmor-style roasters
   profileOptions?: string[];        // Available profiles (P1-P5 for Behmor)
+
+  // Roast console
+  /** True when the roast console has a mode for this machine */
+  implemented?: boolean;
+  /** Machine controls, in the machine's vocabulary (see RoasterControlSpec) */
+  controls?: RoasterControlSpec[];
+  /** The roaster has (or usually has) a bean probe: offers the Turning point event */
+  probe?: boolean;
+  /** Label of the temperature field in the console ("Bean temp", "Drum temp") */
+  tempLabel?: string;
+  /** Route of the machine guide under /how-to/roasters/... */
+  guidePath?: string;
 }
 
 /**

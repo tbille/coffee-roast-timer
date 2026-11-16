@@ -1,150 +1,87 @@
-// Utility functions for finding similar roast profiles
+// Finding roasts similar to a given one (for "similar roasts" suggestions).
+// Uses the structured roaster type, batch size within ±15 %, process and normalised origin.
+// The deprecated free-text `coffee_roaster` is not used.
 
-interface CrackEvent {
-  time: number;
-  targetTemp: number;
-  currentTemp: number;
-  type: 'first' | 'second';
-}
+import {
+  deriveRoastFacts,
+  originLabel,
+  processLabel,
+  roasterName,
+  type ProfileRowInput,
+} from '@/utils/roastProfileView';
 
-interface RoastProfile {
-  id: string;
-  beans_name: string;
-  origin?: string;
-  farm_name?: string;
-  roast_process?: string;
-  coffee_roaster?: string;
-  duration_seconds: number;
-  crack_events: CrackEvent[];
-  initial_weight?: number;
-  final_weight?: number;
-}
-
-export interface SimilarityResult {
-  profile: RoastProfile;
+export interface SimilarityResult<T extends ProfileRowInput = ProfileRowInput> {
+  profile: T;
   score: number;
   reasons: string[];
 }
 
-export const calculateSimilarityScore = (
-  target: RoastProfile,
-  candidate: RoastProfile
-): SimilarityResult => {
+const BATCH_TOLERANCE = 0.15;
+
+export const calculateSimilarityScore = <T extends ProfileRowInput>(target: ProfileRowInput, candidate: T): SimilarityResult<T> => {
   let score = 0;
   const reasons: string[] = [];
 
-  // Same origin +30 points
-  if (target.origin && candidate.origin && target.origin === candidate.origin) {
+  // Same machine +30
+  if (target.roaster_type && candidate.roaster_type && target.roaster_type === candidate.roaster_type) {
     score += 30;
-    reasons.push(`Same origin (${target.origin})`);
+    reasons.push(`Same roaster (${roasterName(target.roaster_type) ?? target.roaster_type})`);
   }
 
-  // Same process +20 points
-  if (
-    target.roast_process &&
-    candidate.roast_process &&
-    target.roast_process === candidate.roast_process
-  ) {
+  // Batch within ±15 % +20
+  const tIn = target.initial_weight ?? undefined;
+  const cIn = candidate.initial_weight ?? undefined;
+  if (tIn && cIn && tIn > 0 && Math.abs(cIn - tIn) / tIn <= BATCH_TOLERANCE) {
     score += 20;
-    reasons.push(`Same process (${target.roast_process})`);
+    reasons.push('Similar batch size');
   }
 
-  // Same roaster +20 points
-  if (
-    target.coffee_roaster &&
-    candidate.coffee_roaster &&
-    target.coffee_roaster === candidate.coffee_roaster
-  ) {
+  // Same process +20 (labels are normalised; legacy roast levels are not processes)
+  const tProcess = processLabel(target);
+  const cProcess = processLabel(candidate);
+  if (tProcess && cProcess && tProcess.toLowerCase() === cProcess.toLowerCase()) {
     score += 20;
-    reasons.push(`Same roaster (${target.coffee_roaster})`);
+    reasons.push(`Same process (${tProcess})`);
   }
 
-  // Similar duration (within 30 seconds) +15 points
-  const durationDiff = Math.abs(
-    target.duration_seconds - candidate.duration_seconds
-  );
-  if (durationDiff <= 30) {
-    score += 15;
-    reasons.push('Similar duration');
+  // Same normalised origin +20 (Columbia = Colombia)
+  const tOrigin = originLabel(target.origin);
+  const cOrigin = originLabel(candidate.origin);
+  if (tOrigin && cOrigin && tOrigin.toLowerCase() === cOrigin.toLowerCase()) {
+    score += 20;
+    reasons.push(`Same origin (${tOrigin})`);
   }
 
-  // Similar first crack timing +15 points
-  const targetFirstCrack = target.crack_events.find((c) => c.type === 'first')?.time;
-  const candidateFirstCrack = candidate.crack_events.find(
-    (c) => c.type === 'first'
-  )?.time;
-
-  if (
-    targetFirstCrack &&
-    candidateFirstCrack &&
-    Math.abs(targetFirstCrack - candidateFirstCrack) <= 30
-  ) {
-    score += 15;
+  // First crack within 30 s +10
+  const tFc = deriveRoastFacts(target).firstCrack?.time;
+  const cFc = deriveRoastFacts(candidate).firstCrack?.time;
+  if (tFc !== undefined && cFc !== undefined && Math.abs(tFc - cFc) <= 30) {
+    score += 10;
     reasons.push('Similar first crack timing');
-  }
-
-  // Similar weight loss percentage +10 points
-  if (
-    target.initial_weight &&
-    target.final_weight &&
-    candidate.initial_weight &&
-    candidate.final_weight
-  ) {
-    const targetLoss =
-      ((target.initial_weight - target.final_weight) / target.initial_weight) * 100;
-    const candidateLoss =
-      ((candidate.initial_weight - candidate.final_weight) /
-        candidate.initial_weight) *
-      100;
-
-    if (Math.abs(targetLoss - candidateLoss) <= 2) {
-      score += 10;
-      reasons.push('Similar weight loss');
-    }
   }
 
   return { profile: candidate, score, reasons };
 };
 
-export const findSimilarRoasts = (
-  target: RoastProfile,
-  candidates: RoastProfile[],
-  limit: number = 5
-): SimilarityResult[] => {
-  return candidates
+export const findSimilarRoasts = <T extends ProfileRowInput>(target: ProfileRowInput, candidates: T[], limit = 5): SimilarityResult<T>[] =>
+  candidates
     .filter((c) => c.id !== target.id)
-    .map((candidate) => calculateSimilarityScore(target, candidate))
+    .map((c) => calculateSimilarityScore(target, c))
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
-};
 
-// Filter profiles by similarity threshold
-export const filterSimilarRoasts = (
-  target: RoastProfile,
-  candidates: RoastProfile[],
-  minScore: number = 30
-): SimilarityResult[] => {
-  return candidates
+export const filterSimilarRoasts = <T extends ProfileRowInput>(target: ProfileRowInput, candidates: T[], minScore = 30): SimilarityResult<T>[] =>
+  candidates
     .filter((c) => c.id !== target.id)
-    .map((candidate) => calculateSimilarityScore(target, candidate))
-    .filter((result) => result.score >= minScore)
+    .map((c) => calculateSimilarityScore(target, c))
+    .filter((r) => r.score >= minScore)
     .sort((a, b) => b.score - a.score);
-};
 
-// Get similarity category label
+/** Plain label for a score, no colour. */
 export const getSimilarityLabel = (score: number): string => {
-  if (score >= 80) return 'Very Similar';
-  if (score >= 60) return 'Quite Similar';
-  if (score >= 40) return 'Moderately Similar';
-  if (score >= 20) return 'Somewhat Similar';
+  if (score >= 80) return 'Very similar';
+  if (score >= 60) return 'Quite similar';
+  if (score >= 40) return 'Somewhat similar';
+  if (score >= 20) return 'A little similar';
   return 'Different';
-};
-
-// Get color for similarity score
-export const getSimilarityColor = (score: number): string => {
-  if (score >= 80) return 'text-green-600';
-  if (score >= 60) return 'text-blue-600';
-  if (score >= 40) return 'text-yellow-600';
-  if (score >= 20) return 'text-orange-600';
-  return 'text-gray-600';
 };

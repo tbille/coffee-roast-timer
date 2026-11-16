@@ -20,7 +20,7 @@ import { SITE_NAME, absoluteUrl } from "@/content/siteContent";
 export function DocsSidebar({ currentSlug, onNavigate }: { currentSlug?: string; onNavigate?: () => void }) {
   const groups = docsBySection();
   return (
-    <nav aria-label="Guides" className="text-sm">
+    <nav aria-label="Learn" className="text-sm">
       <NavLink
         to="/how-to"
         end
@@ -73,13 +73,13 @@ function MobileGuidesMenu({ currentSlug }: { currentSlug?: string }) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="mb-6 lg:hidden">
-          <Menu className="mr-2 h-4 w-4" aria-hidden />
+          <Menu className="mr-2 h-4 w-4" strokeWidth={1.75} aria-hidden />
           All guides
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 overflow-y-auto">
         <SheetHeader className="mb-4 text-left">
-          <SheetTitle>Guides</SheetTitle>
+          <SheetTitle>Learn</SheetTitle>
         </SheetHeader>
         <DocsSidebar currentSlug={currentSlug} onNavigate={() => setOpen(false)} />
       </SheetContent>
@@ -150,7 +150,7 @@ function DocsPager({ slug }: { slug: string }) {
       {prev ? (
         <Link to={prev.path} className="group rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/50">
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ArrowLeft className="h-3 w-3" aria-hidden /> Previous
+            <ArrowLeft className="h-3 w-3" strokeWidth={1.75} aria-hidden /> Previous
           </span>
           <span className="mt-1 block font-medium group-hover:text-primary">{prev.title}</span>
         </Link>
@@ -161,7 +161,7 @@ function DocsPager({ slug }: { slug: string }) {
           className="group rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/50 sm:col-start-2 sm:text-right"
         >
           <span className="flex items-center gap-1 text-xs text-muted-foreground sm:justify-end">
-            Next <ArrowRight className="h-3 w-3" aria-hidden />
+            Next <ArrowRight className="h-3 w-3" strokeWidth={1.75} aria-hidden />
           </span>
           <span className="mt-1 block font-medium group-hover:text-primary">{next.title}</span>
         </Link>
@@ -186,7 +186,7 @@ function DocsRelated({ doc }: { doc: DocEntry }) {
                 <span className="block font-medium group-hover:text-primary">{r.title}</span>
                 <span className="block text-sm text-muted-foreground">{r.description}</span>
               </span>
-              <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" aria-hidden />
+              <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" strokeWidth={1.75} aria-hidden />
             </Link>
           </li>
         ))}
@@ -223,7 +223,7 @@ export function DocsLayout({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Guides", item: absoluteUrl("/how-to") },
+      { "@type": "ListItem", position: 2, name: "Learn", item: absoluteUrl("/how-to") },
       { "@type": "ListItem", position: 3, name: doc.title, item: url },
     ],
   };
@@ -255,7 +255,7 @@ export function DocsLayout({
         ))}
       </Helmet>
 
-      <div className="container max-w-7xl px-4 py-8 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12 xl:grid-cols-[13rem_minmax(0,1fr)_12rem]">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12 xl:grid-cols-[13rem_minmax(0,1fr)_12rem]">
         <aside className="hidden lg:block">
           <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2">
             <DocsSidebar currentSlug={slug} />
@@ -268,7 +268,7 @@ export function DocsLayout({
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/how-to">Guides</Link>
+                    <Link to="/how-to">Learn</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
@@ -287,12 +287,12 @@ export function DocsLayout({
             <MobileGuidesMenu currentSlug={slug} />
 
             <header className="mb-8 border-b pb-6">
-              <p className="text-sm font-medium text-primary">{doc.kind}</p>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{doc.title}</h1>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{doc.kind}</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{doc.title}</h1>
               <p className="mt-3 text-lg leading-relaxed text-muted-foreground">{doc.lede}</p>
               <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" aria-hidden />
+                  <Clock className="h-4 w-4" strokeWidth={1.75} aria-hidden />
                   {doc.readingMinutes} min read
                 </span>
                 {doc.updated ? <span>Updated {formatUpdated(doc.updated)}</span> : null}
@@ -303,7 +303,7 @@ export function DocsLayout({
               <Collapsible className="mb-8 rounded-md border px-4 py-3 xl:hidden">
                 <CollapsibleTrigger className="group flex w-full items-center justify-between text-sm font-medium">
                   On this page
-                  <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" aria-hidden />
+                  <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" strokeWidth={1.75} aria-hidden />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pt-3">
                   <TocLinks items={items} activeId={activeId} />

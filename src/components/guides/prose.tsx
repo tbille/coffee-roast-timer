@@ -60,7 +60,7 @@ const calloutStyles = {
   tip: { icon: Lightbulb, className: "border-accent bg-secondary/40", label: "Tip" },
   warning: {
     icon: AlertTriangle,
-    className: "border-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.08)]",
+    className: "border-warning bg-warning/10",
     label: "Warning",
   },
 } as const;
@@ -85,8 +85,9 @@ export function Callout({
       <Icon
         className={cn(
           "mt-0.5 h-5 w-5 shrink-0",
-          variant === "warning" ? "text-[hsl(var(--warning))]" : "text-primary",
+          variant === "warning" ? "text-warning" : "text-primary",
         )}
+        strokeWidth={1.75}
         aria-hidden
       />
       <div className="space-y-1.5 text-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4">
@@ -190,7 +191,7 @@ export function Formula({ children, caption }: { children: ReactNode; caption?: 
   );
 }
 
-/** Inline reference to a control in the app UI, e.g. <Ui>Save Roast</Ui>. */
+/** Inline reference to a control in the app UI, e.g. <Ui>First crack</Ui>. */
 export function Ui({ children }: { children: ReactNode }) {
   return <strong className="font-semibold text-foreground">{children}</strong>;
 }

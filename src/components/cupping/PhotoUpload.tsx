@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { toast } from "sonner";
-import { ACCEPTED_IMAGE_TYPES, MAX_PHOTO_SIZE_MB } from '@/types/cupping.types';
+import { MAX_PHOTO_SIZE_MB } from '@/types/cupping.types';
 
 interface PhotoUploadProps {
   currentPhotoUrl?: string;
@@ -92,7 +92,7 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
 
   return (
     <div className="space-y-3">
-      <Label>Roasted Bean Photo</Label>
+      <Label>Photo of the roasted beans</Label>
 
       {/* Current photo preview */}
       {currentPhotoUrl && !uploading && (
@@ -106,11 +106,11 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
             type="button"
             variant="destructive"
             size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
             onClick={handleRemovePhoto}
             aria-label="Remove photo"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" strokeWidth={1.75} />
           </Button>
         </div>
       )}
@@ -122,17 +122,26 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`
-            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-            ${isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400'}
+            border-2 border-dashed rounded-lg p-6 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring text-center cursor-pointer transition-colors
+            ${isDragging ? 'border-primary bg-muted' : 'border-input hover:bg-muted/50'}
           `}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload a photo of the roasted beans"
         >
-          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <p className="text-sm text-gray-600 mb-2">
+          <Camera className="h-8 w-8 mx-auto mb-3 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+          <p className="text-sm text-foreground mb-1">
             Click to upload or drag and drop
           </p>
-          <p className="text-xs text-gray-500">
-            Any image format (Max {MAX_PHOTO_SIZE_MB}MB)
+          <p className="text-xs text-muted-foreground">
+            Any image, up to {MAX_PHOTO_SIZE_MB} MB
           </p>
           <input
             ref={fileInputRef}
@@ -149,8 +158,8 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded, onPhotoRemoved }
       {uploading && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-gray-600">Uploading...</span>
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} aria-hidden />
+            <span className="text-sm text-muted-foreground">Uploading…</span>
           </div>
           <Progress value={progress} className="w-full" />
         </div>

@@ -2,14 +2,15 @@ import type { ReactNode } from "react";
 import { ArrowDownToLine, Play, Plus, SlidersHorizontal, StickyNote, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatClock, type RoastStep, type StepKind } from "@/utils/roastProfileView";
+import { formatClock } from "@/lib/format";
+import type { RoastStep, StepKind } from "@/utils/roastProfileView";
 
 const KIND_STYLE: Record<StepKind, { icon: typeof Play; className: string }> = {
   start: { icon: Play, className: "bg-primary text-primary-foreground" },
   setting: { icon: SlidersHorizontal, className: "bg-secondary text-secondary-foreground" },
   extension: { icon: Plus, className: "bg-secondary text-secondary-foreground" },
   milestone: { icon: StickyNote, className: "bg-muted text-foreground" },
-  first_crack: { icon: Zap, className: "bg-[hsl(var(--phase-development))] text-white" },
+  first_crack: { icon: Zap, className: "bg-phase-development text-background" },
   second_crack: { icon: Zap, className: "bg-foreground text-background" },
   drop: { icon: ArrowDownToLine, className: "bg-primary text-primary-foreground" },
 };
@@ -44,13 +45,13 @@ export function RoastSteps({ steps, footer }: { steps: RoastStep[]; footer?: Rea
                   {formatClock(step.time)}
                 </time>
                 <span className={cn("z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full", className)} aria-hidden>
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1 pt-0.5">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="font-medium">{step.title}</span>
                     {step.values?.map((value) => (
-                      <span key={value} className="rounded-md border bg-background px-2 py-0.5 text-xs font-medium">
+                      <span key={value} className="rounded-md border bg-background px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
                         {value}
                       </span>
                     ))}

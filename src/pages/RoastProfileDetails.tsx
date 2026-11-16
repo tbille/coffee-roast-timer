@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Flame, GitCompare, Pencil, Share2, ThumbsUp } from "lucide-react";
+import { ChevronRight, GitCompare, Pencil, Repeat2, Share2, ThumbsUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PageTitle, pageTitle } from "@/components/PageTitle";
 import { CuppingNotesForm } from "@/components/cupping/CuppingNotesForm";
 import { RoastSummary } from "@/components/profile/RoastSummary";
 import { RoastCurveChart } from "@/components/profile/RoastCurveChart";
@@ -26,18 +27,29 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { getTemperatureGraphContextNote } from "@/utils/roasterDisplay";
 import type { TemperatureUnit } from "@/utils/temperatureConversion";
 import {
   checkBatchSize,
+  countBeanReadings,
   deriveChartPoints,
+  deriveEventMarks,
   deriveRoastFacts,
   deriveRoastPhases,
   deriveRoastSteps,
+  isLegacyLevel,
+  isSchemaV2,
+  originLabel,
+  placeLabel,
+  processLabel,
+  roastLevelLabel,
   roasterName,
 } from "@/utils/roastProfileView";
+import { tidyLabel } from "@/utils/textDisplay";
 import type { RoasterType } from "@/types/roaster.types";
+import { PROCESS_LABELS } from "@/types/roast-session.types";
 import type { RoastProfile } from "@/types/roast.types";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -59,6 +71,8 @@ const RoastProfileDetails = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCuppingForm, setShowCuppingForm] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>("C");
 
   const { data: likesData } = useQuery({
@@ -87,7 +101,7 @@ const RoastProfileDetails = () => {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roast-profile-likes", id] }),
-    onError: () => toast.error("Failed to update like status."),
+    onError: () => toast.error("Your like could not be saved."),
   });
 
   const handleLikeClick = () => {
@@ -147,7 +161,7 @@ const RoastProfileDetails = () => {
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast.error("Failed to load roast profile.");
+      toast.error("This roast could not be loaded.");
       navigate("/");
     } finally {
       setLoading(false);
@@ -155,6 +169,23 @@ const RoastProfileDetails = () => {
   };
 
   const isOwner = !!user && user.id === profile?.user_id;
+
+  // "Ready to taste" links land on /profile/:id#notes: scroll to the tasting notes,
+  // and open the tasting form for the owner when nothing is recorded yet.
+  const location = useLocation();
+  const scrolledToNotes = useRef(false);
+  const openedTasting = useRef(false);
+  useEffect(() => {
+    if (loading || !profile || location.hash !== "#notes") return;
+    if (!scrolledToNotes.current) {
+      scrolledToNotes.current = true;
+      requestAnimationFrame(() => document.getElementById("notes")?.scrollIntoView({ block: "start" }));
+    }
+    if (isOwner && !openedTasting.current && profile.cupping_score == null) {
+      openedTasting.current = true;
+      setShowCuppingForm(true);
+    }
+  }, [loading, profile, location.hash, isOwner]);
 
   const updateProfile = async (patch: ProfileUpdate, successTitle: string): Promise<boolean> => {
     if (!profile || !isOwner) return false;
@@ -171,9 +202,21 @@ const RoastProfileDetails = () => {
 
   const handleSaveNotes = (notes: string) => updateProfile({ notes }, "Notes saved");
 
-  const handleSaveDetails = (d: EditableDetails) =>
-    updateProfile(
+  const handleSaveDetails = (d: EditableDetails) => {
+    // Keep a v2 process key in sync with the edited text, so the page shows what was typed
+    const settings = (profile?.roaster_settings ?? null) as Record<string, unknown> | null;
+    let roasterSettingsPatch: Pick<ProfileUpdate, "roaster_settings"> = {};
+    if (settings && typeof settings.process === "string") {
+      const next = { ...settings };
+      const typed = d.roast_process.trim().toLowerCase();
+      const key = Object.entries(PROCESS_LABELS).find(([, label]) => label.toLowerCase() === typed)?.[0];
+      if (key) next.process = key;
+      else delete next.process;
+      roasterSettingsPatch = { roaster_settings: next as ProfileUpdate["roaster_settings"] };
+    }
+    return updateProfile(
       {
+        ...roasterSettingsPatch,
         beans_name: d.beans_name.trim(),
         origin: d.origin || null,
         farm_name: d.farm_name || null,
@@ -184,12 +227,29 @@ const RoastProfileDetails = () => {
       },
       "Roast details updated",
     );
+  };
+
+  const handleDelete = async () => {
+    if (!profile || !isOwner) return;
+    setDeleting(true);
+    const { error } = await supabase.from("roast_profiles").delete().eq("id", profile.id);
+    setDeleting(false);
+    if (error) {
+      console.error("Error deleting roast:", error);
+      toast.error("This roast could not be deleted.");
+      return;
+    }
+    setShowDeleteDialog(false);
+    queryClient.invalidateQueries({ queryKey: ["discover-profiles"] });
+    toast.success("Roast deleted");
+    navigate("/roasts");
+  };
 
   const handleShare = async () => {
     const shareUrl = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${profile?.beans_name} roast profile`, url: shareUrl });
+        await navigator.share({ title: `${profile?.beans_name} roast`, url: shareUrl });
         return;
       } catch {
         // Cancelled or unsupported: fall back to copying the link
@@ -199,7 +259,7 @@ const RoastProfileDetails = () => {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied", { description: "Paste it anywhere to share this roast." });
     } catch {
-      toast.message("Share this profile", { description: shareUrl, duration: 10000 });
+      toast.message("Share this roast", { description: shareUrl, duration: 10000 });
     }
   };
 
@@ -207,7 +267,7 @@ const RoastProfileDetails = () => {
     beans_name: profile?.beans_name ?? "",
     origin: profile?.origin ?? "",
     farm_name: profile?.farm_name ?? "",
-    roast_process: profile?.roast_process ?? "",
+    roast_process: (profile && processLabel(profile)) ?? profile?.roast_process ?? "",
     coffee_roaster: profile?.coffee_roaster ?? "",
     initial_weight: profile?.initial_weight ?? 0,
     final_weight: profile?.final_weight ?? 0,
@@ -219,27 +279,36 @@ const RoastProfileDetails = () => {
     return {
       facts,
       phases: deriveRoastPhases(profile, facts),
+      marks: deriveEventMarks(profile, facts),
       steps: deriveRoastSteps(profile, facts, viewUnit),
       chartPoints: deriveChartPoints(profile, viewUnit),
       batchCheck: checkBatchSize(profile.roaster_type, facts.weightIn),
+      origin: originLabel(profile.origin),
+      process: processLabel(profile),
+      level: roastLevelLabel(profile),
+      levelIsLegacy: isLegacyLevel(profile),
+      place: placeLabel(profile, viewUnit),
+      beanName: tidyLabel(profile.beans_name) || "Untitled roast",
+      isV2: isSchemaV2(profile),
     };
   }, [profile, viewUnit]);
 
   const generatePageTitle = (): string => {
-    if (!profile) return "Coffee Roast Profile";
+    if (!profile) return "Coffee roast";
     const username = profile.profiles?.username;
-    return username ? `${profile.beans_name} - Coffee Roast by ${username}` : `${profile.beans_name} - Coffee Roast Profile`;
+    return username ? `${view?.beanName ?? profile.beans_name} roast by ${username}` : `${view?.beanName ?? profile.beans_name} roast`;
   };
 
   const generatePageDescription = (): string => {
-    if (!profile) return "View detailed coffee roast profile with temperature curves and tasting notes.";
-    const parts = [`Roast of ${profile.beans_name}`];
-    if (profile.origin) parts.push(`from ${profile.origin}`);
-    if (profile.farm_name) parts.push(`from ${profile.farm_name} farm`);
+    if (!profile) return "A home coffee roast with first crack timing, development and tasting notes.";
+    const parts = [`Roast of ${view?.beanName ?? profile.beans_name}`];
+    if (view?.origin) parts.push(`from ${view.origin}`);
+    if (profile.farm_name) parts.push(`(${tidyLabel(profile.farm_name)})`);
     if (profile.profiles?.username) parts.push(`by ${profile.profiles.username}`);
     let description = parts.join(" ");
-    if (profile.roast_process) description += `. ${profile.roast_process} process`;
-    description += ". View temperature curves, development data, and tasting notes.";
+    if (view?.process) description += `. ${view.process} process`;
+    if (view?.level && !view.levelIsLegacy) description += `, ${view.level} roast`;
+    description += ". First crack, development, weight loss and the steps to roast it again.";
     return description.length > 160 ? `${description.substring(0, 157)}...` : description;
   };
 
@@ -279,13 +348,13 @@ const RoastProfileDetails = () => {
     return (
       <>
         <Helmet>
-          <title>Roast Profile Not Found</title>
+          <title>{pageTitle("Roast not found")}</title>
           <meta name="robots" content="noindex, follow" />
           <link rel="canonical" href={canonicalUrl} />
         </Helmet>
         <div className="bg-background px-4 py-16">
           <div className="mx-auto max-w-md space-y-4 text-center">
-            <h1 className="text-2xl font-semibold">Roast profile not found</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Roast not found</h1>
             <p className="text-muted-foreground">It may have been deleted, or the link is incomplete.</p>
             <div className="flex justify-center gap-2">
               <Button asChild><Link to="/discover">Browse roasts</Link></Button>
@@ -300,7 +369,7 @@ const RoastProfileDetails = () => {
   const generateJsonLd = () => ({
     "@context": "https://schema.org",
     "@type": "Recipe",
-    name: profile.beans_name,
+    name: view.beanName,
     description: generatePageDescription(),
     author: { "@type": "Person", name: profile.profiles?.username || "Coffee Roaster" },
     datePublished: profile.created_at,
@@ -308,12 +377,12 @@ const RoastProfileDetails = () => {
     recipeCategory: "Coffee Roasting",
     cookingMethod: "Coffee Roasting",
     recipeCuisine: "Coffee",
-    keywords: ["coffee roasting", "coffee profile", profile.beans_name, profile.origin, profile.farm_name, "temperature curve"]
+    keywords: ["coffee roasting", "roast profile", view.beanName, view.origin, profile.farm_name]
       .filter(Boolean)
       .join(", "),
     recipeIngredient: [
       `${profile.initial_weight ? `${profile.initial_weight}g ` : ""}${profile.beans_name} green coffee beans`,
-      profile.origin && `Origin: ${profile.origin}`,
+      view.origin && `Origin: ${view.origin}`,
       profile.farm_name && `Farm: ${profile.farm_name}`,
     ].filter(Boolean),
     recipeInstructions: view.steps.map((step) => ({
@@ -324,38 +393,41 @@ const RoastProfileDetails = () => {
     recipeYield: profile.final_weight ? `${profile.final_weight}g roasted coffee` : "Roasted coffee beans",
   });
 
-  const { facts, phases, steps, chartPoints, batchCheck } = view;
+  const { facts, phases, marks, steps, chartPoints, batchCheck } = view;
   const roasterType = profile.roaster_type as RoasterType | undefined;
   const spec = roasterType ? ROASTER_SPECS[roasterType] : undefined;
   const displayRoaster = roasterName(roasterType, profile.coffee_roaster);
-  const roastLink = roasterType && spec ? `/roast?roaster=${roasterType}` : "/roast";
-  const roastLabel = spec ? `Roast this on ${spec.displayName}` : "Start a roast";
-  const subtitle = [profile.origin, profile.roast_process, displayRoaster].filter(Boolean).join(" · ");
-  const roastedOn = new Date(profile.created_at);
-  const beanPoints = chartPoints.filter((p) => p.bean !== undefined).length;
-  const showChart = beanPoints >= 3;
+  const roastAgainLink = spec ? `/roast?roaster=${roasterType}&ref=${profile.id}` : `/roast?ref=${profile.id}`;
+  const subtitle = [view.origin, view.process, view.level, displayRoaster].filter(Boolean).join(" · ");
+  const showChart = countBeanReadings(chartPoints) >= 3;
   const liked = likesData?.userHasLiked ?? false;
   const likeCount = likesData?.count ?? 0;
+  // Environment notes written by the post-roast card repeat the "Where" row; hide the duplicate.
+  const envNotes = profile.environmental_notes?.trim();
+  const placeFirst = view.place?.split(" · ")[0]?.toLowerCase();
+  const showEnvNotes = envNotes && !(placeFirst && envNotes.toLowerCase().startsWith(placeFirst) && envNotes.length <= 60);
 
-  const roastCta = (
-    <Button asChild size="lg" className="w-full sm:w-auto">
-      <Link to={roastLink}>
-        <Flame />
-        {roastLabel}
-      </Link>
-    </Button>
+  const roastAgain = (
+    <div className="flex flex-col items-start gap-1.5">
+      <Button asChild size="lg" className="w-full sm:w-auto">
+        <Link to={roastAgainLink}>
+          <Repeat2 strokeWidth={1.75} aria-hidden />
+          Roast again
+        </Link>
+      </Button>
+      <p className="text-xs text-muted-foreground">Opens the timer with this roast as a live reference</p>
+    </div>
   );
 
   return (
     <>
+      <PageTitle title={view.beanName} description={generatePageDescription()} />
       <Helmet>
-        <title>{generatePageTitle()}</title>
-        <meta name="description" content={generatePageDescription()} />
         <meta name="robots" content="index, follow" />
-        <meta name="author" content={profile.profiles?.username || "Coffee Roaster"} />
+        <meta name="author" content={profile.profiles?.username || "Coffee roaster"} />
         <meta
           name="keywords"
-          content={["coffee roasting", "coffee profile", profile.beans_name, profile.origin, profile.farm_name, "temperature curve", "coffee development", "roast analysis"]
+          content={["coffee roasting", "roast profile", view.beanName, view.origin, profile.farm_name, displayRoaster, "first crack", "development"]
             .filter(Boolean)
             .join(", ")}
         />
@@ -363,14 +435,14 @@ const RoastProfileDetails = () => {
         <meta property="og:description" content={generatePageDescription()} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Roast Timer - Coffee Roasting Profiles" />
+        <meta property="og:site_name" content="Roast Timer" />
         <meta property="og:locale" content="en_US" />
         <meta property="article:published_time" content={profile.created_at} />
         <meta property="article:modified_time" content={profile.updated_at || profile.created_at} />
         {profile.profiles?.username && <meta property="article:author" content={profile.profiles.username} />}
         <meta property="article:section" content="Coffee Roasting" />
         <meta property="article:tag" content="coffee roasting" />
-        {profile.origin && <meta property="article:tag" content={profile.origin} />}
+        {view.origin && <meta property="article:tag" content={view.origin} />}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@roasttimer" />
         <meta name="twitter:title" content={generatePageTitle()} />
@@ -379,16 +451,16 @@ const RoastProfileDetails = () => {
         <script type="application/ld+json">{JSON.stringify(generateJsonLd())}</script>
       </Helmet>
 
-      <div className="overflow-x-hidden bg-background px-4 py-6 sm:py-8">
+      <div className="overflow-x-hidden bg-background px-4 py-6 sm:px-6 sm:py-8">
         <article className="mx-auto w-full max-w-4xl space-y-6">
           {/* Header */}
-          <header className="space-y-4">
+          <header className="space-y-5">
             <nav aria-label="Breadcrumb">
               <ol className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
                 <li><Link to="/discover" className="hover:text-foreground hover:underline">Discover</Link></li>
                 {spec && (
                   <>
-                    <li aria-hidden><ChevronRight className="h-3.5 w-3.5" /></li>
+                    <li aria-hidden><ChevronRight className="h-3.5 w-3.5" strokeWidth={1.75} /></li>
                     <li>
                       <Link to={`/discover?roaster=${roasterType}`} className="hover:text-foreground hover:underline">
                         {spec.displayName}
@@ -400,46 +472,51 @@ const RoastProfileDetails = () => {
             </nav>
 
             <div className="space-y-2">
-              <h1 className="wrap-break-word text-2xl font-bold leading-tight text-foreground sm:text-4xl">{profile.beans_name}</h1>
-              {subtitle && <p className="text-base text-foreground/80 sm:text-lg">{subtitle}</p>}
+              <h1 className="wrap-break-word text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">{view.beanName}</h1>
+              {subtitle && <p className="text-base text-muted-foreground sm:text-lg">{subtitle}</p>}
               <p className="text-sm text-muted-foreground">
                 {profile.profiles?.username ? <>Roasted by <span className="font-medium text-foreground">{profile.profiles.username}</span> on </> : "Roasted on "}
-                <time dateTime={profile.created_at}>
-                  {roastedOn.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                </time>
+                <time dateTime={profile.created_at}>{formatDate(profile.created_at)}</time>
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="w-full sm:w-auto">{roastCta}</div>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleLikeClick}
-                disabled={likeMutation.isPending}
-                aria-pressed={liked}
-                aria-label={`${liked ? "Unlike" : "Like"} this roast, ${likeCount} ${likeCount === 1 ? "like" : "likes"}`}
-                className="flex-1 sm:flex-none"
-              >
-                <ThumbsUp className={cn(liked && "fill-current")} />
-                <span className="tabular-nums">{likeCount}</span>
-              </Button>
-              <Button variant="outline" size="lg" onClick={handleShare} className="flex-1 sm:flex-none">
-                <Share2 />
-                Share
-              </Button>
-              {isOwner && (
-                <>
-                  <Button variant="ghost" size="lg" onClick={() => setShowEditDialog(true)} className="flex-1 sm:flex-none">
-                    <Pencil />
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="lg" onClick={() => navigate(`/compare?ids=${id}`)} className="flex-1 sm:flex-none">
-                    <GitCompare />
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+              {roastAgain}
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleLikeClick}
+                  disabled={likeMutation.isPending}
+                  aria-pressed={liked}
+                  aria-label={`${liked ? "Unlike" : "Like"} this roast, ${likeCount} ${likeCount === 1 ? "like" : "likes"}`}
+                >
+                  <ThumbsUp className={cn(liked && "fill-current")} strokeWidth={1.75} aria-hidden />
+                  <span className="font-mono tabular-nums">{likeCount}</span>
+                </Button>
+                <Button variant="outline" size="lg" onClick={handleShare}>
+                  <Share2 strokeWidth={1.75} aria-hidden />
+                  Share
+                </Button>
+                <Button variant="ghost" size="lg" asChild>
+                  <Link to={`/compare?a=${profile.id}`}>
+                    <GitCompare strokeWidth={1.75} aria-hidden />
                     Compare
-                  </Button>
-                </>
-              )}
+                  </Link>
+                </Button>
+                {isOwner && (
+                  <>
+                    <Button variant="ghost" size="lg" onClick={() => setShowEditDialog(true)}>
+                      <Pencil strokeWidth={1.75} aria-hidden />
+                      Edit details
+                    </Button>
+                    <Button variant="ghost" size="lg" onClick={() => setShowDeleteDialog(true)} className="text-destructive hover:text-destructive">
+                      <Trash2 strokeWidth={1.75} aria-hidden />
+                      Delete
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </header>
 
@@ -456,6 +533,7 @@ const RoastProfileDetails = () => {
             <RoastCurveChart
               points={chartPoints}
               facts={facts}
+              marks={marks}
               unit={viewUnit}
               onUnitChange={setViewUnit}
               contextNote={roasterType ? getTemperatureGraphContextNote(roasterType) : null}
@@ -465,24 +543,22 @@ const RoastProfileDetails = () => {
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
             <RoastSteps
               steps={steps}
-              footer={
-                <div className="flex flex-col items-start gap-3">
-                  <p className="text-sm text-muted-foreground">Want to try it? The timer opens set up for this roaster.</p>
-                  {roastCta}
-                </div>
-              }
+              footer={roastAgain}
             />
             <RoastSetup
-              origin={profile.origin}
-              farm={profile.farm_name}
-              process={profile.roast_process}
+              origin={view.origin}
+              farm={tidyLabel(profile.farm_name)}
+              process={view.process}
+              level={view.level}
+              levelIsLegacy={view.levelIsLegacy}
+              place={view.place}
               roaster={displayRoaster}
               manufacturer={spec?.manufacturer}
               weightIn={facts.weightIn}
               weightOut={facts.weightOut}
               batchCheck={batchCheck}
-              startingConditions={profile.roaster_settings?.starting_conditions}
-              environmentalNotes={profile.environmental_notes}
+              startingConditions={view.isV2 ? undefined : profile.roaster_settings?.starting_conditions}
+              environmentalNotes={showEnvNotes ? envNotes : undefined}
               instructions={profile.roaster_settings?.instructions}
             />
           </div>
@@ -526,12 +602,31 @@ const RoastProfileDetails = () => {
           </>
         )}
 
+        {isOwner && (
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this roast?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {view.beanName} and its tasting notes will be removed for good. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleting}>Cancel</Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Deleting…" : "Delete roast"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
         <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Sign in to like roasts</AlertDialogTitle>
               <AlertDialogDescription>
-                Create a free account or sign in to like roast profiles and keep track of your favorites.
+                Create a free account or sign in to like roasts and keep track of your favourites.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

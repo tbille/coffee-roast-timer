@@ -1,44 +1,44 @@
 /**
  * useRoastSession
  *
- * Shared state for every roaster mode on /roast:
- * - a wall-clock timer (accurate in background tabs, correct across any number of pauses)
- * - crack event recording
- * - crash/reload recovery via localStorage
+ * The roast console's clock and log:
+ * - a wall-clock timer (accurate in background tabs, millisecond precision)
+ * - crash/reload recovery via localStorage (`restoredMs` tells the UI it happened)
  *
  * State is split in two:
- * - `settings`: choices made before/while roasting (batch size, profile, heat level...).
+ * - `settings`: choices made before roasting (machine, batch, starting settings).
  *   Kept when a new roast starts.
- * - `log`: what was recorded during the roast (temperatures, cracks...).
- *   Cleared when a new roast starts or the session is reset.
+ * - `log`: what was recorded during the roast. Re-seeded on Charge, cleared on reset.
+ *
+ * There is no pause in the console: pausing hides real roast time and skews the
+ * development ratio. `pause`/`resume` stay in the API for compatibility only.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CrackEvent } from '@/types/roast-data.types';
 
 export type RoastStatus = 'idle' | 'running' | 'paused' | 'stopped';
 
 interface RoastClock {
   status: RoastStatus;
-  /** Wall-clock ms when Start was pressed */
+  /** Wall-clock ms at Charge */
   startedAt: number | null;
-  /** Wall-clock ms when Stop was pressed */
+  /** Wall-clock ms at Drop */
   endedAt: number | null;
-  /** Running time banked by previous run segments (excludes pauses) */
+  /** Running time banked by previous run segments */
   accumulatedMs: number;
   /** Wall-clock ms when the current run segment began; null unless running */
   segmentStartedAt: number | null;
 }
 
 interface StoredSession<S, L> {
-  version: 1;
+  version: 2;
   savedAt: number;
   clock: RoastClock;
   settings: S;
   log: L;
 }
 
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const TICK_MS = 250;
 
@@ -70,49 +70,49 @@ function readStoredSession<S, L>(key: string): StoredSession<S, L> | null {
   }
 }
 
-export interface RoastSession<S, L extends { crackEvents: CrackEvent[] }> {
+export interface RoastSession<S, L> {
   status: RoastStatus;
-  /** Timer is ticking */
   isRunning: boolean;
+  /** Always false in the console; kept for API compatibility */
   isPaused: boolean;
   /** A roast is in progress (running or paused) */
   inProgress: boolean;
   /** Recording controls should be enabled */
   canRecord: boolean;
+  /** Elapsed ms at the last render (re-renders 4x per second while running) */
+  elapsedMs: number;
   elapsedSeconds: number;
-  /** Elapsed seconds computed at call time; use when recording an event */
-  currentElapsed: () => number;
+  /** Elapsed ms computed at call time; use it to stamp an event */
+  currentElapsedMs: () => number;
   startTime: number | null;
   endTime: number | null;
+  /** Elapsed ms at the moment a running/stopped session was restored after a reload; null otherwise */
+  restoredMs: number | null;
+  dismissRestored: () => void;
 
   settings: S;
   updateSettings: (patch: Partial<S>) => void;
   log: L;
-  /**
-   * Add something to the log, stamped with the current elapsed time.
-   * Ignored unless the timer is running. Returns whether it was recorded.
-   */
-  record: (updater: (log: L, elapsedSeconds: number) => L) => boolean;
+  /** Updates the log (any status but idle). */
+  updateLog: (updater: (log: L) => L) => void;
 
-  firstCrack: CrackEvent | undefined;
-  secondCrack: CrackEvent | undefined;
-  recordCrack: (type: CrackEvent['type'], extra?: Pick<CrackEvent, 'targetTemp' | 'currentTemp'>) => void;
-
-  start: () => void;
+  /** Charge: t = 0. `seed` builds the fresh log from the current settings. */
+  start: (seed?: (settings: S) => Partial<L>) => void;
+  /** @deprecated No pause in the console. No-op unless something calls it. */
   pause: () => void;
+  /** @deprecated See pause. */
   resume: () => void;
-  stop: () => void;
+  /** Drop. `atElapsedMs` stops the clock at that elapsed time (stamped at pointer-down). */
+  stop: (atElapsedMs?: number) => void;
+  /** Undo a Drop: the clock continues as if it had never stopped. */
+  undoStop: () => void;
   reset: () => void;
 }
 
-export function useRoastSession<S extends object, L extends { crackEvents: CrackEvent[] }>(
+export function useRoastSession<S extends object, L extends object>(
   storageKey: string,
   initialSettings: S,
   initialLog: L,
-  options: {
-    /** Entries to seed the log with when a roast starts (e.g. initial heat/fan settings) */
-    seedLogOnStart?: (settings: S) => Partial<L>;
-  } = {},
 ): RoastSession<S, L> {
   // Defaults are captured once so callers can pass object literals.
   const defaults = useRef({ settings: initialSettings, log: initialLog });
@@ -121,22 +121,19 @@ export function useRoastSession<S extends object, L extends { crackEvents: Crack
   const [clock, setClock] = useState<RoastClock>(restored?.clock ?? IDLE_CLOCK);
   const [settings, setSettings] = useState<S>(() => ({ ...initialSettings, ...restored?.settings }));
   const [log, setLog] = useState<L>(() => ({ ...initialLog, ...restored?.log }));
-  // Only used to re-render once per elapsed second while the timer runs.
-  const [, setTick] = useState(0);
+  const [restoredMs, setRestoredMs] = useState<number | null>(() =>
+    restored && restored.clock.status !== 'idle' ? runningMs(restored.clock, Date.now()) : null,
+  );
+  const [now, setNow] = useState(() => Date.now());
 
   const clockRef = useRef(clock);
   clockRef.current = clock;
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
-  const seedRef = useRef(options.seedLogOnStart);
-  seedRef.current = options.seedLogOnStart;
 
-  // Re-render while running. Elapsed time is derived from the wall clock,
-  // so throttled intervals (background tabs) never cause drift.
   useEffect(() => {
     if (clock.status !== 'running') return;
-    const tick = () => setTick(Math.floor(runningMs(clockRef.current, Date.now()) / 1000));
-    const id = setInterval(tick, TICK_MS);
+    const id = setInterval(() => setNow(Date.now()), TICK_MS);
     return () => clearInterval(id);
   }, [clock.status]);
 
@@ -147,28 +144,21 @@ export function useRoastSession<S extends object, L extends { crackEvents: Crack
         localStorage.removeItem(storageKey);
         return;
       }
-      const session: StoredSession<S, L> = {
-        version: STORAGE_VERSION,
-        savedAt: Date.now(),
-        clock,
-        settings,
-        log,
-      };
+      const session: StoredSession<S, L> = { version: STORAGE_VERSION, savedAt: Date.now(), clock, settings, log };
       localStorage.setItem(storageKey, JSON.stringify(session));
     } catch {
       // Storage unavailable (private mode, quota): recovery is best-effort.
     }
   }, [storageKey, clock, settings, log]);
 
-  const currentElapsed = useCallback(
-    () => Math.floor(runningMs(clockRef.current, Date.now()) / 1000),
-    [],
-  );
+  const currentElapsedMs = useCallback(() => runningMs(clockRef.current, Date.now()), []);
 
-  const start = useCallback(() => {
+  const start = useCallback((seed?: (settings: S) => Partial<L>) => {
     const t = Date.now();
     setClock({ status: 'running', startedAt: t, endedAt: null, accumulatedMs: 0, segmentStartedAt: t });
-    setLog({ ...defaults.current.log, ...seedRef.current?.(settingsRef.current) });
+    setLog({ ...defaults.current.log, ...seed?.(settingsRef.current) });
+    setRestoredMs(null);
+    setNow(t);
   }, []);
 
   const pause = useCallback(() => {
@@ -183,39 +173,44 @@ export function useRoastSession<S extends object, L extends { crackEvents: Crack
     setClock(c => (c.status === 'paused' ? { ...c, status: 'running', segmentStartedAt: t } : c));
   }, []);
 
-  const stop = useCallback(() => {
+  const stop = useCallback((atElapsedMs?: number) => {
     setClock(c => {
       if (c.status !== 'running' && c.status !== 'paused') return c;
       const t = Date.now();
-      return { ...c, status: 'stopped', endedAt: t, accumulatedMs: runningMs(c, t), segmentStartedAt: null };
+      const elapsed = runningMs(c, t);
+      const at = atElapsedMs !== undefined && atElapsedMs <= elapsed ? atElapsedMs : elapsed;
+      // endedAt is the wall-clock moment matching `at`, so undoStop can continue seamlessly.
+      return { ...c, status: 'stopped', endedAt: t - (elapsed - at), accumulatedMs: at, segmentStartedAt: null };
     });
+  }, []);
+
+  const undoStop = useCallback(() => {
+    setClock(c => {
+      if (c.status !== 'stopped' || c.endedAt === null) return c;
+      return { ...c, status: 'running', endedAt: null, segmentStartedAt: c.endedAt };
+    });
+    setNow(Date.now());
   }, []);
 
   const reset = useCallback(() => {
     setClock(IDLE_CLOCK);
     setLog(defaults.current.log);
+    setRestoredMs(null);
   }, []);
 
   const updateSettings = useCallback((patch: Partial<S>) => {
     setSettings(s => ({ ...s, ...patch }));
   }, []);
 
-  const record = useCallback<RoastSession<S, L>['record']>((updater) => {
-    if (clockRef.current.status !== 'running') return false;
-    const time = currentElapsed();
-    setLog(l => updater(l, time));
-    return true;
-  }, [currentElapsed]);
+  const updateLog = useCallback((updater: (log: L) => L) => {
+    if (clockRef.current.status === 'idle') return;
+    setLog(updater);
+  }, []);
 
-  const recordCrack = useCallback<RoastSession<S, L>['recordCrack']>((type, extra) => {
-    record((l, time) => {
-      if (l.crackEvents.some(e => e.type === type)) return l;
-      if (type === 'second' && !l.crackEvents.some(e => e.type === 'first')) return l;
-      return { ...l, crackEvents: [...l.crackEvents, { type, time, timestamp: Date.now(), ...extra }] };
-    });
-  }, [record]);
+  const dismissRestored = useCallback(() => setRestoredMs(null), []);
 
   const status = clock.status;
+  const elapsedMs = runningMs(clock, status === 'running' ? Math.max(now, Date.now()) : Date.now());
 
   return {
     status,
@@ -223,21 +218,22 @@ export function useRoastSession<S extends object, L extends { crackEvents: Crack
     isPaused: status === 'paused',
     inProgress: status === 'running' || status === 'paused',
     canRecord: status === 'running',
-    elapsedSeconds: Math.floor(runningMs(clock, Date.now()) / 1000),
-    currentElapsed,
+    elapsedMs,
+    elapsedSeconds: Math.floor(elapsedMs / 1000),
+    currentElapsedMs,
     startTime: clock.startedAt,
     endTime: clock.endedAt,
+    restoredMs,
+    dismissRestored,
     settings,
     updateSettings,
     log,
-    record,
-    firstCrack: log.crackEvents.find(e => e.type === 'first'),
-    secondCrack: log.crackEvents.find(e => e.type === 'second'),
-    recordCrack,
+    updateLog,
     start,
     pause,
     resume,
     stop,
+    undoStop,
     reset,
   };
 }

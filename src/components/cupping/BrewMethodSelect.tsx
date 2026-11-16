@@ -11,12 +11,12 @@ interface BrewMethodSelectProps {
 export function BrewMethodSelect({ value, onChange }: BrewMethodSelectProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor="brew-method">Brew Method</Label>
+      <Label htmlFor="brew-method">Brew method</Label>
       <Select value={value || ''} onValueChange={onChange}>
         <SelectTrigger id="brew-method" className="w-full">
           <div className="flex items-center gap-2">
-            <Coffee className="h-4 w-4 text-muted-foreground" />
-            <SelectValue placeholder="Select brew method..." />
+            <Coffee className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            <SelectValue placeholder="Choose a brew method" />
           </div>
         </SelectTrigger>
         <SelectContent>

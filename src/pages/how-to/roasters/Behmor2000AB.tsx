@@ -7,57 +7,84 @@ const Behmor2000AB = () => (
   <DocsLayout slug="behmor-2000ab">
     <RoasterFacts
       roaster="behmor-2000ab"
-      extra={[{ label: "You control", value: "Profile and added time" }]}
+      extra={[{ label: "You control", value: "Weight, program and added time" }]}
     />
 
     <H2 id="how-it-works">How the Behmor works</H2>
+    <p>The front panel gives you three main levers:</p>
+    <ul>
+      <li>
+        <strong>Weight button</strong> (¼ lb, ½ lb, 1 lb). It sets the starting roast time shown on the LCD. Pick the one
+        closest to your batch.
+      </li>
+      <li>
+        <strong>Program</strong> (P1 to P5). In automatic mode each program applies heat differently over that time; P1
+        is the one with the most heat.
+      </li>
+      <li>
+        <strong>+ and −</strong> change the time left on the LCD. Pressing + during the roast is how you extend it.
+      </li>
+    </ul>
     <p>
-      You choose a batch weight, which sets the roast time, and a profile (P1 to P5), which sets how heat is applied
-      over that time. The roaster then counts down. Your main lever during the roast is adding time: press{" "}
-      <strong>+</strong> on the roaster to extend it.
+      The 2000AB Plus also has a <strong>manual mode</strong>. There, P1 to P5 become heat power levels from 0% to 100% in
+      25% steps that you change as you go, and D changes the drum speed. Check your manual for how to enter it on your
+      unit's firmware.
     </p>
     <p>There's no temperature readout, so you roast by time, sight and sound. That's exactly what Roast Timer records.</p>
 
     <Callout variant="warning" title="Press Start at the 75% prompt">
-      About three quarters of the way through, the Behmor beeps and flashes. You have to press <strong>Start</strong>{" "}
-      again within a few seconds, or it stops heating, goes into cooling and shows <strong>Err 7</strong>. It's a
-      safety feature to make sure someone is watching. Stay with the roaster.
+      About three quarters of the way through the set time, the Behmor beeps and flashes. You have about 30 seconds to
+      press <strong>Start</strong> again, or it stops heating and shows <strong>Err 7</strong>. It's a safety feature
+      to make sure someone is watching. Stay with the roaster, and keep the chaff tray clean: built-up chaff is what
+      catches fire.
     </Callout>
 
     <H2 id="setup">Set up Roast Timer</H2>
     <Steps>
       <Step title="Choose the Behmor">
         <p>
-          Open <Link to="/roast?roaster=behmor-2000ab">the timer</Link> and pick <Ui>Behmor 2000AB</Ui> from the roaster
-          menu.
+          Open <Link to="/roast?roaster=behmor-2000ab">the timer</Link> and pick <Ui>Behmor 2000AB Plus</Ui>.
         </p>
       </Step>
-      <Step title="Match the profile and batch size">
+      <Step title="Match the weight button, program and time">
         <p>
-          Pick the same profile in the app as on the roaster, and enter your batch weight. The app's countdown starts
-          from a typical time for that profile; your Behmor's display is the one to trust if they differ.
+          Enter your batch weight, then pick the same weight button and program you pressed on the roaster. The app
+          fills in a starting time from the weight button; change it to what your LCD actually shows, because that's
+          the number to trust.
         </p>
       </Step>
     </Steps>
 
     <H2 id="during">During the roast</H2>
     <Steps>
-      <Step title="Press Start Roast when you press Start on the Behmor">
-        <p>The app counts down alongside the machine.</p>
+      <Step title="Charge when you press Start on the Behmor">
+        <p>
+          Press <Ui>Charge — start timer</Ui> at the same moment. The roast screen counts up like every other machine,
+          and shows the LCD's remaining time as secondary information so you can glance at both.
+        </p>
       </Step>
       <Step title="Log every extension">
         <p>
-          Each time you press <strong>+</strong> on the roaster, press <Ui>Add 30 Seconds</Ui> in the app (up to six
-          times). The app records when you added it, which is what you'll need to repeat the roast.
+          Each time you press + on the roaster, tap <Ui>+30 s</Ui> in the app. It's logged with the time you added it,
+          which is what you'll need to repeat the roast.
+        </p>
+      </Step>
+      <Step title="In manual mode, log the power changes">
+        <p>
+          When you switch to a different P power level, tap the same program on screen. Each change is logged with its
+          time.
         </p>
       </Step>
       <Step title="Watch and listen through the door">
-        <p>Look for yellowing, then browning, and listen for first crack. Press <Ui>First Crack</Ui> when it starts.</p>
-      </Step>
-      <Step title="Stop when you press Cool">
         <p>
-          When the beans reach your color, press <strong>Cool</strong> on the Behmor and <Ui>Stop</Ui> in the app. The
-          Behmor cools the beans in the drum.
+          Tap <Ui>Yellowing</Ui> when the beans turn pale yellow, then <Ui>First crack</Ui> when the cracking starts.
+          The Behmor manual itself says to judge it by sound, not by the clock.
+        </p>
+      </Step>
+      <Step title="Drop when you press Cool">
+        <p>
+          When the beans reach your color, press <strong>Cool</strong> on the Behmor and <Ui>Drop</Ui> in the app. The
+          Behmor cools the beans in the drum, so they keep roasting a little at first: drop a shade early.
         </p>
       </Step>
     </Steps>
@@ -77,7 +104,8 @@ const Behmor2000AB = () => (
         gives more room to steer.
       </li>
       <li>
-        <strong>Aim for about 2–3 minutes after first crack</strong> for a medium roast, then adjust by taste.
+        <strong>Start around 2–3 minutes after first crack</strong> for a medium roast, then adjust by taste. The
+        in-drum cooling adds a little more.
       </li>
     </ul>
 

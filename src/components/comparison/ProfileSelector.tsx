@@ -1,306 +1,125 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card } from '@/components/ui/card';
-import { Search, X } from 'lucide-react';
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RoastCard } from "@/components/roast-card/RoastCard";
+import { useDiscoverRows } from "@/components/discover/useDiscoverRows";
+import { useAuth } from "@/hooks/useAuth";
 
-interface Profile {
-  id: string;
-  beans_name: string;
-  origin?: string;
-  coffee_roaster?: string;
-  created_at: string;
-  duration_seconds: number;
-  user_id: string;
-  profiles?: {
-    username?: string;
-  };
-}
+const PAGE_SIZE = 24;
 
 interface ProfileSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedIds: string[];
-  onSelect: (profileIds: string[]) => void;
-  excludeId?: string; // Exclude current profile when comparing from details page
+  /** Called with the chosen roast id; the sheet closes itself */
+  onSelect: (id: string) => void;
+  /** Title, e.g. "Pick roast A" */
+  title?: string;
+  /** Roast already in the other slot (shown as unavailable) */
+  excludeId?: string;
 }
 
-export const ProfileSelector = ({
-  open,
-  onOpenChange,
-  selectedIds,
-  onSelect,
-  excludeId,
-}: ProfileSelectorProps) => {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
+/** Picks one roast for a compare slot: search, mine/all, RoastCards. */
+export const ProfileSelector = ({ open, onOpenChange, onSelect, title = "Pick a roast", excludeId }: ProfileSelectorProps) => {
   const { user } = useAuth();
-  const isMobile = useIsMobile();
-  const isDesktop = !isMobile;
+  const { data: rows = [], isLoading, isError, refetch } = useDiscoverRows(open);
+  const [query, setQuery] = useState("");
+  const [scope, setScope] = useState<"all" | "mine">("all");
+  const [limit, setLimit] = useState(PAGE_SIZE);
 
-  useEffect(() => {
-    if (open) {
-      fetchProfiles();
-    }
-  }, [open]);
+  const results = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return rows
+      .filter((r) => r.id !== excludeId)
+      .filter((r) => scope === "all" || (user && r.userId === user.id))
+      .filter((r) => terms.every((t) => r.searchText.includes(t)));
+  }, [rows, query, scope, user, excludeId]);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredProfiles(profiles);
-    } else {
-      const query = searchQuery.toLowerCase();
-      setFilteredProfiles(
-        profiles.filter(
-          (p) =>
-            p.beans_name.toLowerCase().includes(query) ||
-            p.origin?.toLowerCase().includes(query) ||
-            p.coffee_roaster?.toLowerCase().includes(query) ||
-            p.profiles?.username?.toLowerCase().includes(query)
-        )
-      );
-    }
-  }, [searchQuery, profiles]);
+  const visible = results.slice(0, limit);
 
-  const fetchProfiles = async () => {
-    setLoading(true);
-
-    try {
-      // First, fetch roast profiles
-      const { data: roastData, error: roastError } = await supabase
-        .from('roast_profiles')
-        .select('id, beans_name, origin, coffee_roaster, created_at, duration_seconds, user_id')
-        .order('created_at', { ascending: false });
-
-      if (roastError) {
-        console.error('Supabase error fetching profiles:', roastError);
-        throw roastError;
-      }
-
-      console.log('Fetched roast profiles:', roastData?.length || 0);
-
-      if (!roastData || roastData.length === 0) {
-        setProfiles([]);
-        setFilteredProfiles([]);
-        setLoading(false);
-        return;
-      }
-
-      // Get unique user IDs
-      const userIds = [...new Set(roastData.map(p => p.user_id))];
-      
-      // Fetch usernames for those users
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, username')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.warn('Could not fetch usernames:', profilesError);
-        // Continue without usernames
-      }
-
-      // Create a map of user_id to username
-      const usernameMap = new Map(
-        (profilesData || []).map(p => [p.id, p.username])
-      );
-
-      // Combine the data
-      const combined = roastData.map(profile => ({
-        ...profile,
-        profiles: {
-          username: usernameMap.get(profile.user_id)
-        }
-      }));
-
-      // Filter out excluded profile if provided
-      const filtered = excludeId
-        ? combined.filter((p) => p.id !== excludeId)
-        : combined;
-
-      setProfiles(filtered);
-      setFilteredProfiles(filtered);
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast.error(`Failed to load profiles: ${errorMessage}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleProfile = (profileId: string) => {
-    if (selectedIds.includes(profileId)) {
-      onSelect(selectedIds.filter((id) => id !== profileId));
-    } else {
-      if (selectedIds.length >= 2) {
-        toast.message("Maximum reached", { description: 'You can compare up to 2 profiles at a time.' });
-        return;
-      }
-      onSelect([...selectedIds, profileId]);
-    }
-  };
-
-  const handleCompare = () => {
-    if (selectedIds.length === 0) {
-      toast.message("No selection", { description: 'Please select at least one profile to compare.' });
-      return;
-    }
+  const choose = (id: string) => {
+    onSelect(id);
     onOpenChange(false);
   };
 
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const content = (
-    <div className="flex flex-col h-full">
-      {/* Search Bar */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder="Search by beans, origin, roaster, or user..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 pr-9"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Selection Count */}
-      <div className="mb-3 text-sm text-muted-foreground">
-        {selectedIds.length} of 2 profiles selected
-      </div>
-
-      {/* Profile List */}
-      <ScrollArea className="flex-1 -mx-4 px-4">
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading profiles...</div>
-        ) : filteredProfiles.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {searchQuery ? 'No profiles found matching your search.' : 'No profiles available.'}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredProfiles.map((profile) => {
-              const isSelected = selectedIds.includes(profile.id);
-              return (
-                <Card
-                  key={profile.id}
-                  className={`p-3 cursor-pointer transition-all ${
-                    isSelected
-                      ? 'border-primary border-2 bg-primary/5'
-                      : 'border hover:border-primary/50'
-                  }`}
-                  onClick={() => toggleProfile(profile.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm truncate">{profile.beans_name}</h4>
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
-                        {profile.profiles?.username && (
-                          <span className="font-medium">by {profile.profiles.username}</span>
-                        )}
-                        {profile.origin && <span>{profile.origin}</span>}
-                        {profile.coffee_roaster && <span>{profile.coffee_roaster}</span>}
-                        <span>{formatDuration(profile.duration_seconds)}</span>
-                        <span>{formatDate(profile.created_at)}</span>
-                      </div>
-                    </div>
-                    {isSelected && (
-                      <div className="ml-2 shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
-                        {selectedIds.indexOf(profile.id) + 1}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </ScrollArea>
-
-      {/* Action Buttons */}
-      <div className="mt-4 flex gap-2">
-        <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleCompare}
-          disabled={selectedIds.length === 0}
-          className="flex-1"
-        >
-          Compare {selectedIds.length > 0 && `(${selectedIds.length})`}
-        </Button>
-      </div>
-    </div>
-  );
-
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Select Profiles to Compare</DialogTitle>
-            <DialogDescription>
-              Choose up to 2 profiles from any user to compare side by side.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden">{content}</div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[85vh]">
-        <DrawerHeader>
-          <DrawerTitle>Select Profiles to Compare</DrawerTitle>
-          <DrawerDescription>
-            Choose up to 2 profiles from any user to compare side by side.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="px-4 flex-1 overflow-hidden pb-4">{content}</div>
-      </DrawerContent>
-    </Drawer>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="flex w-full flex-col gap-4 overflow-hidden sm:max-w-lg">
+        <SheetHeader>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>Any saved roast, yours or from the community.</SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <Label htmlFor="compare-search" className="sr-only">Search roasts</Label>
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            <Input
+              id="compare-search"
+              type="search"
+              placeholder="Search bean, origin, process or roaster"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setLimit(PAGE_SIZE);
+              }}
+              className="pl-9"
+            />
+          </div>
+          {user && (
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={scope}
+              onValueChange={(v) => {
+                if (!v) return;
+                setScope(v as "all" | "mine");
+                setLimit(PAGE_SIZE);
+              }}
+              aria-label="Which roasts"
+              className="justify-start"
+            >
+              <ToggleGroupItem value="all" className="px-3">All roasts</ToggleGroupItem>
+              <ToggleGroupItem value="mine" className="px-3">My roasts</ToggleGroupItem>
+            </ToggleGroup>
+          )}
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {isLoading ? "Loading roasts…" : `${results.length} ${results.length === 1 ? "roast" : "roasts"}`}
+          </p>
+        </div>
+
+        <div className="-mx-6 flex-1 overflow-y-auto px-6 pb-6">
+          {isError ? (
+            <div className="rounded-lg border p-6 text-center text-sm">
+              <p>Roasts could not be loaded.</p>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>Try again</Button>
+            </div>
+          ) : (
+            <>
+              <ul className="space-y-3">
+                {visible.map((card) => (
+                  <RoastCard key={card.id} card={card} href={null} headingLevel="h3">
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => choose(card.id)}>
+                      Compare this roast<span className="sr-only">: {card.title}</span>
+                    </Button>
+                  </RoastCard>
+                ))}
+              </ul>
+              {results.length > visible.length && (
+                <div className="mt-4 flex justify-center">
+                  <Button variant="ghost" onClick={() => setLimit((n) => n + PAGE_SIZE)}>
+                    Show more <span className="ml-1 font-mono text-xs tabular-nums text-muted-foreground">{visible.length} of {results.length}</span>
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };

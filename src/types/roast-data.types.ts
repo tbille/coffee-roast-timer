@@ -11,6 +11,8 @@ export interface BaseRoastData {
   startTime: number;                // Unix timestamp (ms) when roast started
   endTime?: number;                 // Unix timestamp (ms) when roast ended
   crackEvents: CrackEvent[];        // First and second crack events
+  /** 2 for roasts recorded by the console (events in ms, temperatures in °C). Absent on legacy rows. */
+  schema_version?: number;
 }
 
 /**
@@ -18,7 +20,7 @@ export interface BaseRoastData {
  * Records when cracks occur during the roast
  */
 export interface CrackEvent {
-  time: number;                     // Seconds elapsed from start (excluding pauses)
+  time: number;                     // Seconds elapsed since charge
   type: 'first' | 'second';         // Crack type
   targetTemp?: number;              // Target temp at time of crack (Gene mode)
   currentTemp?: number;             // Actual temp at time of crack
@@ -47,13 +49,23 @@ export interface TemperatureDataPoint {
  */
 export interface ProfileBasedRoastData extends BaseRoastData {
   mode: 'profile-based';
-  profile: BehmortProfile;          // Selected profile
-  baseDuration: number;             // Base profile duration (seconds)
-  extensions: Extension[];          // Manual time extensions
+  profile: BehmorProfile;           // Program chosen before Start
+  baseDuration: number;             // Time shown on the LCD at Start (seconds)
+  extensions: Extension[];          // "+" presses (time added)
   temperatureData?: OptionalTempDataPoint[]; // Optional external probe readings
+  /** Weight button pressed before Start: '1/4 lb' | '1/2 lb' | '1 lb' */
+  weightButton?: string;
+  /** Manual mode presses during the roast: "P3" (power) or "D" (drum speed) */
+  manualControls?: BehmorManualPress[];
 }
 
-export type BehmortProfile = 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'Manual';
+export type BehmorProfile = 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'Manual';
+
+export interface BehmorManualPress {
+  time: number;                     // Seconds elapsed since charge
+  setting: string;                  // "P1"…"P5" power level, or "D" drum speed toggle
+  timestamp: number;
+}
 
 export interface Extension {
   time: number;                     // Seconds elapsed when extension added
@@ -84,8 +96,10 @@ export interface SettingChange {
   timestamp: number;                // Unix timestamp of change
 }
 
-export type HeatLevel = 'Low' | 'Medium' | 'High';
-export type FanSpeed = 'Low' | 'Medium' | 'High';
+/** 1–9 on the SR800 dial. Legacy rows used 'Low' | 'Medium' | 'High'. */
+export type HeatLevel = number | 'Low' | 'Medium' | 'High';
+/** 1–9 on the SR800 dial. Legacy rows used 'Low' | 'Medium' | 'High'. */
+export type FanSpeed = number | 'Low' | 'Medium' | 'High';
 
 /**
  * KALDI/Manual: Simple temperature tracking
@@ -150,7 +164,8 @@ export interface HottopRoastData extends BaseRoastData {
   artisanFilePath?: string;         // Original Artisan CSV path
 }
 
-export type HottopMode = 'auto-light' | 'auto-medium' | 'auto-dark' | 'manual';
+/** 'auto' and 'manual' are the machine's two modes. 'auto-*' values exist on legacy rows only. */
+export type HottopMode = 'auto' | 'manual' | 'auto-light' | 'auto-medium' | 'auto-dark';
 
 export interface HottopTempDataPoint {
   time: number;                     // Seconds elapsed from start

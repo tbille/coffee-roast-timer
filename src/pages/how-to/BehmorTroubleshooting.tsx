@@ -11,7 +11,7 @@ const faqSchema = {
       name: "Why is first crack late on my Behmor 2000AB?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Late first crack on a Behmor is usually caused by too large a batch, a cold room or roaster, or low line voltage. Try a smaller batch, a hotter profile such as P1, and roasting at the same starting temperature each time.",
+        text: "Late first crack on a Behmor is usually caused by too large a batch, a cold room or roaster, or low line voltage. Try a smaller batch, a hotter program such as P1, and starting from the same roaster temperature each time.",
       },
     },
     {
@@ -19,7 +19,7 @@ const faqSchema = {
       name: "What does Err 7 mean on a Behmor?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Err 7 means Start was not pressed at the 75% safety prompt, so the roaster stopped heating and went into cooling. Stay with the roaster and press Start when it beeps.",
+        text: "Err 7 means Start was not pressed within about 30 seconds of the safety prompt at 75% of the roast time, so the roaster stopped heating. Stay with the roaster and press Start when it beeps.",
       },
     },
     {
@@ -27,7 +27,7 @@ const faqSchema = {
       name: "How should I use extensions on a Behmor?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Add time earlier in the roast to keep momentum, rather than stacking extensions at the very end.",
+        text: "Press + to add time earlier in the roast to keep momentum, rather than stacking extensions at the very end. Log each one with +30 s in Roast Timer.",
       },
     },
   ],
@@ -44,7 +44,7 @@ const BehmorTroubleshooting = () => (
     <p>The roaster isn't getting enough energy into the beans.</p>
     <ol>
       <li>Reduce the batch size. Try around 340 g instead of a full pound.</li>
-      <li>Use a hotter profile. P1 applies full power throughout.</li>
+      <li>Use a hotter program. In automatic mode P1 applies the most heat; in manual mode, stay on P5 (100%) longer early on.</li>
       <li>Roast somewhere warmer. A cold garage or a breeze can add minutes.</li>
       <li>
         Avoid extension cords and shared circuits. The Behmor is sensitive to low voltage, and it shows up as slow
@@ -55,21 +55,21 @@ const BehmorTroubleshooting = () => (
     <H2 id="stall">The roast stalls after adding time</H2>
     <p>
       If you add all your time in the last minute, the roast often loses momentum and tastes flat. Add extensions in the
-      middle of the roast instead, and log each one with <strong>Add 30 Seconds</strong> so you can see when you added
-      it.
+      middle of the roast instead, and log each one with <strong>+30 s</strong> so you can see when you added it on
+      the saved roast.
     </p>
 
     <H2 id="err-7">The roaster stopped and shows Err 7</H2>
     <p>
-      You missed the 75% prompt. About three quarters through the roast, the Behmor beeps and flashes; you have a few
-      seconds to press <strong>Start</strong>. The roast is over at that point. Let it cool, weigh the beans and save the
-      roast with a note so you don't compare it with complete roasts.
+      You missed the 75% prompt. About three quarters through the set time, the Behmor beeps and flashes; you have about
+      30 seconds to press <strong>Start</strong>. The roast is over at that point. Tap <strong>Drop</strong>, let the
+      beans cool, weigh them and save the roast with a note so you don't compare it with complete roasts.
     </p>
 
     <H2 id="uneven">Color is uneven</H2>
     <ol>
       <li>Reduce the batch size so beans can tumble freely.</li>
-      <li>Clean the chaff tray and drum. Built-up chaff blocks heat.</li>
+      <li>Clean the chaff tray and drum. Built-up chaff blocks heat and is a fire risk.</li>
       <li>Check that the drum is seated properly and turning.</li>
     </ol>
 

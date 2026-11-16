@@ -3,10 +3,9 @@ import { Link } from "react-router";
 import { ArrowRight, BookOpen, ChevronRight, Compass, Flame, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DocsSidebar } from "@/components/guides/DocsLayout";
+import { PageHeader } from "@/components/ui/page-header";
 import { DOC_SECTIONS, DOCS, docsBySection, getDoc, type DocEntry, type DocSectionId } from "@/content/docs";
 import { absoluteUrl } from "@/content/siteContent";
-import { getRoasterPrimaryColor } from "@/utils/roasterColors";
-import type { RoasterType } from "@/types/roaster.types";
 
 const SECTION_ICONS: Record<DocSectionId, LucideIcon> = {
   start: Compass,
@@ -25,7 +24,7 @@ function GuideRow({ doc }: { doc: DocEntry }) {
         </span>
         <span className="flex shrink-0 items-center gap-2 pt-0.5 text-xs text-muted-foreground">
           <span className="hidden sm:inline">{doc.readingMinutes} min</span>
-          <ChevronRight className="h-4 w-4 group-hover:text-primary" aria-hidden />
+          <ChevronRight className="h-4 w-4 group-hover:text-primary" strokeWidth={1.75} aria-hidden />
         </span>
       </Link>
     </li>
@@ -35,13 +34,8 @@ function GuideRow({ doc }: { doc: DocEntry }) {
 function RoasterTile({ doc }: { doc: DocEntry }) {
   const extras = DOCS.filter((d) => d.section === "roasters" && !d.roasterId && d.related?.includes(doc.slug));
   return (
-    <li className="rounded-lg border p-4 transition-colors hover:border-primary/40">
-      <Link to={doc.path} className="group flex items-center gap-2 font-medium hover:text-primary">
-        <span
-          className="h-2.5 w-2.5 shrink-0 rounded-full"
-          style={{ backgroundColor: getRoasterPrimaryColor(doc.roasterId as RoasterType) }}
-          aria-hidden
-        />
+    <li className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/40">
+      <Link to={doc.path} className="font-medium hover:text-primary">
         {doc.navTitle ?? doc.title}
       </Link>
       {extras.map((extra) => (
@@ -66,13 +60,13 @@ const HowTo = () => {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Guides", item: absoluteUrl("/how-to") },
+      { "@type": "ListItem", position: 2, name: "Learn", item: absoluteUrl("/how-to") },
     ],
   };
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Coffee Roasting Guides",
+    name: "Home coffee roasting guides",
     itemListElement: DOC_SECTIONS.flatMap((s) => groups[s.id]).map((doc, index) => ({
       "@type": "ListItem",
       position: index + 1,
@@ -84,13 +78,13 @@ const HowTo = () => {
   return (
     <>
       <Helmet>
-        <title>Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup</title>
+        <title>Home coffee roasting guides: first crack, defects and roaster setup · Roast Timer</title>
         <meta
           name="description"
           content="Guides for home coffee roasting with Roast Timer: log your first roast, fix first crack timing and defects, and set up a Gene Cafe, Behmor, FreshRoast, KALDI, Hottop or popcorn popper."
         />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Home Coffee Roasting Guides: First Crack, Defects, and Roaster Setup" />
+        <meta property="og:title" content="Home coffee roasting guides · Roast Timer" />
         <meta
           property="og:description"
           content="Practical home roasting guides: your first roast, troubleshooting, and roaster-specific setup."
@@ -102,7 +96,7 @@ const HowTo = () => {
         <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
       </Helmet>
 
-      <div className="container max-w-7xl px-4 py-8 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12">
         <aside className="hidden lg:block">
           <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2">
             <DocsSidebar />
@@ -110,24 +104,23 @@ const HowTo = () => {
         </aside>
 
         <div className="min-w-0 max-w-3xl">
-          <header>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Roasting guides</h1>
-            <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
-              Practical help for home roasters, from your first batch to dialing in a coffee you love. Written for
-              Roast Timer, but most of it applies to any roast.
-            </p>
-          </header>
+          <PageHeader
+            className="pb-0"
+            eyebrow="Learn"
+            title="Roasting guides"
+            description="Practical help for home roasters, from your first batch to dialing in a coffee you love. Written for Roast Timer, but most of it applies to any roast."
+          />
 
           <Link
             to={firstRoast.path}
-            className="group mt-8 flex items-center justify-between gap-4 rounded-lg border border-primary/30 bg-secondary/40 p-5 transition-colors hover:border-primary/60"
+            className="group mt-8 flex items-center justify-between gap-4 rounded-lg border bg-card p-5 transition-colors hover:border-primary/40"
           >
             <span>
-              <span className="text-sm font-medium text-primary">New here? Start with</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">New here? Start with</span>
               <span className="mt-0.5 block text-lg font-semibold text-foreground">{firstRoast.title}</span>
               <span className="mt-1 block text-sm text-muted-foreground">{firstRoast.description}</span>
             </span>
-            <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" aria-hidden />
+            <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" strokeWidth={1.75} aria-hidden />
           </Link>
 
           <nav aria-label="Guide sections" className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -137,11 +130,9 @@ const HowTo = () => {
                 <a
                   key={section.id}
                   href={`#${section.id}`}
-                  className="group rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/40"
+                  className="group rounded-lg border bg-card p-4 transition-colors hover:border-primary/40"
                 >
-                  <span className="inline-flex rounded-full bg-primary/10 p-2 text-primary">
-                    <Icon className="h-4 w-4" aria-hidden />
-                  </span>
+                  <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
                   <span className="mt-2 block font-medium group-hover:text-primary">{section.title}</span>
                   <span className="mt-1 block text-sm leading-snug text-muted-foreground">{section.blurb}</span>
                 </a>
@@ -174,7 +165,7 @@ const HowTo = () => {
           ))}
 
           <p className="mt-14 text-sm text-muted-foreground">
-            Spotted something missing or out of date? Tell us with the feedback link at the bottom of the page.
+            Spotted something missing or out of date? Say so with the feedback link at the bottom of the page.
           </p>
         </div>
       </div>

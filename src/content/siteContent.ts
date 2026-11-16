@@ -9,15 +9,25 @@
 import { DOCS, type DocEntry } from "./docs.ts";
 
 export const SITE_URL = "https://roast-timer.com";
-export const SITE_NAME = "Coffee Roast Timer";
+export const SITE_NAME = "Roast Timer";
+/** Longer form used only where search titles benefit (the home <title>). */
+export const SITE_SEO_NAME = "Coffee Roast Timer";
 
-export const SITE_TAGLINE = "Track home coffee roasts, first crack, and roast profiles";
+export const SITE_TAGLINE = "The roast companion for home coffee roasters";
+
+/** Short pitch used in meta descriptions. */
+export const SITE_DESCRIPTION =
+  "A free roast timer for home coffee roasters: a big clock, one tap for first crack, controls that match your machine, and every batch saved so you can roast it again.";
 
 export const SITE_SUMMARY =
-  "Coffee Roast Timer is a free web app for home coffee roasters. It times each roast, " +
-  "logs events such as first crack and second crack as they happen, calculates the " +
-  "development ratio, and saves every batch as a roast profile you can compare, repeat, " +
-  "and share. Roasters can also browse profiles from people using the same machine.";
+  "Roast Timer is a free web app for home coffee roasters. It runs in the browser with no account needed: " +
+  "a big clock, one tap each for yellowing, first crack and drop, a live phase ribbon, and controls that match " +
+  "the Gene Cafe CBR-101, Behmor 2000AB Plus, FreshRoast SR800, KALDI Wide, Hottop KN-8828B-2K+ and air " +
+  "popcorn poppers. After the drop it saves the roast with weight loss, development time and notes, and any " +
+  "saved roast can be followed live as a reference for the next batch.";
+
+/** Where the footer "Send feedback" link points. */
+export const FEEDBACK_URL = "https://forms.gle/RE2Dt1DF9yRLoZ9m9";
 
 export interface ContentLink {
   title: string;
@@ -27,24 +37,24 @@ export interface ContentLink {
 
 export const HOME_FEATURES: { title: string; text: string }[] = [
   {
-    title: "Roast timer with event logging",
-    text: "Start a timer and mark first crack, second crack, temperature readings and setting changes as they happen. Bean origin, green and roasted weights, and notes save with the roast.",
+    title: "A roast screen you can read from across the room",
+    text: "A huge clock, a phase ribbon for drying, Maillard and development that fills in from the moments you tap, and one big button for the next one: yellowing, first crack, drop. The screen stays awake, and a reload doesn't lose the roast.",
   },
   {
-    title: "Development ratio and weight loss",
-    text: "The app calculates development time after first crack, development ratio, and weight loss so you can see how far each batch was taken.",
+    title: "Controls that match your machine",
+    text: "SR800 heat and fan 1–9, Behmor weight, program and +30 s, Gene Cafe setpoint, Hottop heat and fan in percent, KALDI flame, and a popcorn popper mode with safety cues. Each tap is logged with its time. Temperature logging is optional.",
   },
   {
-    title: "Roast profiles you can repeat",
-    text: "Every saved roast becomes a profile with a timeline. Compare two roasts side by side and use a saved profile as the plan for your next batch.",
+    title: "A post-roast card with the numbers that matter",
+    text: "Type the weight out and see the weight loss next to total time, first crack and development. Add bean, origin, process, roast level, where you roasted and notes, and fix any event time you tapped late. Saved on your device without an account, synced when you sign in.",
   },
   {
-    title: "Community profiles by roaster",
-    text: "Browse first-crack and drop times shared by other home roasters, filtered by roaster model and coffee origin.",
+    title: "Roast it again",
+    text: "Follow any saved roast as a live reference: its yellowing, first crack and drop show as ghost markers and the clock tells you how far ahead or behind you are.",
   },
   {
-    title: "Cupping notes",
-    text: "Record tasting and cupping notes against each roast to connect roast decisions to flavor in the cup.",
+    title: "My roasts and Discover",
+    text: "Your roasts grouped by bean, with trends, a ready-to-taste list and CSV or JSON export. Discover shows community roasts with the same comparable numbers, filtered by machine.",
   },
 ];
 
@@ -66,57 +76,62 @@ export const GUIDES: ContentLink[] = DOCS.filter((d) => d.kind !== "Roaster guid
 
 export const MAIN_PAGES: ContentLink[] = [
   {
-    title: "Start a roast",
+    title: "Roast",
     path: "/roast",
     description: "Open the roast timer and log a new batch.",
   },
   {
-    title: "Discover roast profiles",
+    title: "Discover",
     path: "/discover",
-    description: "Search community roast profiles by roaster and coffee origin.",
+    description: "Community roasts with first crack, development and weight loss, filtered by machine and origin.",
   },
   {
-    title: "All roasting guides",
+    title: "Learn",
     path: "/how-to",
-    description: "Every how-to and roaster-specific guide.",
+    description: "Roasting guides: your first roast, fixing first crack timing, defects, and each supported machine.",
   },
   {
     title: "About",
     path: "/about",
-    description: "Why Coffee Roast Timer was built and who maintains it.",
+    description: "Why Roast Timer was built and who maintains it.",
   },
 ];
 
 export const HOME_FAQ: { question: string; answer: string }[] = [
   {
-    question: "What is Coffee Roast Timer?",
+    question: "What is Roast Timer?",
     answer:
-      "Coffee Roast Timer is a free web app for home coffee roasting. It times your roast, lets you mark first crack, second crack and temperature readings as they happen, and saves each batch as a roast profile you can review and repeat.",
+      "A free web app for home coffee roasting. It gives you a big clock and one button for each moment of the roast (yellowing, first crack, drop), logs the changes you make on your machine, and saves each batch with its weight loss and development time so you can roast it again.",
   },
   {
-    question: "Is Coffee Roast Timer free?",
+    question: "Do I need an account?",
     answer:
-      "Yes. All core features are free and no credit card is required. You can run the timer without an account; a free account is needed to save roasts and build your profile history.",
+      "No. The timer and the post-roast card work without one, and your roasts are kept on your device. Sign in with a free account when you want them synced across devices and shared on Discover.",
   },
   {
-    question: "Which coffee roasters are supported?",
+    question: "Which roasters does it support?",
     answer:
-      "Coffee Roast Timer has dedicated setups for the Gene Cafe CBR-101, Behmor 2000AB Plus, FreshRoast SR800, KALDI Wide, Hottop KN-8828B-2K+, and air popcorn poppers. Any other roaster can be tracked with the general temperature-logging setup.",
+      "Six machines have their own controls: Gene Cafe CBR-101, Behmor 2000AB Plus, FreshRoast SR800, KALDI Wide, Hottop KN-8828B-2K+ and air popcorn poppers. Each one has a guide with starting numbers.",
   },
   {
-    question: "What is a development ratio in coffee roasting?",
+    question: "Do I need a thermometer?",
     answer:
-      "Development ratio is the share of total roast time that happens after first crack begins. For example, 4 minutes of development in a 15 minute roast is a 26.7% development ratio. Coffee Roast Timer calculates it automatically from the first crack and drop times you log.",
+      "No. Most home roasts are judged by time, color and sound, and that's what the app is built around. If you have a probe, you can log readings as you go, and the saved roast shows a curve once there are a few of them.",
   },
   {
-    question: "Do I need to install anything?",
+    question: "What is development time, and what number should I aim for?",
     answer:
-      "No. Coffee Roast Timer runs in any modern web browser on a phone, tablet or computer, so you can keep it next to the roaster while you work.",
+      "Development is the time from first crack to drop, and the development ratio is that time as a share of the whole roast: 1:30 after first crack in a 9:00 roast is about 17%. There is no single good number. Typical starting points differ between drum and air roasters and between light and darker roasts, so compare your own roasts and let the cup decide.",
   },
   {
-    question: "Can I see other people's roast profiles?",
+    question: "Are my roasts public?",
     answer:
-      "Yes. The Discover page lists roast profiles shared by the community, filterable by roaster model and coffee origin, so you can see typical first crack and drop times on your machine.",
+      "Roasts you save to your account are visible on Discover, so other people with the same machine can learn from them. Roasts kept only on your device are private. Keep anything personal out of the notes.",
+  },
+  {
+    question: "Does it work on my phone?",
+    answer:
+      "Yes. It runs in any modern browser on a phone, tablet or computer. During a roast the screen is kept awake where the browser allows it, and an accidental reload brings the roast back.",
   },
 ];
 
