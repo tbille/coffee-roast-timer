@@ -573,7 +573,9 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
         {/* Kept on the draft, so a signed-out roast keeps the choice for when it syncs. */}
         <VisibilityPicker
           value={details.visibility ?? DEFAULT_VISIBILITY}
-          onChange={(v) => setDetail("visibility", v)}
+          onChange={(v) =>
+            update((d) => ({ ...d, details: { ...d.details, visibility: v, visibilityChangedAt: Date.now() } }))
+          }
           disabled={busy !== null}
         />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">

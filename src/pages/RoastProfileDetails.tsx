@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
-import { forgetRoast } from "@/lib/drafts";
+import { forgetRoast, setDraftVisibilitySilently } from "@/lib/drafts";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { getTemperatureGraphContextNote } from "@/utils/roasterDisplay";
 import type { TemperatureUnit } from "@/utils/temperatureConversion";
@@ -273,6 +273,8 @@ const RoastProfileDetails = () => {
       return false;
     }
     setProfile({ ...profile, visibility: next });
+    // Keep the device copy in step so a later sync of it cannot undo this change.
+    setDraftVisibilitySilently(profile.id, next);
     queryClient.invalidateQueries({ queryKey: ["discover-profiles"] });
     queryClient.invalidateQueries({ queryKey: ["latest-roasts"] });
     toast.success(`Visibility: ${VISIBILITY_LABELS[next]}`);

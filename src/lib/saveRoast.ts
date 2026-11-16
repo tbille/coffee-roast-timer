@@ -242,6 +242,19 @@ export function buildRoastRow(draft: RoastDraft, userId: string): RoastProfileIn
   };
 }
 
+/** Shown when the database cannot keep a roast private yet; the draft stays on the device. */
+export const SAVE_PRIVATELY_UNAVAILABLE = "Couldn't save privately right now. Try again in a moment.";
+
+/**
+ * True when visibility was picked on the post-roast card after the draft last
+ * reached the account (or it never did). Pure; exported for tests.
+ */
+export function visibilityChangedSinceSync(draft: RoastDraft, syncedAt: number | undefined): boolean {
+  const changedAt = draft.details.visibilityChangedAt;
+  if (!isRoastVisibility(draft.details.visibility) || !isNum(changedAt)) return false;
+  return syncedAt === undefined || changedAt > syncedAt;
+}
+
 const errorMessage = (e: unknown) =>
   e && typeof e === 'object' && 'message' in e ? String((e as { message: unknown }).message) : 'Unknown error';
 
@@ -258,6 +271,8 @@ export async function saveRoast(draft: RoastDraft, userId: string): Promise<Save
     let { error } = await supabase.from('roast_profiles').insert(row);
     if (isMissingVisibilityColumn(error)) {
       warnMissingVisibility('saveRoast');
+      // Without the column every row is public: never fall back for a private or unlisted roast.
+      if (row.visibility !== 'public') return { ok: false, error: SAVE_PRIVATELY_UNAVAILABLE, code: error?.code };
       ({ error } = await supabase.from('roast_profiles').insert(withoutVisibility(row)));
     }
     if (!error) {
@@ -273,13 +288,17 @@ export async function saveRoast(draft: RoastDraft, userId: string): Promise<Save
       delete changes.id;
       delete changes.user_id;
       delete changes.created_at;
-      // Only send visibility when this draft chose one, so a change made on the roast page is not undone.
-      if (!isRoastVisibility(draft.details.visibility)) delete changes.visibility;
+      // The row may have been made private (or public) on the roast page or in My roasts since:
+      // only send visibility when it was picked on the card after the last sync.
+      if (!visibilityChangedSinceSync(draft, stored.syncedAt)) delete changes.visibility;
       const runUpdate = (patch: Partial<RoastProfileInsert>) =>
         supabase.from('roast_profiles').update(patch).eq('id', row.id!).eq('user_id', userId);
       let { error: updateError } = await runUpdate(changes);
       if (isMissingVisibilityColumn(updateError)) {
         warnMissingVisibility('saveRoast');
+        if (changes.visibility !== undefined && changes.visibility !== 'public') {
+          return { ok: false, error: SAVE_PRIVATELY_UNAVAILABLE, code: updateError?.code };
+        }
         ({ error: updateError } = await runUpdate(withoutVisibility(changes)));
       }
       if (updateError) return { ok: false, error: updateError.message, code: updateError.code };

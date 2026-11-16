@@ -7,7 +7,7 @@
  * - Storage can be unavailable (private mode, quota, blocked site data):
  *   every access is wrapped and degrades to an empty list / no-op.
  */
-import type { RoastDraft } from '@/types/roast-session.types';
+import type { RoastDraft, RoastVisibility } from '@/types/roast-session.types';
 import { ROAST_SESSION_KEY, clearStoredSessionFor } from '@/hooks/useRoastSession';
 
 export const DRAFTS_STORAGE_KEY = 'roast_drafts:v1';
@@ -142,6 +142,22 @@ export function markSynced(id: string, at: number = Date.now()): void {
   const index = drafts.findIndex((d) => d.result.id === id);
   if (index < 0) return;
   drafts[index] = { ...drafts[index], syncedAt: at };
+  write(drafts);
+}
+
+/**
+ * Records a visibility change made in the account (roast page, My roasts) on the
+ * device copy, without making it dirty: `updatedAt` and `syncedAt` stay as they
+ * are, and the card's pending choice (`visibilityChangedAt`) is dropped, so a
+ * later sync of this draft cannot put the old value back.
+ */
+export function setDraftVisibilitySilently(id: string, visibility: RoastVisibility): void {
+  const drafts = read();
+  const index = drafts.findIndex((d) => d.result.id === id);
+  if (index < 0) return;
+  const details = { ...drafts[index].details, visibility };
+  delete details.visibilityChangedAt;
+  drafts[index] = { ...drafts[index], details };
   write(drafts);
 }
 

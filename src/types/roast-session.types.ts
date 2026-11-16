@@ -135,6 +135,12 @@ export interface RoastDetails {
   notes?: string;
   /** Who can see the saved roast. Defaults to 'private'. */
   visibility?: RoastVisibility;
+  /**
+   * When `visibility` was last picked on the post-roast card (ms). An update of an
+   * already-saved roast only sends `visibility` when this is newer than `syncedAt`,
+   * so a stale device copy never undoes a change made elsewhere.
+   */
+  visibilityChangedAt?: number;
 }
 
 /** A roast stored on this device until it is saved to the account. */
