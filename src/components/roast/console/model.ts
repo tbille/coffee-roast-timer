@@ -26,7 +26,7 @@ import type {
 } from '@/types/roast-data.types';
 import type { RoasterType } from '@/types/roaster.types';
 import type { PhaseBarMarker, PhaseBarSegment } from '@/components/roast-card/PhaseBar';
-import { formatTemp, type TempUnit } from '@/lib/format';
+import { formatTemp, msToSeconds, type TempUnit } from '@/lib/format';
 import { BEHMOR_MANUAL_POWER, ROASTER_SPECS, type BehmorProgram } from '@/utils/roasterRegistry';
 
 export const SCHEMA_VERSION = 2;
@@ -254,7 +254,7 @@ export function controlAt(log: ConsoleLog, control: string, t: number): number |
 /* Result                                                              */
 /* ------------------------------------------------------------------ */
 
-const sec = (ms: number) => Math.round(ms / 1000);
+const sec = msToSeconds;
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
 
 /** Events with `tempC` set from a reading under 30 s old (never from an input default). */

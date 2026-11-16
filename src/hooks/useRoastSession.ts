@@ -38,6 +38,9 @@ interface StoredSession<S, L> {
   log: L;
 }
 
+/** Storage key of the /roast console session (also read by the roast-in-progress pill). */
+export const ROAST_SESSION_KEY = 'roast_session:v2';
+
 const STORAGE_VERSION = 2;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const TICK_MS = 250;
@@ -65,6 +68,25 @@ function readStoredSession<S, L>(key: string): StoredSession<S, L> | null {
       return null;
     }
     return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Elapsed ms of the roast persisted under `key` if it is running, else null.
+ * Read-only (never clears storage) and wall-clock based, so it is right from any
+ * page or tab even though the console that owns the session is not mounted.
+ */
+export function readRunningElapsedMs(key: string, now: number = Date.now()): number | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredSession<unknown, unknown>> | null;
+    const clock = parsed?.clock;
+    if (parsed?.version !== STORAGE_VERSION || !clock || clock.status !== 'running') return null;
+    if (typeof parsed.savedAt !== 'number' || now - parsed.savedAt > MAX_AGE_MS) return null;
+    return runningMs(clock, now);
   } catch {
     return null;
   }

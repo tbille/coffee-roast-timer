@@ -11,7 +11,7 @@ import { useRoasting } from '@/contexts/RoastingContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useAudioCues } from '@/hooks/useAudioCues';
 import { useReference } from '@/hooks/useReference';
-import { useRoastSession } from '@/hooks/useRoastSession';
+import { ROAST_SESSION_KEY, useRoastSession } from '@/hooks/useRoastSession';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { supabase } from '@/integrations/supabase/client';
 import { formatClockMs, formatTemp, type TempUnit } from '@/lib/format';
@@ -37,7 +37,6 @@ import { audioEnabled, useConsolePrefs, type MachineSetup } from './prefs';
 import { RoastView, type Snackbar } from './RoastView';
 import { SetupView } from './SetupView';
 
-const STORAGE_KEY = 'roast_session:v2';
 const CONTROL_DEBOUNCE_MS = 800;
 const UNDO_WINDOW_MS = 5000;
 const POPPER_ALERT_S = 180;
@@ -54,7 +53,7 @@ export interface RoastConsoleProps {
 }
 
 export function RoastConsole({ roasterType: setupRoaster, onRoasterChange, refId, onClearRefParam, linkNonce }: RoastConsoleProps) {
-  const session = useRoastSession<Record<string, never>, ConsoleLog>(STORAGE_KEY, {}, EMPTY_LOG);
+  const session = useRoastSession<Record<string, never>, ConsoleLog>(ROAST_SESSION_KEY, {}, EMPTY_LOG);
   const { status, log, updateLog } = session;
   const [prefs, updatePrefs] = useConsolePrefs();
   const { setRoasting } = useRoasting();

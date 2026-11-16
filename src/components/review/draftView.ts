@@ -7,6 +7,7 @@ import { deriveRoastFacts, deriveRoastPhases, roasterName, type ProfileViewInput
 import type { RoastCardData } from "@/components/roast-card/RoastCard";
 import { normaliseOrigin } from "@/lib/origins";
 import { LOCAL_REF_PREFIX } from "@/lib/drafts";
+import { msToSeconds } from "@/lib/format";
 import { crackEvents, findEvent, milestones, UNNAMED_BEAN } from "@/lib/saveRoast";
 import type { RoasterType } from "@/types/roaster.types";
 import type { RoastMilestone } from "@/types/roast.types";
@@ -85,7 +86,7 @@ export function controlLabel(c: Pick<ControlChange, "control" | "value">): strin
  */
 export function referenceFromDraft(draft: RoastDraft, savedId?: string): RoastReference {
   const { result, details } = draft;
-  const s = (ms?: number) => (ms === undefined ? undefined : Math.round(ms / 1000));
+  const s = (ms?: number) => (ms === undefined ? undefined : msToSeconds(ms));
   return {
     id: savedId ?? (draft.syncedAt ? result.id : `${LOCAL_REF_PREFIX}${result.id}`),
     name: draftTitle(draft),
@@ -95,7 +96,7 @@ export function referenceFromDraft(draft: RoastDraft, savedId?: string): RoastRe
     firstCrackS: s(findEvent(result.events, "first_crack")?.t),
     secondCrackS: s(findEvent(result.events, "second_crack")?.t),
     dropS: Math.round(result.durationSeconds),
-    cues: result.controlChanges.map((c) => ({ s: Math.round(c.t / 1000), label: controlLabel(c) })),
+    cues: result.controlChanges.map((c) => ({ s: msToSeconds(c.t), label: controlLabel(c) })),
     startingSettings: result.startingSettings,
     batchGrams: details.weightInGrams ?? result.batchGrams,
   };

@@ -8,10 +8,22 @@ export type TempUnit = 'C' | 'F';
 
 const isFiniteNumber = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
 
-/** Seconds to "m:ss" (minutes are not wrapped into hours: 75:03). Negative values clamp to 0:00. */
+/**
+ * Elapsed ms to whole seconds. The single ms -> seconds rule for the app: floor,
+ * like a stopwatch, so the live log, the review card and saved milestones agree.
+ */
+export function msToSeconds(ms: number): number {
+  if (!isFiniteNumber(ms)) return 0;
+  return Math.floor(Math.max(0, ms) / 1000);
+}
+
+/**
+ * Seconds to "m:ss" (minutes are not wrapped into hours: 75:03). Fractional
+ * seconds are floored (see msToSeconds); negative values clamp to 0:00.
+ */
 export function formatClock(seconds: number): string {
   if (!isFiniteNumber(seconds)) return '0:00';
-  const safe = Math.max(0, Math.round(seconds));
+  const safe = Math.max(0, Math.floor(seconds));
   const mins = Math.floor(safe / 60);
   const secs = safe % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -20,7 +32,7 @@ export function formatClock(seconds: number): string {
 /** Milliseconds to "m:ss" (floors, so a running clock never shows a second early). */
 export function formatClockMs(ms: number): string {
   if (!isFiniteNumber(ms)) return '0:00';
-  return formatClock(Math.floor(Math.max(0, ms) / 1000));
+  return formatClock(msToSeconds(ms));
 }
 
 /** Signed seconds to "+m:ss" / "-m:ss" / "0:00", for deltas against a reference. */

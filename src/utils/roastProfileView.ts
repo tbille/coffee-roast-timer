@@ -29,7 +29,7 @@ import { convertTemperature, type TemperatureUnit } from "@/utils/temperatureCon
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { tidyLabel } from "@/utils/textDisplay";
 import { normaliseOrigin } from "@/lib/origins";
-import { formatClock as formatClockBase } from "@/lib/format";
+import { formatClock as formatClockBase, msToSeconds } from "@/lib/format";
 import type { RoasterType } from "@/types/roaster.types";
 import type { RoastMilestone, RoasterSettings } from "@/types/roast.types";
 import {
@@ -445,7 +445,7 @@ function v2SettingsSteps(p: ProfileViewInput, viewUnit: TemperatureUnit): RoastS
   let group: V2Control[] = [];
   const flush = () => {
     if (!group.length) return;
-    const time = Math.round(group[0].t / 1000);
+    const time = msToSeconds(group[0].t);
     // Keep only the last value per control inside the group
     const latest = new Map<string, V2Control>();
     group.forEach((c) => latest.set(c.control, c));

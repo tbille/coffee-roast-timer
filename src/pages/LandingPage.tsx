@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { JsonLd } from "@/components/JsonLd";
 import { Hero } from "@/components/landing/Hero";
 import { ValueProps } from "@/components/landing/ValueProps";
 import { MachinesGrid } from "@/components/landing/MachinesGrid";
@@ -24,8 +25,8 @@ const LandingPage = () => (
       <meta name="robots" content="index, follow" />
       <link rel="canonical" href={SITE_URL} />
       {/* WebSite / Organization / WebApplication JSON-LD is static in index.html (src/content/staticShell.ts). */}
-      <script type="application/ld+json">{JSON.stringify(homeFaqJsonLd())}</script>
     </Helmet>
+    <JsonLd data={homeFaqJsonLd()} />
 
     <Hero />
     <ValueProps />

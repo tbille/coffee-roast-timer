@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
+import { JsonLd } from "@/components/JsonLd";
 import { Coffee, Search, X } from "lucide-react";
 import { PageTitle } from "@/components/PageTitle";
 import { PageHeader } from "@/components/ui/page-header";
@@ -147,8 +148,8 @@ const Discover = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://roast-timer.com/discover" />
         <link rel="canonical" href="https://roast-timer.com/discover" />
-        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
+      <JsonLd data={collectionSchema} />
 
       <div className="bg-background px-4 py-6 sm:px-6 sm:py-8">
         <div className="mx-auto w-full max-w-6xl">

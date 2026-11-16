@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
+import { JsonLd } from "@/components/JsonLd";
 import { Link, NavLink } from "react-router";
 import { ArrowLeft, ArrowRight, ChevronDown, Clock, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -248,12 +249,10 @@ export function DocsLayout({
         <meta property="og:type" content="article" />
         <meta property="og:url" content={url} />
         <link rel="canonical" href={url} />
-        {[breadcrumbSchema, articleSchema, ...schemas].map((schema, i) => (
-          <script key={i} type="application/ld+json">
-            {JSON.stringify(schema)}
-          </script>
-        ))}
       </Helmet>
+      {[breadcrumbSchema, articleSchema, ...schemas].map((schema, i) => (
+        <JsonLd key={i} data={schema} />
+      ))}
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12 xl:grid-cols-[13rem_minmax(0,1fr)_12rem]">
         <aside className="hidden lg:block">

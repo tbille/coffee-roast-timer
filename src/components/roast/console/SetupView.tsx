@@ -273,13 +273,14 @@ export function SetupView(props: SetupViewProps) {
           </div>
         </section>
 
-        <div className="space-y-2 pt-2">
+        {/* Phones: sticky above the tab bar so Charge is always in reach. From md up: inline. */}
+        <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 -mx-4 space-y-1.5 border-t border-border bg-background px-4 py-3 sm:-mx-6 sm:px-6 md:static md:mx-0 md:space-y-2 md:border-0 md:bg-transparent md:px-0 md:pb-0 md:pt-2">
           <button
             type="button"
             onClick={onCharge}
             disabled={!!blockedReason}
             aria-describedby={blockedReason ? `${id}-blocked` : undefined}
-            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 text-lg font-semibold text-accent-foreground transition-opacity duration-150 hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 text-lg font-semibold text-accent-foreground transition-opacity duration-150 hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 md:h-14"
           >
             <Flame className="h-5 w-5" strokeWidth={1.75} aria-hidden />
             Charge — start timer
@@ -289,7 +290,9 @@ export function SetupView(props: SetupViewProps) {
               {blockedReason}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">Press when the beans go in. That moment is 0:00.</p>
+            <p className="text-center text-xs text-muted-foreground md:text-left md:text-sm">
+              Press when the beans go in.<span className="hidden md:inline"> That moment is 0:00.</span>
+            </p>
           )}
         </div>
 

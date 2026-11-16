@@ -31,7 +31,7 @@ import { useBeanNames } from "@/hooks/useMyRoasts";
 import { deleteDraft, getDraft, upsertDraft } from "@/lib/drafts";
 import { findEvent, saveRoast } from "@/lib/saveRoast";
 import { normaliseOrigin, ORIGIN_SUGGESTIONS } from "@/lib/origins";
-import { formatClock, formatClockDelta, formatGrams, formatPercent, parseLocaleNumber } from "@/lib/format";
+import { formatClock, formatClockDelta, formatGrams, formatPercent, msToSeconds, parseLocaleNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   PLACE_LABELS,
@@ -169,7 +169,7 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
         result: {
           ...d.result,
           events,
-          durationSeconds: drop ? Math.round(drop.t / 1000) : d.result.durationSeconds,
+          durationSeconds: drop ? msToSeconds(drop.t) : d.result.durationSeconds,
         },
       };
     });
@@ -179,7 +179,7 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
   const totalS = Math.round(draft.result.durationSeconds);
   const { facts, phases } = useMemo(() => draftFacts(draft), [draft]);
   const fcEvent = findEvent(draft.result.events, "first_crack");
-  const fcS = fcEvent ? Math.round(fcEvent.t / 1000) : undefined;
+  const fcS = fcEvent ? msToSeconds(fcEvent.t) : undefined;
   const scS = facts.secondCrack?.time;
 
   const weightOut = parseLocaleNumber(weightOutText);

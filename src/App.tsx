@@ -73,8 +73,19 @@ const Main = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// next-themes renders its no-flash <script> inside the React tree. In a
+// client-only SPA React never executes it and logs "Encountered a script tag";
+// a non-JS type marks it as an inert data block. Theme is applied in an effect.
+const THEME_SCRIPT_PROPS = { type: "text/plain" };
+
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+  <ThemeProvider
+    attribute="class"
+    defaultTheme="system"
+    enableSystem
+    disableTransitionOnChange
+    scriptProps={THEME_SCRIPT_PROPS}
+  >
   <HelmetProvider>
     {import.meta.env.VITE_GSC_SITE_VERIFICATION ? (
       <Helmet>

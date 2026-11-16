@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Helmet } from "react-helmet-async";
+import { JsonLd } from "@/components/JsonLd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, GitCompare, Pencil, Repeat2, Share2, ThumbsUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -448,8 +449,8 @@ const RoastProfileDetails = () => {
         <meta name="twitter:title" content={generatePageTitle()} />
         <meta name="twitter:description" content={generatePageDescription()} />
         <link rel="canonical" href={canonicalUrl} />
-        <script type="application/ld+json">{JSON.stringify(generateJsonLd())}</script>
       </Helmet>
+      <JsonLd data={generateJsonLd()} />
 
       <div className="overflow-x-hidden bg-background px-4 py-6 sm:px-6 sm:py-8">
         <article className="mx-auto w-full max-w-4xl space-y-6">

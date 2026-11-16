@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json, TablesInsert } from '@/integrations/supabase/types';
 import { listUnsyncedDrafts, markSynced, getDraft, isDirty } from '@/lib/drafts';
 import { normaliseOrigin } from '@/lib/origins';
+import { msToSeconds } from '@/lib/format';
 import {
   PLACE_LABELS,
   PROCESS_LABELS,
@@ -32,7 +33,7 @@ export type SaveRoastResult =
 type RoastProfileInsert = TablesInsert<'roast_profiles'>;
 
 const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
-const toS = (ms: number) => Math.round(ms / 1000);
+const toS = msToSeconds;
 
 /** Event of a type, last one wins (a re-mark replaces the earlier tap). */
 export function findEvent(events: RoastEvent[], type: RoastEventType): RoastEvent | undefined {

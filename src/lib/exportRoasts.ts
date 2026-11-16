@@ -6,6 +6,7 @@ import type { RoastDraft } from '@/types/roast-session.types';
 import { PLACE_LABELS, PROCESS_LABELS, ROAST_LEVEL_LABELS, type RoastLevel } from '@/types/roast-session.types';
 import { deriveRoastFacts, type ProfileViewInput } from '@/utils/roastProfileView';
 import { normaliseOrigin } from '@/lib/origins';
+import { msToSeconds } from '@/lib/format';
 import { buildRoastRow, findEvent } from '@/lib/saveRoast';
 
 /** The subset of a `roast_profiles` row the export reads. */
@@ -102,7 +103,7 @@ export function exportRecordFromDraft(draft: RoastDraft): ExportRecord {
     source: 'device',
     process: draft.details.process ? PROCESS_LABELS[draft.details.process] : '',
     roast_level: draft.details.roastLevel ? ROAST_LEVEL_LABELS[draft.details.roastLevel] : '',
-    yellowing_s: y ? Math.round(y.t / 1000) : '',
+    yellowing_s: y ? msToSeconds(y.t) : '',
     environment: [draft.details.place ? PLACE_LABELS[draft.details.place] : '', draft.details.ambientC !== undefined ? `${draft.details.ambientC} °C` : '']
       .filter(Boolean)
       .join(' · '),

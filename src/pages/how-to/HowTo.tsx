@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { JsonLd } from "@/components/JsonLd";
 import { Link } from "react-router";
 import { ArrowRight, BookOpen, ChevronRight, Compass, Flame, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -92,9 +93,9 @@ const HowTo = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={absoluteUrl("/how-to")} />
         <link rel="canonical" href={absoluteUrl("/how-to")} />
-        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
-        <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
       </Helmet>
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={itemListSchema} />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-12 lg:py-12">
         <aside className="hidden lg:block">

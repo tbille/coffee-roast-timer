@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatClock, parseClock } from "@/lib/format";
+import { formatClock, msToSeconds, parseClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { findEvent } from "@/lib/saveRoast";
 import type { RoastEvent, RoastEventType } from "@/types/roast-session.types";
@@ -26,14 +26,14 @@ function orderError(events: RoastEvent[], type: RoastEventType, s: number): stri
   const idx = ORDER.indexOf(type);
   for (let i = idx - 1; i >= 0; i--) {
     const before = findEvent(events, ORDER[i]);
-    if (before && Math.round(before.t / 1000) >= s) {
-      return `Must be after ${EVENT_LABELS[ORDER[i]].toLowerCase()} (${formatClock(before.t / 1000)}).`;
+    if (before && msToSeconds(before.t) >= s) {
+      return `Must be after ${EVENT_LABELS[ORDER[i]].toLowerCase()} (${formatClock(msToSeconds(before.t))}).`;
     }
   }
   for (let i = idx + 1; i < ORDER.length; i++) {
     const after = findEvent(events, ORDER[i]);
-    if (after && Math.round(after.t / 1000) <= s) {
-      return `Must be before ${EVENT_LABELS[ORDER[i]].toLowerCase()} (${formatClock(after.t / 1000)}).`;
+    if (after && msToSeconds(after.t) <= s) {
+      return `Must be before ${EVENT_LABELS[ORDER[i]].toLowerCase()} (${formatClock(msToSeconds(after.t))}).`;
     }
   }
   return null;
@@ -53,7 +53,7 @@ export function EventTimes({ baseId, events, onChange }: EventTimesProps) {
 
   const commit = (type: RoastEventType, s: number) => {
     const existing = findEvent(events, type);
-    if (existing && Math.round(existing.t / 1000) === s) return;
+    if (existing && msToSeconds(existing.t) === s) return;
     const t = s * 1000;
     const next = existing
       ? events.map((e) => (e === existing ? { ...e, t, tempC: undefined, editedFromT: e.editedFromT ?? e.t } : e))
@@ -75,8 +75,8 @@ export function EventTimes({ baseId, events, onChange }: EventTimesProps) {
               <TimeField
                 id={eventInputId(baseId, type)}
                 label={EVENT_LABELS[type]}
-                seconds={Math.round(e.t / 1000)}
-                editedFrom={e.editedFromT !== undefined ? Math.round(e.editedFromT / 1000) : undefined}
+                seconds={msToSeconds(e.t)}
+                editedFrom={e.editedFromT !== undefined ? msToSeconds(e.editedFromT) : undefined}
                 validate={(s) => orderError(events, type, s)}
                 onCommit={(s) => commit(type, s)}
               />

@@ -2,14 +2,17 @@ import { Link } from "react-router";
 import { Coffee } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { RoastInProgress } from "@/components/layout/RoastInProgress";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { useIsActive } from "@/components/layout/useIsActive";
 import { useRoasting } from "@/contexts/RoastingContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
   const { roasting } = useRoasting();
   const isActive = useIsActive();
+  const isMobile = useIsMobile();
   if (roasting) return null;
 
   return (
@@ -50,6 +53,8 @@ const Header = () => {
         </nav>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {/* Phones show it above the bottom tab bar instead. */}
+          {!isMobile && <RoastInProgress />}
           <ThemeToggle />
           <AccountMenu />
         </div>

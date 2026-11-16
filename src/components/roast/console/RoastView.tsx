@@ -2,11 +2,11 @@
  * Roast (status running): full-viewport focus view with one clock, one phase
  * ribbon and one next-event button. "Exit focus" shows the normal page around it.
  */
-import { forwardRef, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import { forwardRef, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 import { Maximize2, Minimize2, Undo2, X } from 'lucide-react';
 import { PhaseBar } from '@/components/roast-card/PhaseBar';
 import { cn } from '@/lib/utils';
-import { formatClock, formatClockDelta, formatClockMs, formatPercent, type TempUnit } from '@/lib/format';
+import { formatClock, formatClockDelta, formatClockMs, formatPercent, msToSeconds, type TempUnit } from '@/lib/format';
 import { ROASTER_SPECS } from '@/utils/roasterRegistry';
 import type { RoastEventType, RoastReference } from '@/types/roast-session.types';
 import type { VoiceCommand } from './voice';
@@ -68,6 +68,9 @@ export interface RoastViewProps {
 
 const chip =
   'inline-flex h-12 shrink-0 items-center justify-center rounded-full border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50';
+
+/** After the big button logs an event, it ignores presses this long (a double tap must not FC → Drop). */
+const PRIMARY_COOLDOWN_MS = 1000;
 
 const KEY_HINT: Record<RoastEventType, string> = {
   turning_point: '',
@@ -134,6 +137,21 @@ export function RoastView(props: RoastViewProps) {
   const canDrop = !!yellow || log.yellowingSkipped || !!fc;
   const fire = (type: RoastEventType) => onEvent(type, stamp());
 
+  // Double-tap guard for the next-event button and Space/Enter (secondary chips and Undo are not affected).
+  const cooldownUntil = useRef(0);
+  const cooldownTimer = useRef<number | undefined>(undefined);
+  const [coolingDown, setCoolingDown] = useState(false);
+  useEffect(() => () => window.clearTimeout(cooldownTimer.current), []);
+  const firePrimary = (t: number) => {
+    const now = performance.now();
+    if (now < cooldownUntil.current || (next === 'drop' && !canDrop)) return;
+    cooldownUntil.current = now + PRIMARY_COOLDOWN_MS;
+    setCoolingDown(true);
+    window.clearTimeout(cooldownTimer.current);
+    cooldownTimer.current = window.setTimeout(() => setCoolingDown(false), PRIMARY_COOLDOWN_MS);
+    onEvent(next, t);
+  };
+
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
     const target = e.target as HTMLElement;
@@ -161,8 +179,7 @@ export function RoastView(props: RoastViewProps) {
         // Let buttons, chips and steppers handle their own activation.
         if (target.closest('button, a, [role="spinbutton"], [role="radio"], [role="switch"]')) return;
         e.preventDefault();
-        if (next === 'drop' && !canDrop) return;
-        onEvent(next, t);
+        firePrimary(t);
         return;
       case 'y':
         if (!fc) onEvent('yellowing', t);
@@ -342,7 +359,8 @@ export function RoastView(props: RoastViewProps) {
             label={EVENT_LABELS[next]}
             hint={shortcuts ? KEY_HINT[next] : undefined}
             disabled={next === 'drop' && !canDrop}
-            onPress={() => fire(next)}
+            coolingDown={coolingDown}
+            onPress={() => firePrimary(stamp())}
           />
           <div className="flex gap-2 overflow-x-auto lg:shrink-0">
             {spec.probe && !tp && !yellow && !fc && (
@@ -374,17 +392,23 @@ export function RoastView(props: RoastViewProps) {
 
 const PrimaryButton = forwardRef<
   HTMLButtonElement,
-  { label: string; hint?: string; disabled?: boolean; onPress: () => void }
->(function PrimaryButton({ label, hint, disabled, onPress }, ref) {
+  { label: string; hint?: string; disabled?: boolean; coolingDown?: boolean; onPress: () => void }
+>(function PrimaryButton({ label, hint, disabled, coolingDown, onPress }, ref) {
   return (
     <PressButton
       ref={ref}
       onPress={onPress}
       disabled={disabled}
-      className="flex h-24 w-full min-w-0 select-none flex-col items-center justify-center rounded-lg bg-accent px-4 text-accent-foreground transition-transform duration-150 [touch-action:manipulation] focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] disabled:opacity-50 motion-reduce:transition-none lg:h-[72px] lg:flex-1"
+      // Not `disabled` while cooling down: that would drop keyboard focus from the button.
+      aria-disabled={coolingDown || undefined}
+      className={cn(
+        'flex h-24 w-full min-w-0 select-none flex-col items-center justify-center rounded-lg bg-accent px-4 text-accent-foreground transition-[transform,opacity] duration-150 [touch-action:manipulation] focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] disabled:opacity-50 motion-reduce:transition-none lg:h-[72px] lg:flex-1',
+        coolingDown && 'scale-[0.99] opacity-60',
+      )}
     >
       <span className="text-2xl font-semibold leading-tight sm:text-3xl">{label}</span>
-      {hint && <span className="text-xs font-medium opacity-80">{hint}</span>}
+      {/* Key hints are noise on touch-first devices. */}
+      {hint && <span className="text-xs font-medium opacity-80 [@media(hover:none)_and_(pointer:coarse)]:hidden">{hint}</span>}
     </PressButton>
   );
 });
@@ -431,10 +455,10 @@ function referenceDelta(log: ConsoleLog, reference: RoastReference | null, elaps
     const d = actual - ref;
     return Math.abs(d) < 5 ? 'On pace' : `${label} ${formatClockDelta(d)} vs reference`;
   };
-  if (fc && reference.firstCrackS) return compare('FC', fc.t / 1000, reference.firstCrackS);
+  if (fc && reference.firstCrackS) return compare('FC', msToSeconds(fc.t), reference.firstCrackS);
   if (y && reference.yellowingS && !fc) {
     if (reference.firstCrackS && elapsedS > reference.firstCrackS) return `FC due ${formatClock(reference.firstCrackS)}`;
-    return compare('Yellow', y.t / 1000, reference.yellowingS);
+    return compare('Yellow', msToSeconds(y.t), reference.yellowingS);
   }
   if (!y && reference.yellowingS) return `Reference yellow ${formatClock(reference.yellowingS)}`;
   if (!fc && reference.firstCrackS) return `Reference FC ${formatClock(reference.firstCrackS)}`;
