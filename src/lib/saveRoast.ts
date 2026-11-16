@@ -12,9 +12,12 @@ import type { Json, TablesInsert } from '@/integrations/supabase/types';
 import { listUnsyncedDrafts, markSynced, getDraft, isDirty } from '@/lib/drafts';
 import { normaliseOrigin } from '@/lib/origins';
 import { msToSeconds } from '@/lib/format';
+import { isMissingVisibilityColumn, warnMissingVisibility } from '@/lib/visibility';
 import {
   PLACE_LABELS,
   PROCESS_LABELS,
+  DEFAULT_VISIBILITY,
+  isRoastVisibility,
   type ControlChange,
   type RoastDraft,
   type RoastEvent,
@@ -31,6 +34,13 @@ export type SaveRoastResult =
   | { ok: false; error: string; code?: string };
 
 type RoastProfileInsert = TablesInsert<'roast_profiles'>;
+
+/** Copy of a row without `visibility`, for databases that predate the column. */
+function withoutVisibility<T extends { visibility?: unknown }>(row: T): Omit<T, 'visibility'> {
+  const copy = { ...row };
+  delete copy.visibility;
+  return copy;
+}
 
 const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
 const toS = msToSeconds;
@@ -228,6 +238,7 @@ export function buildRoastRow(draft: RoastDraft, userId: string): RoastProfileIn
     temperature_data: legacyTemperatureData(draft) as unknown as Json,
     roaster_data: roasterData as unknown as Json,
     created_at: new Date(result.chargedAt).toISOString(),
+    visibility: isRoastVisibility(details.visibility) ? details.visibility : DEFAULT_VISIBILITY,
   };
 }
 
@@ -244,7 +255,11 @@ export async function saveRoast(draft: RoastDraft, userId: string): Promise<Save
   const at = Date.now();
   const row = buildRoastRow(draft, userId);
   try {
-    const { error } = await supabase.from('roast_profiles').insert(row);
+    let { error } = await supabase.from('roast_profiles').insert(row);
+    if (isMissingVisibilityColumn(error)) {
+      warnMissingVisibility('saveRoast');
+      ({ error } = await supabase.from('roast_profiles').insert(withoutVisibility(row)));
+    }
     if (!error) {
       markSynced(draft.result.id, at);
       return { ok: true, id: row.id!, alreadySaved: false };
@@ -258,11 +273,15 @@ export async function saveRoast(draft: RoastDraft, userId: string): Promise<Save
       delete changes.id;
       delete changes.user_id;
       delete changes.created_at;
-      const { error: updateError } = await supabase
-        .from('roast_profiles')
-        .update(changes)
-        .eq('id', row.id!)
-        .eq('user_id', userId);
+      // Only send visibility when this draft chose one, so a change made on the roast page is not undone.
+      if (!isRoastVisibility(draft.details.visibility)) delete changes.visibility;
+      const runUpdate = (patch: Partial<RoastProfileInsert>) =>
+        supabase.from('roast_profiles').update(patch).eq('id', row.id!).eq('user_id', userId);
+      let { error: updateError } = await runUpdate(changes);
+      if (isMissingVisibilityColumn(updateError)) {
+        warnMissingVisibility('saveRoast');
+        ({ error: updateError } = await runUpdate(withoutVisibility(changes)));
+      }
       if (updateError) return { ok: false, error: updateError.message, code: updateError.code };
     }
     markSynced(draft.result.id, at);

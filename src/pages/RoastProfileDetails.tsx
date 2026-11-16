@@ -51,13 +51,15 @@ import {
 } from "@/utils/roastProfileView";
 import { tidyLabel } from "@/utils/textDisplay";
 import type { RoasterType } from "@/types/roaster.types";
-import { PROCESS_LABELS } from "@/types/roast-session.types";
+import { PROCESS_LABELS, VISIBILITY_LABELS, type RoastVisibility } from "@/types/roast-session.types";
+import { VisibilityPicker } from "@/components/visibility/Visibility";
+import { isMissingVisibilityColumn, rowVisibility } from "@/lib/visibility";
 import type { RoastProfile } from "@/types/roast.types";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProfileUpdate = Database["public"]["Tables"]["roast_profiles"]["Update"];
 
-type ProfileRow = RoastProfile & { roaster_data: Record<string, unknown> | null };
+type ProfileRow = RoastProfile & { roaster_data: Record<string, unknown> | null; visibility?: string | null };
 
 const RoastProfileDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,6 +77,8 @@ const RoastProfileDetails = () => {
   const [showCuppingForm, setShowCuppingForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showPrivateShareDialog, setShowPrivateShareDialog] = useState(false);
+  const [savingVisibility, setSavingVisibility] = useState(false);
   const [viewUnit, setViewUnit] = useState<TemperatureUnit>("C");
 
   const { data: likesData } = useQuery({
@@ -249,7 +253,37 @@ const RoastProfileDetails = () => {
     navigate("/roasts");
   };
 
+  const visibility = rowVisibility(profile);
+
+  /** Owner only. Resolves true once the row has the new visibility. */
+  const updateVisibility = async (next: RoastVisibility): Promise<boolean> => {
+    if (!profile || !isOwner) return false;
+    if (next === visibility) return true;
+    setSavingVisibility(true);
+    const { error } = await supabase
+      .from("roast_profiles")
+      .update({ visibility: next })
+      .eq("id", profile.id);
+    setSavingVisibility(false);
+    if (error) {
+      console.error("Error updating visibility:", error);
+      toast.error(
+        isMissingVisibilityColumn(error) ? "Visibility settings are not available yet." : "Visibility could not be changed.",
+      );
+      return false;
+    }
+    setProfile({ ...profile, visibility: next });
+    queryClient.invalidateQueries({ queryKey: ["discover-profiles"] });
+    queryClient.invalidateQueries({ queryKey: ["latest-roasts"] });
+    toast.success(`Visibility: ${VISIBILITY_LABELS[next]}`);
+    return true;
+  };
+
   const handleShare = async () => {
+    if (isOwner && visibility === "private") {
+      setShowPrivateShareDialog(true);
+      return;
+    }
     const shareUrl = window.location.href;
     if (navigator.share) {
       try {
@@ -259,6 +293,11 @@ const RoastProfileDetails = () => {
         // Cancelled or unsupported: fall back to copying the link
       }
     }
+    await copyShareLink();
+  };
+
+  const copyShareLink = async () => {
+    const shareUrl = window.location.href;
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied", { description: "Paste it anywhere to share this roast." });
@@ -358,8 +397,20 @@ const RoastProfileDetails = () => {
         </Helmet>
         <div className="bg-background px-4 py-16">
           <div className="mx-auto max-w-md space-y-4 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Roast not found</h1>
-            <p className="text-muted-foreground">It may have been deleted, or the link is incomplete.</p>
+            <h1 className="text-2xl font-semibold tracking-tight">This roast is private or doesn't exist.</h1>
+            <p className="text-muted-foreground">
+              {user ? (
+                "It may have been deleted, made private by its roaster, or the link is incomplete."
+              ) : (
+                <>
+                  If it's yours,{" "}
+                  <Link to={`/auth?next=${encodeURIComponent(`/profile/${id ?? ""}`)}`} className="text-primary underline underline-offset-4">
+                    sign in
+                  </Link>{" "}
+                  to open it.
+                </>
+              )}
+            </p>
             <div className="flex justify-center gap-2">
               <Button asChild><Link to="/discover">Browse roasts</Link></Button>
               <Button variant="outline" asChild><Link to="/">Home</Link></Button>
@@ -427,7 +478,8 @@ const RoastProfileDetails = () => {
     <>
       <PageTitle title={view.beanName} description={generatePageDescription()} />
       <Helmet>
-        <meta name="robots" content="index, follow" />
+        {/* Private and link-only roasts stay out of search engines. */}
+        <meta name="robots" content={visibility === "public" ? "index, follow" : "noindex, nofollow"} />
         <meta name="author" content={profile.profiles?.username || "Coffee roaster"} />
         <meta
           name="keywords"
@@ -453,7 +505,7 @@ const RoastProfileDetails = () => {
         <meta name="twitter:description" content={generatePageDescription()} />
         <link rel="canonical" href={canonicalUrl} />
       </Helmet>
-      <JsonLd data={generateJsonLd()} />
+      {visibility === "public" && <JsonLd data={generateJsonLd()} />}
 
       <div className="overflow-x-hidden bg-background px-4 py-6 sm:px-6 sm:py-8">
         <article className="mx-auto w-full max-w-4xl space-y-6">
@@ -522,6 +574,15 @@ const RoastProfileDetails = () => {
                 )}
               </div>
             </div>
+
+            {isOwner && (
+              <VisibilityPicker
+                value={visibility}
+                onChange={(v) => void updateVisibility(v)}
+                disabled={savingVisibility}
+                className="rounded-lg border p-4"
+              />
+            )}
           </header>
 
           <RoastSummary facts={facts} phases={phases} />
@@ -619,6 +680,45 @@ const RoastProfileDetails = () => {
                 <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleting}>Cancel</Button>
                 <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                   {deleting ? "Deleting…" : "Delete roast"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {isOwner && (
+          <AlertDialog open={showPrivateShareDialog} onOpenChange={setShowPrivateShareDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>This roast is private</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Only you can open it. To share it, make it Link only (anyone with the link can open it) or Public (also listed on Discover). The link is copied once you choose.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button variant="outline" onClick={() => setShowPrivateShareDialog(false)} disabled={savingVisibility}>Cancel</Button>
+                <Button
+                  variant="outline"
+                  disabled={savingVisibility}
+                  onClick={async () => {
+                    if (await updateVisibility("public")) {
+                      setShowPrivateShareDialog(false);
+                      await copyShareLink();
+                    }
+                  }}
+                >
+                  Make public
+                </Button>
+                <Button
+                  disabled={savingVisibility}
+                  onClick={async () => {
+                    if (await updateVisibility("unlisted")) {
+                      setShowPrivateShareDialog(false);
+                      await copyShareLink();
+                    }
+                  }}
+                >
+                  Make link only
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

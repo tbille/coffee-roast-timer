@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RoastCard } from "@/components/roast-card/RoastCard";
-import { useDiscoverRows } from "@/components/discover/useDiscoverRows";
+import { useDiscoverRows, useOwnRoastRows } from "@/components/discover/useDiscoverRows";
 import { useAuth } from "@/hooks/useAuth";
 
 const PAGE_SIZE = 24;
@@ -25,18 +25,21 @@ interface ProfileSelectorProps {
 /** Picks one roast for a compare slot: search, mine/all, RoastCards. */
 export const ProfileSelector = ({ open, onOpenChange, onSelect, title = "Pick a roast", excludeId }: ProfileSelectorProps) => {
   const { user } = useAuth();
-  const { data: rows = [], isLoading, isError, refetch } = useDiscoverRows(open);
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"all" | "mine">("all");
+  const mine = scope === "mine" && !!user;
+  // "All roasts" lists public roasts; "My roasts" lists every roast of the account, private ones included.
+  const publicRows = useDiscoverRows(open && !mine);
+  const ownRows = useOwnRoastRows(user?.id, open && mine);
+  const { data: rows = [], isLoading, isError, refetch } = mine ? ownRows : publicRows;
   const [limit, setLimit] = useState(PAGE_SIZE);
 
   const results = useMemo(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     return rows
       .filter((r) => r.id !== excludeId)
-      .filter((r) => scope === "all" || (user && r.userId === user.id))
       .filter((r) => terms.every((t) => r.searchText.includes(t)));
-  }, [rows, query, scope, user, excludeId]);
+  }, [rows, query, excludeId]);
 
   const visible = results.slice(0, limit);
 
@@ -50,7 +53,7 @@ export const ProfileSelector = ({ open, onOpenChange, onSelect, title = "Pick a 
       <SheetContent side="right" className="flex w-full flex-col gap-4 overflow-hidden sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>Any saved roast, yours or from the community.</SheetDescription>
+          <SheetDescription>Any of your roasts, or a public one from the community.</SheetDescription>
         </SheetHeader>
 
         <div className="space-y-3">

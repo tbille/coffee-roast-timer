@@ -162,7 +162,7 @@ export function renderLlmsTxt(): string {
 
 ${SITE_SUMMARY}
 
-The app is client-rendered; the pages below are the canonical sources. Everything is free, and the timer works without an account. Roasts saved to an account are public on Discover.
+The app is client-rendered; the pages below are the canonical sources. Everything is free, and the timer works without an account. Saved roasts are private unless their roaster makes them link-only or public on Discover.
 
 ## Features
 

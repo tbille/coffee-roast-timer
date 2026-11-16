@@ -120,11 +120,17 @@ Deno.serve(async (req) => {
       priority: 0.6
     });
 
-    // Fetch all public roast profiles
-    const { data: profiles, error } = await supabase
-      .from('roast_profiles')
-      .select('id, updated_at')
-      .order('created_at', { ascending: false });
+    // Only public roasts: private and link-only roasts stay out of search engines.
+    const query = (publicOnly: boolean) => {
+      const q = supabase.from('roast_profiles').select('id, updated_at');
+      return (publicOnly ? q.eq('visibility', 'public') : q).order('created_at', { ascending: false });
+    };
+    let { data: profiles, error } = await query(true);
+    if (error && (error.code === '42703' || error.code === 'PGRST204') && /visibility/i.test(error.message ?? '')) {
+      // Before the visibility migration every roast is public.
+      console.warn('roast_profiles.visibility does not exist yet; listing every roast');
+      ({ data: profiles, error } = await query(false));
+    }
 
     if (error) {
       console.error('Error fetching roast profiles for sitemap:', error);

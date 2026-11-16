@@ -106,7 +106,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Do I need an account?",
     answer:
-      "No. The timer and the post-roast card work without one, and your roasts are kept on your device. Sign in with a free account when you want them synced across devices and shared on Discover.",
+      "No. The timer and the post-roast card work without one, and your roasts are kept on your device. Sign in with a free account when you want them synced across devices, and shared if you choose.",
   },
   {
     question: "Which roasters does it support?",
@@ -126,7 +126,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Are my roasts public?",
     answer:
-      "Roasts you save to your account are visible on Discover, so other people with the same machine can learn from them. Roasts kept only on your device are private. Keep anything personal out of the notes.",
+      "Only if you choose. New roasts are private: only you can see them. On the post-roast card or the roast's page you can make one Link only (anyone with the link can open it) or Public (listed on Discover, so people with the same machine can learn from it). Roasts kept only on your device are private too.",
   },
   {
     question: "Does it work on my phone?",

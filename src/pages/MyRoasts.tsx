@@ -27,6 +27,8 @@ import { RoasterFilter, ALL_ROASTERS, UNKNOWN_ROASTER } from "@/components/dashb
 import { TrendStrip, type TrendPoint } from "@/components/dashboard/TrendStrip";
 import { ReadyToTaste, readyToTaste } from "@/components/dashboard/ReadyToTaste";
 import { RoastActions } from "@/components/dashboard/RoastActions";
+import { VisibilityBadge } from "@/components/visibility/Visibility";
+import { rowVisibility } from "@/lib/visibility";
 import { beanKey, rowToCard, rowTrendPoint } from "@/components/dashboard/roastRows";
 import { useAuth } from "@/hooks/useAuth";
 import { useDrafts } from "@/hooks/useDrafts";
@@ -34,7 +36,7 @@ import { useMyRoasts, type MyRoastRow } from "@/hooks/useMyRoasts";
 import { forgetRoast } from "@/lib/drafts";
 import { syncPendingDrafts } from "@/lib/saveRoast";
 import { exportRoastsCsv, exportRoastsJson } from "@/lib/exportRoasts";
-import type { RoastDraft } from "@/types/roast-session.types";
+import { VISIBILITY_LABELS, type RoastDraft, type RoastVisibility } from "@/types/roast-session.types";
 
 const SIGN_IN_HREF = "/auth?next=/roasts";
 
@@ -47,7 +49,7 @@ export default function MyRoasts() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const drafts = useDrafts();
-  const { rows, loading, error, refresh, remove } = useMyRoasts(user?.id);
+  const { rows, loading, error, refresh, remove, setVisibility } = useMyRoasts(user?.id);
   const [roaster, setRoaster] = useState<string>(ALL_ROASTERS);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [continueId, setContinueId] = useState<string | null>(null);
@@ -123,6 +125,12 @@ export default function MyRoasts() {
     } else {
       toast.error("Could not delete the roast", { description: "Check your connection and try again." });
     }
+  };
+
+  const changeVisibility = async (id: string, next: RoastVisibility) => {
+    const res = await setVisibility(id, next);
+    if ("error" in res) toast.error("Visibility could not be changed", { description: res.error });
+    else toast.success(`Visibility: ${VISIBILITY_LABELS[next]}`);
   };
 
   const syncNow = async () => {
@@ -305,17 +313,23 @@ export default function MyRoasts() {
                           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {group.rows.map((row) => {
                               const card = rowToCard(row);
+                              const visibility = rowVisibility(row);
                               return (
                                 <RoastCard
                                   key={row.id}
                                   card={card}
                                   headingLevel="h3"
                                   actions={
-                                    <RoastActions
-                                      title={card.title}
-                                      roastAgainHref={roastAgainHref(row.roaster_type, row.id)}
-                                      onDelete={() => setDeleteTarget({ kind: "row", id: row.id, title: card.title })}
-                                    />
+                                    <>
+                                      <VisibilityBadge visibility={visibility} />
+                                      <RoastActions
+                                        title={card.title}
+                                        roastAgainHref={roastAgainHref(row.roaster_type, row.id)}
+                                        onDelete={() => setDeleteTarget({ kind: "row", id: row.id, title: card.title })}
+                                        visibility={visibility}
+                                        onVisibilityChange={(v) => void changeVisibility(row.id, v)}
+                                      />
+                                    </>
                                   }
                                 />
                               );

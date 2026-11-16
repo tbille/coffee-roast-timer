@@ -6,6 +6,7 @@ import { RoastCard, type RoastCardData } from "@/components/roast-card/RoastCard
 import { Skeleton } from "@/components/ui/skeleton";
 import { rowToCard, type ProfileRowInput } from "@/utils/roastProfileView";
 import { UNNAMED_BEAN } from "@/lib/saveRoast";
+import { withVisibilityFallback } from "@/lib/visibility";
 
 const COUNT = 6;
 
@@ -14,11 +15,13 @@ const COLUMNS =
   "id, beans_name, origin, farm_name, roast_process, coffee_roaster, roaster_type, duration_seconds, initial_weight, final_weight, crack_events, milestones, roaster_data, roaster_settings, created_at, likes:roast_profile_likes(count)";
 
 async function fetchLatest(): Promise<RoastCardData[]> {
-  const { data, error } = await supabase
-    .from("roast_profiles")
-    .select(COLUMNS)
-    .order("created_at", { ascending: false })
-    .limit(30);
+  // Public roasts only; private and link-only roasts never appear in lists.
+  const { data, error } = await withVisibilityFallback("latest-roasts", (hasColumn) => {
+    const query = supabase.from("roast_profiles").select(COLUMNS);
+    return (hasColumn ? query.eq("visibility", "public") : query)
+      .order("created_at", { ascending: false })
+      .limit(30);
+  });
   if (error) throw error;
   return ((data ?? []) as unknown as ProfileRowInput[])
     .map(rowToCard)

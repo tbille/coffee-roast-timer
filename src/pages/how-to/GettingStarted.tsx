@@ -110,9 +110,10 @@ const GettingStarted = () => (
       </Step>
     </Steps>
 
-    <Callout title="Saved roasts are public">
-      Roasts saved to your account appear on <Link to="/discover">Discover</Link> so other people with the same roaster
-      can learn from them. Keep anything private out of the notes.
+    <Callout title="Your roasts are private until you share them">
+      Under <Ui>Who can see it</Ui>, keep a roast <Ui>Private</Ui> (only you), make it <Ui>Link only</Ui> (anyone with
+      the link) or <Ui>Public</Ui>, which lists it on <Link to="/discover">Discover</Link> so other people with the same
+      roaster can learn from it. You can change it later on the roast's page.
     </Callout>
 
     <H2 id="what-you-learned">What you just did</H2>

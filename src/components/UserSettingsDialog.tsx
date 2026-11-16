@@ -235,7 +235,7 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
                 maxLength={50}
               />
               <p className="text-xs text-muted-foreground">
-                Shown on the roasts you save (they are visible on Discover).
+                Shown on the roasts you share (Link only or Public).
               </p>
             </div>
             <Button

@@ -105,6 +105,7 @@ export type Database = {
           temperature_unit: string
           updated_at: string
           user_id: string
+          visibility: string
         }
         Insert: {
           beans_name: string
@@ -136,6 +137,7 @@ export type Database = {
           temperature_unit?: string
           updated_at?: string
           user_id: string
+          visibility?: string
         }
         Update: {
           beans_name?: string
@@ -167,6 +169,7 @@ export type Database = {
           temperature_unit?: string
           updated_at?: string
           user_id?: string
+          visibility?: string
         }
         Relationships: []
       }

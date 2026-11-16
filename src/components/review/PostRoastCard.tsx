@@ -35,6 +35,7 @@ import { normaliseOrigin, ORIGIN_SUGGESTIONS } from "@/lib/origins";
 import { formatClock, formatClockDelta, formatGrams, formatPercent, msToSeconds, parseLocaleNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
+  DEFAULT_VISIBILITY,
   PLACE_LABELS,
   PROCESS_LABELS,
   ROAST_LEVEL_LABELS,
@@ -47,6 +48,7 @@ import {
   type RoastReference,
   type RoastResult,
 } from "@/types/roast-session.types";
+import { VisibilityPicker } from "@/components/visibility/Visibility";
 import { EventTimes } from "./EventTimes";
 import { draftFacts, eventInputId, referenceFromDraft, roastAgainHref } from "./draftView";
 
@@ -338,7 +340,6 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
     ambient: `${baseId}-ambient`,
     ambientError: `${baseId}-ambient-error`,
     notes: `${baseId}-notes`,
-    saveNote: `${baseId}-save-note`,
   };
 
   const refId = savedToCloud ? draft.result.id : `local:${draft.result.id}`;
@@ -569,6 +570,12 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
 
       {/* Actions */}
       <div className="space-y-4 border-t pt-6">
+        {/* Kept on the draft, so a signed-out roast keeps the choice for when it syncs. */}
+        <VisibilityPicker
+          value={details.visibility ?? DEFAULT_VISIBILITY}
+          onChange={(v) => setDetail("visibility", v)}
+          disabled={busy !== null}
+        />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <div className="space-y-2 sm:flex-1">
             <Button
@@ -577,7 +584,6 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
               className="h-12 w-full sm:w-auto"
               onClick={handleSave}
               disabled={busy !== null || savedToCloud || savedOnDevice}
-              aria-describedby={ids.saveNote}
             >
               {busy === "save" ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} aria-hidden />
@@ -586,9 +592,6 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
               ) : null}
               {savedToCloud || savedOnDevice ? "Saved" : saveState === "cloud" || saveState === "device" ? "Save changes" : "Save"}
             </Button>
-            <p id={ids.saveNote} className="text-xs text-muted-foreground">
-              Saved roasts are visible on Discover.
-            </p>
           </div>
           <Button
             type="button"
@@ -623,7 +626,7 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
                   <AlertDialogTitle>Discard this roast?</AlertDialogTitle>
                   <AlertDialogDescription>
                     {discardSynced && user
-                      ? "The roast is removed from this device. This also deletes it from your account and Discover. This cannot be undone."
+                      ? "The roast is removed from this device. This also deletes it from your account. This cannot be undone."
                       : discardSynced
                         ? "The roast is removed from this device. The copy saved to your account stays there."
                         : "The roast and everything typed here is removed from this device. This cannot be undone."}

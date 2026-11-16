@@ -75,6 +75,31 @@ export const PLACE_LABELS: Record<RoastPlace, string> = {
   outdoors: 'Outdoors',
 };
 
+/** Who can open a saved roast (`roast_profiles.visibility`). */
+export type RoastVisibility = 'private' | 'unlisted' | 'public';
+
+/** New roasts are private until the roaster chooses otherwise. */
+export const DEFAULT_VISIBILITY: RoastVisibility = 'private';
+
+export const VISIBILITY_OPTIONS: RoastVisibility[] = ['private', 'unlisted', 'public'];
+
+/** Short labels for chips and badges. */
+export const VISIBILITY_LABELS: Record<RoastVisibility, string> = {
+  private: 'Private',
+  unlisted: 'Link only',
+  public: 'Public',
+};
+
+/** One-line descriptions of who can see the roast. */
+export const VISIBILITY_DESCRIPTIONS: Record<RoastVisibility, string> = {
+  private: 'Only me',
+  unlisted: 'Anyone with the link',
+  public: 'Public on Discover',
+};
+
+export const isRoastVisibility = (v: unknown): v is RoastVisibility =>
+  v === 'private' || v === 'unlisted' || v === 'public';
+
 /** What the console hands to the post-roast card when the roast is dropped. */
 export interface RoastResult {
   /** Client UUID; becomes the roast_profiles.id on save (idempotent insert). */
@@ -108,6 +133,8 @@ export interface RoastDetails {
   place?: RoastPlace;
   ambientC?: number;
   notes?: string;
+  /** Who can see the saved roast. Defaults to 'private'. */
+  visibility?: RoastVisibility;
 }
 
 /** A roast stored on this device until it is saved to the account. */

@@ -3,7 +3,8 @@
  * drafts kept on this device. Everything runs in the browser.
  */
 import type { RoastDraft } from '@/types/roast-session.types';
-import { PLACE_LABELS, PROCESS_LABELS, ROAST_LEVEL_LABELS, type RoastLevel } from '@/types/roast-session.types';
+import { DEFAULT_VISIBILITY, PLACE_LABELS, PROCESS_LABELS, ROAST_LEVEL_LABELS, type RoastLevel, type RoastVisibility } from '@/types/roast-session.types';
+import { rowVisibility } from '@/lib/visibility';
 import { deriveRoastFacts, type ProfileViewInput } from '@/utils/roastProfileView';
 import { normaliseOrigin } from '@/lib/origins';
 import { msToSeconds } from '@/lib/format';
@@ -27,6 +28,7 @@ export interface ExportableRow {
   environmental_notes?: string | null;
   notes?: string | null;
   cupping_score?: number | null;
+  visibility?: string | null;
 }
 
 export interface ExportRecord {
@@ -51,6 +53,7 @@ export interface ExportRecord {
   environment: string;
   notes: string;
   cupping_score: number | '';
+  visibility: RoastVisibility;
 }
 
 const round1 = (n: number | undefined): number | '' => (n === undefined || !Number.isFinite(n) ? '' : Math.round(n * 10) / 10);
@@ -91,6 +94,7 @@ export function exportRecordFromRow(row: ExportableRow): ExportRecord {
     environment: row.environmental_notes ?? '',
     notes: row.notes ?? '',
     cupping_score: orBlank(row.cupping_score),
+    visibility: rowVisibility(row),
   };
 }
 
@@ -101,6 +105,7 @@ export function exportRecordFromDraft(draft: RoastDraft): ExportRecord {
   return {
     ...base,
     source: 'device',
+    visibility: draft.details.visibility ?? DEFAULT_VISIBILITY,
     process: draft.details.process ? PROCESS_LABELS[draft.details.process] : '',
     roast_level: draft.details.roastLevel ? ROAST_LEVEL_LABELS[draft.details.roastLevel] : '',
     yellowing_s: y ? msToSeconds(y.t) : '',
@@ -114,6 +119,7 @@ const CSV_COLUMNS: (keyof ExportRecord)[] = [
   'id', 'source', 'roasted_at', 'bean', 'origin', 'farm', 'process', 'roast_level', 'roaster',
   'weight_in_g', 'weight_out_g', 'loss_percent', 'total_s', 'yellowing_s', 'first_crack_s',
   'second_crack_s', 'development_s', 'development_percent', 'environment', 'notes', 'cupping_score',
+  'visibility',
 ];
 
 function csvCell(value: unknown): string {
