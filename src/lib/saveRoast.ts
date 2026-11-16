@@ -240,11 +240,13 @@ const errorMessage = (e: unknown) =>
  * Marks the draft synced on success.
  */
 export async function saveRoast(draft: RoastDraft, userId: string): Promise<SaveRoastResult> {
+  // Stamped before the request: edits made while it is in flight stay unsynced (isDirty).
+  const at = Date.now();
   const row = buildRoastRow(draft, userId);
   try {
     const { error } = await supabase.from('roast_profiles').insert(row);
     if (!error) {
-      markSynced(draft.result.id);
+      markSynced(draft.result.id, at);
       return { ok: true, id: row.id!, alreadySaved: false };
     }
     if (error.code !== '23505') return { ok: false, error: error.message, code: error.code };
@@ -263,7 +265,7 @@ export async function saveRoast(draft: RoastDraft, userId: string): Promise<Save
         .eq('user_id', userId);
       if (updateError) return { ok: false, error: updateError.message, code: updateError.code };
     }
-    markSynced(draft.result.id);
+    markSynced(draft.result.id, at);
     return { ok: true, id: row.id!, alreadySaved: true };
   } catch (e) {
     return { ok: false, error: errorMessage(e) };
@@ -278,7 +280,8 @@ export function syncPendingDrafts(userId: string): Promise<{ saved: number; fail
   syncing = (async () => {
     let saved = 0;
     let failed = 0;
-    for (const draft of listUnsyncedDrafts()) {
+    // Drafts made while someone else was signed in on this browser are theirs, not this account's.
+    for (const draft of listUnsyncedDrafts().filter((d) => !d.ownerId || d.ownerId === userId)) {
       const res = await saveRoast(draft, userId);
       if (res.ok) saved++;
       else failed++;

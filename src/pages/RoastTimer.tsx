@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { PageTitle } from "@/components/PageTitle";
@@ -30,8 +30,13 @@ const RoastTimer = () => {
     setLinkNonce((n) => n + 1);
   }, [roasterParam, searchParams, setSearchParams, switchRoaster]);
 
-  // Any new ?ref= (e.g. "Roast again" while a finished roast is on screen) also counts as a new link.
+  // A new ?ref= (e.g. "Roast again" while a finished roast is on screen) also counts as a new link.
+  // Not the one present on mount: `ref` stays in the URL, so a reload must keep the review card.
+  // (Links from other pages also carry ?roaster=, which is consumed and bumps above.)
+  const prevRefId = useRef(refId);
   useEffect(() => {
+    if (refId === prevRefId.current) return;
+    prevRefId.current = refId;
     if (refId) setLinkNonce((n) => n + 1);
   }, [refId]);
 

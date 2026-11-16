@@ -8,12 +8,17 @@
  *   every access is wrapped and degrades to an empty list / no-op.
  */
 import type { RoastDraft } from '@/types/roast-session.types';
+import { ROAST_SESSION_KEY, clearStoredSessionFor } from '@/hooks/useRoastSession';
 
 export const DRAFTS_STORAGE_KEY = 'roast_drafts:v1';
 export const DRAFTS_CHANGED_EVENT = 'roast-drafts-changed';
 
 /** Prefix used for references that only exist on this device. */
 export const LOCAL_REF_PREFIX = 'local:';
+
+/** Ids of roasts the person deleted or discarded (most recent last), so nothing re-drafts them. */
+const DELETED_STORAGE_KEY = 'roast_drafts_deleted:v1';
+const MAX_DELETED = 50;
 
 /** Synced drafts are dropped from the device this long after they reached the account. */
 const SYNCED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -67,8 +72,8 @@ export function getDraft(id: string): RoastDraft | undefined {
 }
 
 /**
- * Inserts or replaces the draft with the same `result.id`. Keeps the original
- * `createdAt` and `syncedAt`, and stamps `updatedAt`. Returns false when the
+ * Inserts or replaces the draft with the same `result.id`. Keeps the stored
+ * `createdAt` and `syncedAt` (only markSynced changes it), and stamps `updatedAt`. Returns false when the
  * device refused the write (storage full or blocked).
  */
 export function upsertDraft(draft: RoastDraft): boolean {
@@ -80,9 +85,11 @@ export function upsertDraft(draft: RoastDraft): boolean {
     drafts[index] = {
       ...draft,
       createdAt: prev.createdAt,
-      syncedAt: draft.syncedAt ?? prev.syncedAt,
       updatedAt: now,
     };
+    // Only markSynced moves the stamp: a stale in-memory copy must not overwrite it.
+    if (prev.syncedAt !== undefined) drafts[index].syncedAt = prev.syncedAt;
+    else delete drafts[index].syncedAt;
   } else {
     drafts.push({ ...draft, createdAt: draft.createdAt || now, updatedAt: now });
   }
@@ -97,6 +104,36 @@ export function deleteDraft(id: string): void {
   const drafts = read();
   const next = drafts.filter((d) => d.result.id !== id);
   if (next.length !== drafts.length) write(next);
+}
+
+function readDeleted(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(DELETED_STORAGE_KEY) ?? '[]');
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** True when the roast was deleted or discarded on this device. */
+export function wasDeleted(id: string): boolean {
+  return readDeleted().includes(id);
+}
+
+/**
+ * The person deleted or discarded this roast: drop its draft, remember the id so a
+ * remounted review card does not draft it again, and clear the console session
+ * still holding it (a finished roast stays there for up to 24 h).
+ */
+export function forgetRoast(id: string): void {
+  deleteDraft(id);
+  try {
+    const ids = [...readDeleted().filter((x) => x !== id), id].slice(-MAX_DELETED);
+    window.localStorage.setItem(DELETED_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    /* storage unavailable */
+  }
+  clearStoredSessionFor(ROAST_SESSION_KEY, id);
 }
 
 /** Records that the draft now exists in Supabase (same id). */

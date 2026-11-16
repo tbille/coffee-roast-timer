@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RoastCard, type RoastCardData } from "@/components/roast-card/RoastCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { rowToCard, type ProfileRowInput } from "@/utils/roastProfileView";
+import { UNNAMED_BEAN } from "@/lib/saveRoast";
 
 const COUNT = 6;
 
@@ -22,7 +23,7 @@ async function fetchLatest(): Promise<RoastCardData[]> {
   return ((data ?? []) as unknown as ProfileRowInput[])
     .map(rowToCard)
     // Keep the homepage to roasts that say something: a named coffee with first crack marked.
-    .filter((card) => card.title !== "Untitled roast" && card.facts.firstCrack && card.facts.totalSeconds > 0)
+    .filter((card) => card.title !== "Untitled roast" && card.title !== UNNAMED_BEAN && card.facts.firstCrack && card.facts.totalSeconds > 0)
     .slice(0, COUNT);
 }
 

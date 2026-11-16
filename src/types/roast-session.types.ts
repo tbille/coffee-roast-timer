@@ -118,6 +118,8 @@ export interface RoastDraft {
   updatedAt: number;
   /** Set once the roast exists in Supabase (same id as result.id) */
   syncedAt?: number;
+  /** Account signed in when the draft was made; only that account (or anyone, if unset) may upload it */
+  ownerId?: string;
 }
 
 /** A saved roast used as a guide while roasting ("Roast again"). */

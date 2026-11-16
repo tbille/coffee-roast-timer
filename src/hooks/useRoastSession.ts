@@ -92,6 +92,21 @@ export function readRunningElapsedMs(key: string, now: number = Date.now()): num
   }
 }
 
+/**
+ * Removes the session stored under `key` when its log belongs to roast `id`, so a
+ * deleted roast's finished session cannot remount its review card (and re-draft it).
+ */
+export function clearStoredSessionFor(key: string, id: string): void {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as { log?: { id?: unknown } } | null;
+    if (parsed?.log?.id === id) localStorage.removeItem(key);
+  } catch {
+    // Storage unavailable or corrupt: nothing to clear.
+  }
+}
+
 export interface RoastSession<S, L> {
   status: RoastStatus;
   isRunning: boolean;

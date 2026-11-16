@@ -181,7 +181,7 @@ export function SetupView(props: SetupViewProps) {
             <p id={`${id}-grams-hint`} className={cn('text-sm', overMax ? 'text-warning' : 'text-muted-foreground')}>
               {overMax
                 ? `Above the ${spec.maxBatchSize} g this machine is made for.`
-                : `Within ${spec.minBatchSize}–${spec.maxBatchSize} g on the ${spec.name}.`}
+                : `Within ${spec.minBatchSize}–${spec.maxBatchSize} g on the ${spec.displayName}.`}
             </p>
           </div>
         </section>
@@ -298,7 +298,7 @@ export function SetupView(props: SetupViewProps) {
 
         <Collapsible className="rounded-lg border border-border">
           <CollapsibleTrigger className="group flex h-12 w-full items-center justify-between px-4 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
-            Tips for the {spec.name}
+            Tips for the {spec.displayName}
             <ChevronDown className="h-4 w-4 transition-transform duration-150 group-data-[state=open]:rotate-180" strokeWidth={1.75} aria-hidden />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 px-4 pb-4">
@@ -309,7 +309,7 @@ export function SetupView(props: SetupViewProps) {
             </ul>
             {spec.guidePath && (
               <Link to={spec.guidePath} className="inline-block text-sm font-medium text-foreground underline underline-offset-4">
-                Read the {spec.name} guide
+                Read the {spec.displayName} guide
               </Link>
             )}
           </CollapsibleContent>

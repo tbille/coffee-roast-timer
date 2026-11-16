@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
+import { forgetRoast } from "@/lib/drafts";
 import { ROASTER_SPECS } from "@/utils/roasterRegistry";
 import { getTemperatureGraphContextNote } from "@/utils/roasterDisplay";
 import type { TemperatureUnit } from "@/utils/temperatureConversion";
@@ -240,6 +241,8 @@ const RoastProfileDetails = () => {
       toast.error("This roast could not be deleted.");
       return;
     }
+    // Drop the device copy and any finished session holding it, so nothing re-uploads it.
+    forgetRoast(profile.id);
     setShowDeleteDialog(false);
     queryClient.invalidateQueries({ queryKey: ["discover-profiles"] });
     toast.success("Roast deleted");

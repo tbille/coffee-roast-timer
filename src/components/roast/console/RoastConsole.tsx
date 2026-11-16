@@ -14,6 +14,7 @@ import { useReference } from '@/hooks/useReference';
 import { ROAST_SESSION_KEY, useRoastSession } from '@/hooks/useRoastSession';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { supabase } from '@/integrations/supabase/client';
+import { deleteDraft, getDraft } from '@/lib/drafts';
 import { formatClockMs, formatTemp, type TempUnit } from '@/lib/format';
 import { ROASTER_SPECS } from '@/utils/roasterRegistry';
 import type { RoasterType } from '@/types/roaster.types';
@@ -284,6 +285,10 @@ export function RoastConsole({ roasterType: setupRoaster, onRoasterChange, refId
   };
 
   const undoDrop = () => {
+    // The review card drafted the first Drop; the next Drop must not reuse that copy.
+    // A synced copy stays: the card keeps its details and takes the new result.
+    const drafted = log.id ? getDraft(log.id) : undefined;
+    if (drafted && !drafted.syncedAt) deleteDraft(log.id);
     session.undoStop();
     updateLog((l) => {
       const last = l.history[l.history.length - 1];

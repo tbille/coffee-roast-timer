@@ -31,7 +31,7 @@ import { beanKey, rowToCard, rowTrendPoint } from "@/components/dashboard/roastR
 import { useAuth } from "@/hooks/useAuth";
 import { useDrafts } from "@/hooks/useDrafts";
 import { useMyRoasts, type MyRoastRow } from "@/hooks/useMyRoasts";
-import { deleteDraft } from "@/lib/drafts";
+import { forgetRoast } from "@/lib/drafts";
 import { syncPendingDrafts } from "@/lib/saveRoast";
 import { exportRoastsCsv, exportRoastsJson } from "@/lib/exportRoasts";
 import type { RoastDraft } from "@/types/roast-session.types";
@@ -55,7 +55,11 @@ export default function MyRoasts() {
   const draftsRef = useRef<HTMLElement>(null);
 
   // Roasts not in the account yet (synced copies only serve "Roast again" from this device).
-  const deviceDrafts = useMemo(() => drafts.filter((d) => !d.syncedAt), [drafts]);
+  // On a shared browser, only show drafts nobody owns or that belong to the signed-in person.
+  const deviceDrafts = useMemo(
+    () => drafts.filter((d) => !d.syncedAt && (!d.ownerId || d.ownerId === user?.id)),
+    [drafts, user?.id],
+  );
   const continuing = continueId ? drafts.find((d) => d.result.id === continueId) : undefined;
 
   const counts = useMemo(() => {
@@ -108,13 +112,13 @@ export default function MyRoasts() {
     const target = deleteTarget;
     setDeleteTarget(null);
     if (target.kind === "draft") {
-      deleteDraft(target.id);
+      forgetRoast(target.id);
       if (continueId === target.id) setContinueId(null);
       return;
     }
     const ok = await remove(target.id);
     if (ok) {
-      deleteDraft(target.id);
+      forgetRoast(target.id);
       toast.success("Roast deleted");
     } else {
       toast.error("Could not delete the roast", { description: "Check your connection and try again." });

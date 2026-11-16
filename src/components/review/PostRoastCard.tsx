@@ -28,7 +28,8 @@ import { StatStrip, type StatItem } from "@/components/roast-card/StatStrip";
 import { PhaseBar, type PhaseBarMarker } from "@/components/roast-card/PhaseBar";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeanNames } from "@/hooks/useMyRoasts";
-import { deleteDraft, getDraft, upsertDraft } from "@/lib/drafts";
+import { forgetRoast, getDraft, upsertDraft, wasDeleted } from "@/lib/drafts";
+import { supabase } from "@/integrations/supabase/client";
 import { findEvent, saveRoast } from "@/lib/saveRoast";
 import { normaliseOrigin, ORIGIN_SUGGESTIONS } from "@/lib/origins";
 import { formatClock, formatClockDelta, formatGrams, formatPercent, msToSeconds, parseLocaleNumber } from "@/lib/format";
@@ -87,11 +88,37 @@ const AUTOSAVE_MS = 400;
 
 const numText = (n?: number) => (n === undefined || !Number.isFinite(n) ? "" : String(n));
 
-function initialDraft(result: RoastResult): RoastDraft {
+/** Drop time as recorded live (an edited drop keeps it in `editedFromT`). */
+const recordedDropT = (r: RoastResult) => {
+  const drop = findEvent(r.events, "drop");
+  return drop ? (drop.editedFromT ?? drop.t) : undefined;
+};
+
+/**
+ * The stored draft for this roast, or a new one. A stored draft from before an
+ * "Undo drop" (the roast went on and dropped again) keeps its details but takes
+ * the new result; `stale` says it must be re-drafted and is not saved as shown.
+ */
+function initialDraft(result: RoastResult, ownerId: string | undefined): { draft: RoastDraft; stale: boolean } {
   const stored = getDraft(result.id);
-  if (stored) return stored;
+  if (stored) {
+    const stale =
+      recordedDropT(stored.result) !== recordedDropT(result) ||
+      stored.result.controlChanges.length !== result.controlChanges.length ||
+      stored.result.readings.length !== result.readings.length;
+    return { draft: stale ? { ...stored, result } : stored, stale };
+  }
   const now = Date.now();
-  return { result, details: { weightInGrams: result.batchGrams > 0 ? result.batchGrams : undefined }, createdAt: now, updatedAt: now };
+  return {
+    draft: {
+      result,
+      details: { weightInGrams: result.batchGrams > 0 ? result.batchGrams : undefined },
+      createdAt: now,
+      updatedAt: now,
+      ...(ownerId ? { ownerId } : {}),
+    },
+    stale: false,
+  };
 }
 
 type SaveState = "idle" | "device" | "cloud" | "error";
@@ -101,10 +128,14 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
   const baseId = useId();
   const beanNames = useBeanNames(user?.id);
 
-  const [draft, setDraft] = useState<RoastDraft>(() => initialDraft(result));
+  const [initial] = useState(() => initialDraft(result, user?.id));
+  const [draft, setDraft] = useState<RoastDraft>(initial.draft);
   const [version, setVersion] = useState(0);
-  const [savedVersion, setSavedVersion] = useState<number | null>(() => (getDraft(result.id)?.syncedAt ? 0 : null));
-  const [saveState, setSaveState] = useState<SaveState>(() => (getDraft(result.id)?.syncedAt ? "cloud" : "idle"));
+  const savedAsShown = !!initial.draft.syncedAt && !initial.stale;
+  const [savedVersion, setSavedVersion] = useState<number | null>(savedAsShown ? 0 : null);
+  const [saveState, setSaveState] = useState<SaveState>(savedAsShown ? "cloud" : "idle");
+  /** Whether the account already holds this roast (DraftSync may have uploaded it), read when Discard opens. */
+  const [discardSynced, setDiscardSynced] = useState(false);
   const [busy, setBusy] = useState<null | "save" | "next">(null);
 
   const [weightOutText, setWeightOutText] = useState(() => numText(draft.details.weightOutGrams));
@@ -112,6 +143,7 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
   const [ambientText, setAmbientText] = useState(() => numText(draft.details.ambientC));
 
   const draftRef = useRef(draft);
+  const staleRef = useRef(initial.stale);
   const pending = useRef(false);
   const weightOutRef = useRef<HTMLInputElement>(null);
 
@@ -120,8 +152,10 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
   }, [draft]);
 
   // Drafted on the device the moment the card appears; nothing is required.
+  // Never for a roast the person already deleted (its session can outlive the draft).
   useEffect(() => {
-    if (!getDraft(draftRef.current.result.id)) upsertDraft(draftRef.current);
+    const id = draftRef.current.result.id;
+    if ((staleRef.current || !getDraft(id)) && !wasDeleted(id)) upsertDraft(draftRef.current);
     weightOutRef.current?.focus({ preventScroll: true });
   }, []);
 
@@ -244,7 +278,8 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
     if (res.ok) {
       setSaveState("cloud");
       setSavedVersion(at);
-      setDraft((d) => ({ ...d, syncedAt: Date.now() }));
+      // The stored stamp is taken before the request, so edits made meanwhile stay unsynced.
+      setDraft((d) => ({ ...d, syncedAt: getDraft(d.result.id)?.syncedAt ?? d.syncedAt }));
       toast.success(res.alreadySaved ? "Changes saved" : "Roast saved");
     } else {
       setSaveState("error");
@@ -265,9 +300,20 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
     onNextBatch(referenceFromDraft(current, savedId));
   };
 
-  const handleDiscard = () => {
+  const handleDiscard = async () => {
     pending.current = false;
-    deleteDraft(draft.result.id);
+    const id = draft.result.id;
+    // DraftSync may have uploaded it in the background: remove it from the account too.
+    if (getDraft(id)?.syncedAt && user) {
+      setBusy("save");
+      const { error } = await supabase.from("roast_profiles").delete().eq("id", id).eq("user_id", user.id);
+      setBusy(null);
+      if (error) {
+        toast.error("Could not delete the roast from your account", { description: "Check your connection and try again." });
+        return;
+      }
+    }
+    forgetRoast(id);
     onDiscard();
   };
 
@@ -560,7 +606,7 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
               Done
             </Button>
           ) : (
-            <AlertDialog>
+            <AlertDialog onOpenChange={(open) => open && setDiscardSynced(!!getDraft(draft.result.id)?.syncedAt)}>
               <AlertDialogTrigger asChild>
                 <Button
                   type="button"
@@ -576,9 +622,11 @@ export function PostRoastCard({ result, reference, onDiscard, onNextBatch }: Pos
                 <AlertDialogHeader>
                   <AlertDialogTitle>Discard this roast?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {saveState === "cloud"
-                      ? "Your latest changes are removed from this device. The roast already saved to your account stays there."
-                      : "The roast and everything typed here is removed from this device. This cannot be undone."}
+                    {discardSynced && user
+                      ? "The roast is removed from this device. This also deletes it from your account and Discover. This cannot be undone."
+                      : discardSynced
+                        ? "The roast is removed from this device. The copy saved to your account stays there."
+                        : "The roast and everything typed here is removed from this device. This cannot be undone."}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

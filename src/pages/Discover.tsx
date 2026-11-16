@@ -66,7 +66,7 @@ const Discover = () => {
   const query = searchParams.get("q") ?? "";
   const roaster = searchParams.get("roaster") ?? "all";
   const sortParam = searchParams.get("sort") as SortKey | null;
-  const sort: SortKey = sortParam && sortParam in SORTERS ? sortParam : "newest";
+  const sort: SortKey = sortParam && Object.prototype.hasOwnProperty.call(SORTERS, sortParam) ? sortParam : "newest";
 
   const updateParam = (key: string, value: string, defaultValue: string) => {
     const next = new URLSearchParams(searchParams);
