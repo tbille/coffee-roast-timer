@@ -58,36 +58,35 @@ const UserSettingsDialog = ({ trigger, open, onOpenChange }: UserSettingsDialogP
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  // Fetch user profile on component mount
+  // Fetch the account's settings each time the dialog opens
+  const userId = user?.id;
   useEffect(() => {
-    if (user && isOpen) {
-      fetchUserProfile();
-    }
-  }, [user, isOpen]);
+    if (!userId || !isOpen) return;
+    const fetchUserProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username, default_temperature_unit')
+          .eq('id', userId)
+          .single();
 
-  const fetchUserProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username, default_temperature_unit')
-        .eq('id', user?.id)
-        .single();
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+          console.error('Error fetching profile:', error);
+          return;
+        }
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        const currentUsername = data?.username || "";
+        const currentTempUnit = (data?.default_temperature_unit || 'C') as TemperatureUnit;
+        setUsername(currentUsername);
+        setOriginalUsername(currentUsername);
+        setDefaultTempUnit(currentTempUnit);
+        setOriginalTempUnit(currentTempUnit);
+      } catch (error) {
         console.error('Error fetching profile:', error);
-        return;
       }
-
-      const currentUsername = data?.username || "";
-      const currentTempUnit = (data?.default_temperature_unit || 'C') as TemperatureUnit;
-      setUsername(currentUsername);
-      setOriginalUsername(currentUsername);
-      setDefaultTempUnit(currentTempUnit);
-      setOriginalTempUnit(currentTempUnit);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
+    };
+    fetchUserProfile();
+  }, [userId, isOpen]);
 
   const handleUpdateUsername = async () => {
     if (!user) return;

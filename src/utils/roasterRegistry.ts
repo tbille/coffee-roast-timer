@@ -210,7 +210,7 @@ export const ROASTER_SPECS: Record<RoasterType, RoasterSpecification> = {
       'With a full 8 oz load, start the fan high enough that the beans move, then lower it as they lose weight',
       'A fan left at 9 can keep the beans from ever reaching first crack',
       'Small batches roast quickly - stay attentive',
-      'Experiment with heat/fan combinations for different profiles'
+      'Experiment with heat and fan combinations for different beans'
     ],
     warnings: [
       'Small batch size - not suitable for bulk roasting',
@@ -681,36 +681,6 @@ export function getRoasterSpec(type: RoasterType): RoasterSpecification {
   return spec;
 }
 
-/**
- * Get list of popular/featured roasters for onboarding
- * Returns roasters sorted by popularity
- * @param limit - Maximum number of roasters to return (default: 4)
- * @returns Array of roaster specifications
- */
-export function getPopularRoasters(limit: number = 4): RoasterSpecification[] {
-  return Object.values(ROASTER_SPECS)
-    .filter(spec => spec.popularityRank !== undefined)
-    .sort((a, b) => (a.popularityRank || 99) - (b.popularityRank || 99))
-    .slice(0, limit);
-}
-
-/**
- * Get all supported roaster types
- * @returns Array of all roaster type identifiers
- */
-export function getAllRoasterTypes(): RoasterType[] {
-  return Object.keys(ROASTER_SPECS) as RoasterType[];
-}
-
-/**
- * Check if a roaster type is valid/supported
- * @param type - String to check
- * @returns True if type is supported
- */
-export function isValidRoasterType(type: string): type is RoasterType {
-  return type in ROASTER_SPECS;
-}
-
 /** Machines the roast console has a mode for, in menu order. */
 export const IMPLEMENTED_ROASTERS: RoasterType[] = (Object.keys(ROASTER_SPECS) as RoasterType[])
   .filter((type) => ROASTER_SPECS[type].implemented)
@@ -742,13 +712,6 @@ export const BEHMOR_MANUAL_POWER: Record<BehmorProgram, number> = { P1: 0, P2: 2
 
 /** Seconds logged per "+" press. The app's assumption; check against your display. */
 export const BEHMOR_PLUS_SECONDS = 30;
-
-/** Weight button closest to a batch size in grams. */
-export function behmorWeightFor(grams: number): BehmorWeight {
-  if (grams <= 170) return '1/4 lb';
-  if (grams <= 340) return '1/2 lb';
-  return '1 lb';
-}
 
 /** Hottop KN-8828B-2K+ modes as named on the machine. */
 export const HOTTOP_MODES = [

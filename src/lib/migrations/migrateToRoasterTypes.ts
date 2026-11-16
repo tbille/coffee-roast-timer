@@ -5,9 +5,27 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { detectRoasterType } from '@/utils/roasterDetection';
 import type { RoasterType } from '@/types/roaster.types';
-import type { DualTempRoastData } from '@/types/roast-data.types';
+import type { DualTempRoastData, RoastData } from '@/types/roast-data.types';
+
+/** The legacy columns this migration reads from a `roast_profiles` row. */
+interface LegacyProfileRow {
+  id: string;
+  created_at: string;
+  duration_seconds: number;
+  coffee_roaster?: string | null;
+  temperature_data?: unknown;
+  crack_events?: unknown;
+}
+
+interface LegacyPoint {
+  time?: number;
+  targetTemp?: number;
+  currentTemp?: number;
+  type?: 'first' | 'second';
+}
 
 const MIGRATION_FLAG_KEY = 'roaster_migration_v1_complete';
 
@@ -28,7 +46,7 @@ function setMigrationComplete() {
 /**
  * Convert legacy temperature data to new format
  */
-function convertLegacyData(profile: any, roasterType: RoasterType): any {
+function convertLegacyData(profile: LegacyProfileRow, roasterType: RoasterType): RoastData {
   // For Gene CBR-101 (most common), convert to DualTempRoastData
   if (roasterType === 'gene-cbr-101') {
     const roastData: DualTempRoastData = {
@@ -36,7 +54,7 @@ function convertLegacyData(profile: any, roasterType: RoasterType): any {
       startTime: new Date(profile.created_at).getTime(),
       endTime: new Date(profile.created_at).getTime() + (profile.duration_seconds * 1000),
       temperatureData: Array.isArray(profile.temperature_data) 
-        ? profile.temperature_data.map((point: any) => ({
+        ? (profile.temperature_data as LegacyPoint[]).map((point) => ({
             time: point.time || 0,
             targetTemp: point.targetTemp || 0,
             currentTemp: point.currentTemp || 0,
@@ -44,7 +62,7 @@ function convertLegacyData(profile: any, roasterType: RoasterType): any {
           }))
         : [],
       crackEvents: Array.isArray(profile.crack_events)
-        ? profile.crack_events.map((event: any) => ({
+        ? (profile.crack_events as LegacyPoint[]).map((event) => ({
             time: event.time || 0,
             type: event.type || 'first',
             targetTemp: event.targetTemp,
@@ -69,7 +87,7 @@ function convertLegacyData(profile: any, roasterType: RoasterType): any {
 /**
  * Migrate a single profile
  */
-async function migrateProfile(profile: any): Promise<{ success: boolean; error?: string }> {
+async function migrateProfile(profile: LegacyProfileRow): Promise<{ success: boolean; error?: string }> {
   try {
     // Detect roaster type from coffee_roaster field
     const detectedType = detectRoasterType(profile.coffee_roaster);
@@ -82,7 +100,7 @@ async function migrateProfile(profile: any): Promise<{ success: boolean; error?:
       .from('roast_profiles')
       .update({
         roaster_type: detectedType,
-        roaster_data: roasterData
+        roaster_data: roasterData as unknown as Json
       })
       .eq('id', profile.id);
     

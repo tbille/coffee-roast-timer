@@ -140,19 +140,3 @@ export interface UserRoasterPreference {
   created_at: string;               // ISO timestamp of creation
 }
 
-/**
- * Roaster selection for onboarding
- * Simplified roaster info for onboarding flow
- */
-export interface RoasterSelectionOption {
-  type: RoasterType;
-  name: string;
-  image: string;
-  description: string;
-  specs: {
-    batchSize: string;              // "225-450g"
-    duration: string;               // "12-20 min"
-    difficulty: 'beginner' | 'intermediate' | 'advanced';
-  };
-  featured?: boolean;               // Show in initial grid
-}

@@ -27,7 +27,7 @@ const faqSchema = {
       name: "How should I use extensions on a Behmor?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Press + to add time earlier in the roast to keep momentum, rather than stacking extensions at the very end. Log each one with +30 s in Roast Timer.",
+        text: "Press + to add time earlier in the roast to keep momentum, rather than stacking extensions at the very end. Log each press with +30 s in Roast Timer, as many taps as matches what your machine added.",
       },
     },
   ],
@@ -44,7 +44,7 @@ const BehmorTroubleshooting = () => (
     <p>The roaster isn't getting enough energy into the beans.</p>
     <ol>
       <li>Reduce the batch size. Try around 340 g instead of a full pound.</li>
-      <li>Use a hotter program. In automatic mode P1 applies the most heat; in manual mode, stay on P5 (100%) longer early on.</li>
+      <li>Use a hotter program. P3 to P5 apply less heat and often need time added; P1 applies the most. Running by hand, stay on P5 (100%) longer early on.</li>
       <li>Roast somewhere warmer. A cold garage or a breeze can add minutes.</li>
       <li>
         Avoid extension cords and shared circuits. The Behmor is sensitive to low voltage, and it shows up as slow

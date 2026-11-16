@@ -111,18 +111,6 @@ export interface RoastProfile {
   };
 }
 
-export interface RoastStatistics {
-  duration: number;
-  firstCrackTime?: number;
-  firstCrackTemp?: number;
-  secondCrackTime?: number;
-  secondCrackTemp?: number;
-  finalTemp: number;
-  weightLossPercent?: number;
-  developmentTime?: number;
-  developmentRatio?: number;
-}
-
 // NEW: Roaster Settings Types for Replication Guidance
 
 export interface TemperatureAdjustment {

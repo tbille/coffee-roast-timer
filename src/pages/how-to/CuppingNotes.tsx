@@ -37,16 +37,16 @@ const CuppingNotes = () => (
           Go to <Link to="/roasts">My roasts</Link> and open the roast you're tasting.
         </p>
       </Step>
-      <Step title="Press Add cupping">
+      <Step title="Press Add tasting">
         <p>
           It's in the <Ui>Tasting notes</Ui> section near the top of the page. You only see it on your own roasts. If the
-          roast already has notes, the button reads <Ui>Edit cupping</Ui>.
+          roast already has notes, the button reads <Ui>Edit tasting</Ui>.
         </p>
       </Step>
       <Step title="Fill in what you can">
         <p>Every field is optional, so a score and two tags are fine. See the table below for what each field is for.</p>
       </Step>
-      <Step title="Press Save Notes">
+      <Step title="Press Save tasting">
         <p>Your notes show on the roast straight away. You can edit them at any time.</p>
       </Step>
     </Steps>
@@ -55,13 +55,12 @@ const CuppingNotes = () => (
       caption="Fields in the cupping form"
       columns={["Field", "What to enter"]}
       rows={[
-        ["Cupping Date", "The day you tasted it."],
-        ["Rest Days", "Days between roasting and tasting. This is what makes notes comparable."],
-        ["Cupping Score", "0–100. 50 is average; use the full range so differences stand out."],
-        ["Brew Method", "Espresso, pour over, French press, AeroPress and more. Keep it the same when comparing."],
-        ["Flavor Profile", "Up to 8 tags from a fixed list, such as Chocolate, Citrus, Floral, Nutty or Wine-like."],
-        ["Tasting Notes", "Free text for everything else, in your own words."],
-        ["Roasted Bean Photo", "A photo of the roasted beans, useful for comparing color between batches."],
+        ["Tasting date", "The day you tasted it. Rest days (days between roasting and tasting) are worked out from it; they're what makes notes comparable."],
+        ["Score", "0–100. 50 is average; use the full range so differences stand out."],
+        ["Brew method", "Espresso, pour over, French press, AeroPress and more. Keep it the same when comparing."],
+        ["Flavour tags", "Up to 8 tags from a fixed list, such as Chocolate, Citrus, Floral, Nutty or Wine-like."],
+        ["Tasting notes", "Free text for everything else, in your own words."],
+        ["Photo of the roasted beans", "Useful for comparing color between batches."],
       ]}
     />
 

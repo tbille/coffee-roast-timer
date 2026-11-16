@@ -14,21 +14,21 @@ const Behmor2000AB = () => (
     <p>The front panel gives you three main levers:</p>
     <ul>
       <li>
-        <strong>Weight button</strong> (¼ lb, ½ lb, 1 lb). It sets the starting roast time shown on the LCD. Pick the one
-        closest to your batch.
+        <strong>Weight button</strong> (¼ lb, ½ lb, 1 lb). It sets the time shown on the display: 8:30 for ¼ lb, 12:00
+        for ½ lb and 18:00 for 1 lb. Pick the one closest to your batch.
       </li>
       <li>
-        <strong>Program</strong> (P1 to P5). In automatic mode each program applies heat differently over that time; P1
-        is the one with the most heat.
+        <strong>Program</strong> (P1 to P5). P1 is the default. The programs change how heat is applied over that time,
+        not how long the roast is; P3 to P5 apply less heat, so they often need time added.
       </li>
       <li>
-        <strong>+ and −</strong> change the time left on the LCD. Pressing + during the roast is how you extend it.
+        <strong>+ and −</strong> change the time left on the display. Pressing + during the roast is how you extend
+        it.
       </li>
     </ul>
     <p>
-      The 2000AB Plus also has a <strong>manual mode</strong>. There, P1 to P5 become heat power levels from 0% to 100% in
-      25% steps that you change as you go, and D changes the drum speed. Check your manual for how to enter it on your
-      unit's firmware.
+      The 2000AB Plus can also be run by hand. After you press <strong>Start</strong>, P1 to P5 act as manual power
+      levels: P1 0%, P2 25%, P3 50%, P4 75% and P5 100%. <strong>D</strong> changes the drum speed.
     </p>
     <p>There's no temperature readout, so you roast by time, sight and sound. That's exactly what Roast Timer records.</p>
 
@@ -49,8 +49,8 @@ const Behmor2000AB = () => (
       <Step title="Match the weight button, program and time">
         <p>
           Enter your batch weight, then pick the same weight button and program you pressed on the roaster. The app
-          fills in a starting time from the weight button; change it to what your LCD actually shows, because that's
-          the number to trust.
+          fills in the display time for that weight button; change it to what your display actually shows, because
+          that's the number to trust.
         </p>
       </Step>
     </Steps>
@@ -60,18 +60,18 @@ const Behmor2000AB = () => (
       <Step title="Charge when you press Start on the Behmor">
         <p>
           Press <Ui>Charge — start timer</Ui> at the same moment. The roast screen counts up like every other machine,
-          and shows the LCD's remaining time as secondary information so you can glance at both.
+          and shows the display's remaining time as secondary information so you can glance at both.
         </p>
       </Step>
       <Step title="Log every extension">
         <p>
-          Each time you press + on the roaster, tap <Ui>+30 s</Ui> in the app. It's logged with the time you added it,
-          which is what you'll need to repeat the roast.
+          Each time you press + on the roaster, tap <Ui>+30 s</Ui> in the app. Each tap is logged as 30 seconds at the
+          moment you added it, so tap it as many times as matches what your machine actually added.
         </p>
       </Step>
-      <Step title="In manual mode, log the power changes">
+      <Step title="Running by hand? Log the power changes">
         <p>
-          When you switch to a different P power level, tap the same program on screen. Each change is logged with its
+          When you press a different P button to change the power level, tap the same button on screen. Each change is logged with its
           time.
         </p>
       </Step>

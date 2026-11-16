@@ -284,17 +284,3 @@ export function normaliseOrigin(raw: string | null | undefined): string {
   return capitaliseSensibly(trimmed);
 }
 
-/** Country for a normalised origin or region, if known ("Sumatra" → "Indonesia"). */
-export function originCountry(raw: string | null | undefined): string | undefined {
-  const name = normaliseOrigin(raw);
-  if (!name) return undefined;
-  if (ORIGIN_COUNTRIES.includes(name)) return name;
-  if (ORIGIN_REGIONS[name]) return ORIGIN_REGIONS[name];
-  const words = name.split(' ');
-  for (let n = words.length; n >= 1; n--) {
-    const head = words.slice(0, n).join(' ');
-    if (ORIGIN_COUNTRIES.includes(head)) return head;
-    if (ORIGIN_REGIONS[head]) return ORIGIN_REGIONS[head];
-  }
-  return undefined;
-}

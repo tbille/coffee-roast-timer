@@ -27,7 +27,7 @@ const GeneCafeCBR101 = () => (
       </Step>
       <Step title="Set the starting target temperature">
         <p>
-          Set the <Ui>Setpoint</Ui> to what you dial in on the roaster.
+          Set the <Ui>Setpoint</Ui> to what you dial in on the roaster. The Gene Cafe goes up to 250 °C (482 °F).
         </p>
       </Step>
     </Steps>

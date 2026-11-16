@@ -10,11 +10,6 @@ export interface CuppingNotes {
   roasted_bean_photo_url?: string;
 }
 
-export interface FlavorTag {
-  id: string;
-  label: string;
-}
-
 // Predefined brew methods
 export const BREW_METHODS = [
   'Espresso',

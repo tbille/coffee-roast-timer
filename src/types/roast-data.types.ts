@@ -194,30 +194,3 @@ export type RoastData =
   | PopcornPopperData
   | HottopRoastData;
 
-/**
- * Type guard utilities
- * Helper functions to safely narrow RoastData union type
- */
-export function isDualTempData(data: RoastData): data is DualTempRoastData {
-  return data.mode === 'dual-temperature';
-}
-
-export function isProfileBasedData(data: RoastData): data is ProfileBasedRoastData {
-  return data.mode === 'profile-based';
-}
-
-export function isHeatFanData(data: RoastData): data is HeatFanRoastData {
-  return data.mode === 'heat-fan-control';
-}
-
-export function isManualData(data: RoastData): data is ManualRoastData {
-  return data.mode === 'manual-simple';
-}
-
-export function isPopcornPopperData(data: RoastData): data is PopcornPopperData {
-  return data.mode === 'manual-simple' && 'visualCues' in data;
-}
-
-export function isHottopData(data: RoastData): data is HottopRoastData {
-  return data.mode === 'hottop-advanced';
-}

@@ -9,8 +9,8 @@ const HottopKN8828 = () => (
 
     <H2 id="how-it-works">How the Hottop works</H2>
     <p>
-      The Hottop is an electric drum roaster with a bean temperature probe. You can let it run its own program, or set
-      heat and fan power yourself. Because it reads bean temperature, it's the roaster where logging temperatures pays
+      The Hottop is an electric drum roaster with a bean temperature probe. It has two modes: <strong>Auto</strong>,
+      which runs its one built-in program, and <strong>Manual</strong>, where you set heat and fan power yourself. Because it reads bean temperature, it's the roaster where logging temperatures pays
       off most: your readings become a curve, and its slope is the <strong>rate of rise</strong> (RoR), how many
       degrees per minute the beans are gaining.
     </p>
@@ -24,8 +24,8 @@ const HottopKN8828 = () => (
       </Step>
       <Step title="Set the starting heat and fan">
         <p>
-          Set <Ui>Heat</Ui> and <Ui>Fan</Ui> in percent to match the roaster. If the Hottop is running one of its own
-          programs, leave them and just log the moments.
+          Set <Ui>Heat</Ui> and <Ui>Fan</Ui> in percent to match the roaster. If the Hottop is in Auto mode, leave
+          them and just log the moments.
         </p>
       </Step>
     </Steps>

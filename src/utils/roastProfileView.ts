@@ -260,17 +260,6 @@ export function deriveRoastFacts(p: ProfileViewInput): RoastFacts {
 }
 
 /**
- * Whether a roast's numbers are plausible enough to feed community aggregates
- * (medians, ranges). Outliers are only excluded from aggregates, never flagged on cards.
- * Dev % outside 3–50 or weight loss outside 5–30 % are excluded.
- */
-export function isPlausibleForAggregates(facts: RoastFacts): boolean {
-  if (facts.developmentPercent !== undefined && (facts.developmentPercent < 3 || facts.developmentPercent > 50)) return false;
-  if (facts.weightLossPercent !== undefined && (facts.weightLossPercent < 5 || facts.weightLossPercent > 30)) return false;
-  return true;
-}
-
-/**
  * Roast phases from recorded events only. Drying/Maillard are split only when a
  * real yellowing mark exists; otherwise the pre-crack period is one phase.
  */

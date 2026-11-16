@@ -22,8 +22,9 @@ const FreshRoastSR800 = () => (
       </li>
     </ul>
     <p>
-      Each dial has nine steps, 1 to 9. Roast Timer uses the same numbers, so “Heat 7, Fan 5” in the app is exactly what
-      you set on the roaster, and anyone else with an SR800 can repeat it.
+      Heat and fan each have nine steps, 1 to 9, and the roaster starts at heat 9, fan 5. Roast Timer uses the same
+      numbers, so “Heat 7, Fan 5” in the app is exactly what you set on the roaster, and anyone else with an SR800 can
+      repeat it.
     </p>
 
     <Callout variant="warning" title="Stay with it">
@@ -62,7 +63,8 @@ const FreshRoastSR800 = () => (
       <Step title="Lower the fan as the beans lighten">
         <p>
           Beans lose water and get lighter as they roast. Reduce the fan once they're moving freely, so they don't fly up
-          the chamber and the roast keeps its pace.
+          the chamber and the roast keeps its pace. Too much fan carries heat away and can stall the roast before first
+          crack.
         </p>
       </Step>
       <Step title="Tap yellowing and first crack, then drop">
@@ -91,7 +93,7 @@ const FreshRoastSR800 = () => (
     />
     <Callout variant="tip" title="Roasts too fast?">
       Raise the fan a step or lower the heat early on. If first crack still comes before 5 minutes, try a slightly
-      bigger batch. Too slow? Lower the fan a step.
+      bigger batch. Too slow, or stalling before first crack? Lower the fan a step.
     </Callout>
 
     <RoasterLinks roaster="freshroast-sr800" />
